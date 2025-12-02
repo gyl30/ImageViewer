@@ -35,8 +35,10 @@ void image_viewer_window::setup_ui()
     view_->setRenderHint(QPainter::Antialiasing);
     view_->setRenderHint(QPainter::SmoothPixmapTransform);
     view_->setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
-    view_->setTransformationAnchor(QGraphicsView::AnchorViewCenter);
+
+    view_->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
     view_->setResizeAnchor(QGraphicsView::AnchorViewCenter);
+
     view_->setBackgroundBrush(Qt::black);
 
     view_->viewport()->installEventFilter(this);
