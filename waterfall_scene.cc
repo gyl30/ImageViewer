@@ -71,54 +71,78 @@ void waterfall_scene::layout_items(int view_width)
     int max_height = *std::max_element(col_heights.begin(), col_heights.end());
     setSceneRect(0, 0, view_width, max_height + 50);
 }
-
 void waterfall_scene::load_visible_items(const QRectF& visible_rect)
 {
-    QRectF unload_rect = visible_rect.adjusted(-2000, -2000, 2000, 2000);
+    QRectF load_rect = visible_rect.adjusted(0, -800, 0, 1200);
+
+    QRectF unload_rect = visible_rect.adjusted(0, -2500, 0, 3000);
 
     qreal dpr = 1.0;
     if (!views().isEmpty())
     {
-        dpr = views().first()->devicePixelRatio();
+        if (auto* v = views().first())
+        {
+            dpr = v->devicePixelRatio();
+        }
+    }
+
+    QList<QGraphicsItem*> visible_graphics_items = items(load_rect);
+
+    for (auto* g_item : visible_graphics_items)
+    {
+        auto* item = dynamic_cast<waterfall_item*>(g_item);
+        if (item == nullptr)
+        {
+            continue;
+        }
+
+        if (item->is_loaded() || item->is_loading())
+        {
+            continue;
+        }
+
+        item->set_loading(true);
+
+        int req_width = static_cast<int>(current_col_width_ * dpr);
+        int req_height = 0;
+
+        QSize orig_size = item->get_original_size();
+        if (orig_size.isValid() && orig_size.width() > 0)
+        {
+            double ratio = static_cast<double>(orig_size.height()) / orig_size.width();
+            req_height = static_cast<int>(req_width * ratio);
+        }
+        else if (!item->pixmap().isNull() && item->pixmap().width() > 0)
+        {
+            double ratio = static_cast<double>(item->pixmap().height()) / item->pixmap().width();
+            req_height = static_cast<int>(req_width * ratio);
+        }
+
+        QSize target_size(req_width, req_height);
+
+        emit request_load_image(item->get_path(), target_size);
     }
 
     for (auto* item : items_)
     {
+        if (!item->is_loaded() && !item->is_loading())
+        {
+            continue;
+        }
+
         QRectF item_rect = item->sceneBoundingRect();
 
-        if (visible_rect.intersects(item_rect))
+        if (!unload_rect.intersects(item_rect))
         {
-            if (!item->is_loaded() && !item->is_loading())
+            if (item->is_loading())
             {
-                item->set_loading(true);
-
-                int req_height = 0;
-                if (!item->pixmap().isNull() && item->pixmap().width() > 0)
-                {
-                    double ratio = static_cast<double>(item->pixmap().height()) / item->pixmap().width();
-                    req_height = static_cast<int>(current_col_width_ * ratio);
-                }
-
-                QSize request_size(static_cast<int>(current_col_width_ * dpr), static_cast<int>(req_height * dpr));
-
-                emit request_load_image(item->get_path(), request_size);
+                emit request_cancel_image(item->get_path());
             }
-        }
-        else if (!unload_rect.intersects(item_rect))
-        {
-            if (item->is_loaded() || item->is_loading())
-            {
-                if (item->is_loading())
-                {
-                    emit request_cancel_image(item->get_path());
-                }
 
-                item->unload();
-            }
+            item->unload();
         }
     }
 }
-
 void waterfall_scene::on_image_loaded(const QString& path, const QImage& image)
 {
     if (auto it = item_map_.find(path); it != item_map_.end())
