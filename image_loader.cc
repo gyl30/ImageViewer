@@ -20,7 +20,7 @@ void image_loader::request_thumbnail(const QString& path, const QSize& target_si
     }
 
     QImageReader reader(path);
-
+    reader.setAutoTransform(true);
     if (reader.supportsOption(QImageIOHandler::ScaledSize))
     {
         reader.setScaledSize(target_size);
