@@ -4,8 +4,8 @@
 #include <QMenu>
 #include <QClipboard>
 #include <QApplication>
-#include <QGraphicsView>
 #include <QGraphicsSceneMouseEvent>
+#include <QGraphicsView>
 
 #include "waterfall_item.h"
 #include "waterfall_scene.h"
@@ -106,8 +106,13 @@ void waterfall_scene::load_visible_items(const QRectF& visible_rect)
         }
         else if (!unload_rect.intersects(item_rect))
         {
-            if (item->is_loaded())
+            if (item->is_loaded() || item->is_loading())
             {
+                if (item->is_loading())
+                {
+                    emit request_cancel_image(item->get_path());
+                }
+
                 item->unload();
             }
         }
@@ -121,7 +126,6 @@ void waterfall_scene::on_image_loaded(const QString& path, const QImage& image)
         waterfall_item* item = it.value();
 
         item->set_pixmap_safe(QPixmap::fromImage(image));
-
         item->set_display_width(current_col_width_);
 
         item->set_loaded(true);

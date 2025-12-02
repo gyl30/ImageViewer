@@ -25,6 +25,7 @@ class waterfall_scene : public QGraphicsScene
 
    signals:
     void request_load_image(QString path, QSize size);
+    void request_cancel_image(QString path);
     void image_double_clicked(QString path);
     void request_open_folder();
 
@@ -43,4 +44,4 @@ class waterfall_scene : public QGraphicsScene
     int current_col_width_;
 };
 
-#endif    // WATERFALL_SCENE_H
+#endif

@@ -1,51 +1,128 @@
-#include <QImageReader>
+#include <cmath>
 #include <QDebug>
+#include <QImageReader>
 #include "image_loader.h"
 
-image_loader::image_loader(QObject* parent) : QObject(parent) { cache_.setMaxCost(100L * 1024 * 1024); }
+image_loader::image_loader(QObject* parent) : QObject(parent), stop_flag_(false) { cache_.setMaxCost(200L * 1024 * 1024); }
 
-image_loader::~image_loader() { cache_.clear(); }
+image_loader::~image_loader() { stop_processing(); }
+
+void image_loader::start_processing() { process_loop(); }
+
+void image_loader::stop_processing()
+{
+    stop_flag_ = true;
+    condition_.wakeAll();
+}
 
 void image_loader::request_thumbnail(const QString& path, const QSize& target_size)
 {
+    QMutexLocker locker(&mutex_);
+
     if (cache_.contains(path))
     {
         emit thumbnail_loaded(path, *cache_.object(path));
         return;
     }
 
-    if (path.isEmpty())
+    if (pending_paths_.contains(path))
     {
-        return;
+        for (auto it = task_queue_.begin(); it != task_queue_.end(); ++it)
+        {
+            if (it->path == path)
+            {
+                task_queue_.erase(it);
+                break;
+            }
+        }
+        task_queue_.prepend({path, target_size});
+    }
+    else
+    {
+        task_queue_.prepend({path, target_size});
+        pending_paths_.insert(path);
     }
 
-    QImageReader reader(path);
-    reader.setAutoTransform(true);
+    condition_.wakeOne();
+}
 
-    if (reader.supportsOption(QImageIOHandler::ScaledSize))
+void image_loader::cancel_thumbnail(const QString& path)
+{
+    QMutexLocker locker(&mutex_);
+
+    if (pending_paths_.contains(path))
     {
-        reader.setScaledSize(target_size);
+        pending_paths_.remove(path);
+
+        for (auto it = task_queue_.begin(); it != task_queue_.end(); ++it)
+        {
+            if (it->path == path)
+            {
+                task_queue_.erase(it);
+                break;
+            }
+        }
     }
+}
 
-    QImage image;
-
-    if (reader.canRead())
+void image_loader::process_loop()
+{
+    while (!stop_flag_)
     {
-        image = reader.read();
+        load_task current_task;
+
+        {
+            QMutexLocker locker(&mutex_);
+            while (task_queue_.isEmpty() && !stop_flag_)
+            {
+                condition_.wait(&mutex_);
+            }
+
+            if (stop_flag_)
+            {
+                break;
+            }
+
+            current_task = task_queue_.takeFirst();
+            pending_paths_.remove(current_task.path);
+
+            current_loading_path_ = current_task.path;
+        }
+
+        {
+            QMutexLocker locker(&mutex_);
+            if (cache_.contains(current_task.path))
+            {
+                emit thumbnail_loaded(current_task.path, *cache_.object(current_task.path));
+                continue;
+            }
+        }
+
+        QImageReader reader(current_task.path);
+        reader.setAutoTransform(true);
+
+        if (reader.supportsOption(QImageIOHandler::ScaledSize) && !current_task.target_size.isEmpty())
+        {
+            reader.setScaledSize(current_task.target_size);
+        }
+
+        QImage image = reader.read();
+
+        if (!image.isNull())
+        {
+            if (image.width() != current_task.target_size.width() && !current_task.target_size.isEmpty())
+            {
+                image = image.scaled(current_task.target_size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            }
+
+            int cost = image.width() * image.height() * 4;
+
+            {
+                QMutexLocker locker(&mutex_);
+                cache_.insert(current_task.path, new QImage(image), cost);
+            }
+
+            emit thumbnail_loaded(current_task.path, image);
+        }
     }
-
-    if (image.isNull())
-    {
-        return;
-    }
-
-    if (image.width() != target_size.width() && !target_size.isEmpty())
-    {
-        image = image.scaled(target_size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    }
-
-    int cost = (image.width() * image.height() * 4);
-
-    cache_.insert(path, new QImage(image), cost);
-    emit thumbnail_loaded(path, image);
 }

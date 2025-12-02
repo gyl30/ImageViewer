@@ -75,6 +75,7 @@ void main_window::setup_worker()
 
     image_loader_->moveToThread(worker_thread_);
 
+    connect(worker_thread_, &QThread::started, image_loader_, &image_loader::start_processing);
     connect(worker_thread_, &QThread::finished, image_loader_, &QObject::deleteLater);
 
     worker_thread_->start();
@@ -83,7 +84,10 @@ void main_window::setup_worker()
 void main_window::setup_connections()
 {
     connect(view_, &waterfall_view::view_resized, this, [this](int width) { scene_->layout_items(width); });
-    connect(scene_, &waterfall_scene::request_load_image, image_loader_, &image_loader::request_thumbnail);
+
+    connect(scene_, &waterfall_scene::request_load_image, image_loader_, &image_loader::request_thumbnail, Qt::DirectConnection);
+    connect(scene_, &waterfall_scene::request_cancel_image, image_loader_, &image_loader::cancel_thumbnail, Qt::DirectConnection);
+
     connect(image_loader_, &image_loader::thumbnail_loaded, scene_, &waterfall_scene::on_image_loaded);
     connect(scene_, &waterfall_scene::image_double_clicked, this, &main_window::on_image_double_clicked);
     connect(scene_, &waterfall_scene::request_open_folder, this, &main_window::on_add_folder);
