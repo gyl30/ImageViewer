@@ -4,6 +4,10 @@
 #include <QFileDialog>
 #include <QDirIterator>
 #include <QImageReader>
+#include <QStatusBar>
+#include <QtConcurrent>
+#include <QCoreApplication>
+#include <QResizeEvent>
 
 #include "main_window.h"
 #include "image_loader.h"
@@ -12,7 +16,16 @@
 #include "waterfall_scene.h"
 #include "image_viewer_window.h"
 
-main_window::main_window(QWidget* parent) : QMainWindow(parent), view_(nullptr), scene_(nullptr), worker_thread_(nullptr), image_loader_(nullptr)
+main_window::main_window(QWidget* parent)
+    : QMainWindow(parent),
+      view_(nullptr),
+      scene_(nullptr),
+      worker_thread_(nullptr),
+      image_loader_(nullptr),
+      scan_duration_(0),
+      total_count_(0),
+      loaded_count_(0),
+      scan_watcher_(new QFutureWatcher<std::vector<image_meta>>(this))
 {
     setup_ui();
     setup_worker();
@@ -40,6 +53,9 @@ void main_window::setup_ui()
     view_->setScene(scene_);
 
     setCentralWidget(view_);
+
+    status_label_ = new QLabel("Ready", this);
+    statusBar()->addWidget(status_label_);
 }
 
 void main_window::setup_worker()
@@ -60,6 +76,9 @@ void main_window::setup_connections()
     connect(scene_, &waterfall_scene::request_load_image, image_loader_, &image_loader::request_thumbnail);
     connect(image_loader_, &image_loader::thumbnail_loaded, scene_, &waterfall_scene::on_image_loaded);
     connect(scene_, &waterfall_scene::image_double_clicked, this, &main_window::on_image_double_clicked);
+
+    connect(image_loader_, &image_loader::thumbnail_loaded, this, &main_window::on_image_loaded_stat);
+    connect(scan_watcher_, &QFutureWatcher<std::vector<image_meta>>::finished, this, &main_window::on_scan_finished);
 }
 
 void main_window::on_add_folder()
@@ -70,31 +89,80 @@ void main_window::on_add_folder()
         return;
     }
 
-    QDirIterator it(dir_path, QStringList() << "*.jpg" << "*.png" << "*.jpeg" << "*.webp", QDir::Files, QDirIterator::Subdirectories);
+    scene_->clear();
+    total_count_ = 0;
+    loaded_count_ = 0;
+    scan_duration_ = 0;
 
-    while (it.hasNext())
-    {
-        QString file_path = it.next();
+    scan_timer_.start();
+    status_label_->setText("Scanning folder...");
 
-        QImageReader reader(file_path);
-        QSize size = reader.size();
-
-        if (size.isValid())
+    QFuture<std::vector<image_meta>> future = QtConcurrent::run(
+        [dir_path]()
         {
-            image_meta meta;
-            meta.path = file_path;
-            meta.original_size = size;
+            std::vector<image_meta> results;
+            QDirIterator it(dir_path, QStringList() << "*.jpg" << "*.png" << "*.jpeg" << "*.webp", QDir::Files, QDirIterator::Subdirectories);
 
-            scene_->add_image(meta);
-        }
+            while (it.hasNext())
+            {
+                QString file_path = it.next();
+
+                QImageReader reader(file_path);
+                QSize size = reader.size();
+
+                if (size.isValid())
+                {
+                    image_meta meta;
+                    meta.path = file_path;
+                    meta.original_size = size;
+                    results.push_back(meta);
+                }
+            }
+            return results;
+        });
+
+    scan_watcher_->setFuture(future);
+}
+
+void main_window::on_scan_finished()
+{
+    std::vector<image_meta> metas = scan_watcher_->result();
+
+    total_count_ = static_cast<int>(metas.size());
+
+    for (const auto& meta : metas)
+    {
+        scene_->add_image(meta);
     }
 
     scene_->layout_items(view_->viewport()->width());
+
+    scan_duration_ = scan_timer_.elapsed();
+    update_status_bar();
+
+    QMetaObject::invokeMethod(view_, [this]() { view_->check_visible_area(); }, Qt::QueuedConnection);
+}
+
+void main_window::on_image_loaded_stat()
+{
+    loaded_count_++;
+    update_status_bar();
+}
+
+void main_window::update_status_bar()
+{
+    QString status = QString("Scan+Layout: %1 ms | Loaded: %2 / %3").arg(scan_duration_).arg(loaded_count_).arg(total_count_);
+
+    if (loaded_count_ == total_count_ && total_count_ > 0)
+    {
+        status += " [All Done]";
+    }
+
+    status_label_->setText(status);
 }
 
 void main_window::on_image_double_clicked(const QString& path)
 {
-    qDebug() << "Opening full image: " << path;
     auto* viewer = new image_viewer_window(nullptr);
     viewer->set_image_path(path);
     viewer->show();

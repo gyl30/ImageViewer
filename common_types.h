@@ -12,6 +12,6 @@ struct image_meta
 
 const int kColumnMargin = 10;
 const int kItemMargin = 10;
-const int kThumbWidth = 200;
+const int kMinColWidth = 200;
 
 #endif    // COMMON_TYPES_H

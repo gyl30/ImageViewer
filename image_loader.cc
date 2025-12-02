@@ -38,9 +38,8 @@ void image_loader::request_thumbnail(const QString& path, const QSize& target_si
         image = image.scaled(target_size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     }
 
-    QPixmap pixmap = QPixmap::fromImage(image);
+    int cost = image.width() * image.height() * 4;
 
-    int cost = pixmap.width() * pixmap.height() * 4;
-    cache_.insert(path, new QPixmap(pixmap), cost);
-    emit thumbnail_loaded(path, pixmap);
+    cache_.insert(path, new QImage(image), cost);
+    emit thumbnail_loaded(path, image);
 }

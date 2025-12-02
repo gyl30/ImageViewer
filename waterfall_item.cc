@@ -2,13 +2,48 @@
 #include <QPen>
 #include "waterfall_item.h"
 
-waterfall_item::waterfall_item(const image_meta& meta, QGraphicsItem* parent) : QGraphicsPixmapItem(parent), path_(meta.path)
+waterfall_item::waterfall_item(const image_meta& meta, QGraphicsItem* parent)
+    : QGraphicsPixmapItem(parent), path_(meta.path), loaded_(false), loading_(false), target_width_(kMinColWidth)
 {
     setFlag(QGraphicsItem::ItemIsSelectable);
+    setShapeMode(QGraphicsPixmapItem::BoundingRectShape);
 
-    QPixmap placeholder(kThumbWidth, 200);
+    QPixmap placeholder(kMinColWidth, 200);
     placeholder.fill(Qt::lightGray);
     setPixmap(placeholder);
 }
 
 QString waterfall_item::get_path() const { return path_; }
+
+bool waterfall_item::is_loaded() const { return loaded_; }
+void waterfall_item::set_loaded(bool loaded) { loaded_ = loaded; }
+
+bool waterfall_item::is_loading() const { return loading_; }
+void waterfall_item::set_loading(bool loading) { loading_ = loading; }
+
+void waterfall_item::set_display_width(int width)
+{
+    if (width <= 0 || width == target_width_)
+    {
+        return;
+    }
+    target_width_ = width;
+    update_scale();
+}
+
+void waterfall_item::set_pixmap_safe(const QPixmap& pixmap)
+{
+    setPixmap(pixmap);
+    update_scale();
+}
+
+void waterfall_item::update_scale()
+{
+    if (pixmap().isNull() || pixmap().width() == 0)
+    {
+        return;
+    }
+
+    qreal s = static_cast<qreal>(target_width_) / pixmap().width();
+    setScale(s);
+}

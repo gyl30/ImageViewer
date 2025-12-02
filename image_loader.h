@@ -2,9 +2,10 @@
 #define IMAGE_LOADER_H
 
 #include <QObject>
-#include <QPixmap>
+#include <QImage>
 #include <QMutex>
 #include <QCache>
+#include <QSize>
 
 class image_loader : public QObject
 {
@@ -18,10 +19,10 @@ class image_loader : public QObject
     void request_thumbnail(const QString& path, const QSize& target_size);
 
    signals:
-    void thumbnail_loaded(QString path, QPixmap pixmap);
+    void thumbnail_loaded(QString path, QImage image);
 
    private:
-    QCache<QString, QPixmap> cache_;
+    QCache<QString, QImage> cache_;
 };
 
 #endif    // IMAGE_LOADER_H
