@@ -12,6 +12,7 @@
 class waterfall_view;
 class waterfall_scene;
 class image_loader;
+class image_viewer_window;
 
 class main_window : public QMainWindow
 {
@@ -48,6 +49,7 @@ class main_window : public QMainWindow
     int loaded_count_;
 
     QFutureWatcher<std::vector<image_meta>>* scan_watcher_;
+    image_viewer_window* viewer_window_;
 };
 
 #endif

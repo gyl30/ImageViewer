@@ -30,7 +30,8 @@ main_window::main_window(QWidget* parent)
       scan_duration_(0),
       total_count_(0),
       loaded_count_(0),
-      scan_watcher_(new QFutureWatcher<std::vector<image_meta>>(this))
+      scan_watcher_(new QFutureWatcher<std::vector<image_meta>>(this)),
+      viewer_window_(nullptr)
 {
     setup_ui();
     setup_worker();
@@ -204,13 +205,13 @@ void main_window::on_selection_changed()
     {
         size_str = QString("%1 B").arg(file_bytes);
     }
-    else if (file_bytes < 1024 * 1024)
+    else if (file_bytes < static_cast<qint64>(1024 * 1024))
     {
-        size_str = QString("%1 KB").arg(file_bytes / 1024.0, 0, 'f', 1);
+        size_str = QString("%1 KB").arg(static_cast<double>(file_bytes) / 1024.0, 0, 'f', 1);
     }
     else
     {
-        size_str = QString("%1 MB").arg(file_bytes / (1024.0 * 1024.0), 0, 'f', 2);
+        size_str = QString("%1 MB").arg(static_cast<double>(file_bytes) / (1024.0 * 1024.0), 0, 'f', 2);
     }
 
     info_label_->setText(QString("%1 | %2x%3 | %4").arg(file_name).arg(img_size.width()).arg(img_size.height()).arg(size_str));
@@ -218,7 +219,12 @@ void main_window::on_selection_changed()
 
 void main_window::on_image_double_clicked(const QString& path)
 {
-    auto* viewer = new image_viewer_window(nullptr);
+    if (viewer_window_ == nullptr)
+    {
+        viewer_window_ = new image_viewer_window(nullptr);
+
+        connect(viewer_window_, &QObject::destroyed, this, [this]() { viewer_window_ = nullptr; });
+    }
 
     if (scan_watcher_->isFinished())
     {
@@ -229,9 +235,16 @@ void main_window::on_image_double_clicked(const QString& path)
         {
             paths.push_back(meta.path);
         }
-        viewer->set_image_list(paths);
+        viewer_window_->set_image_list(paths);
     }
 
-    viewer->set_image_path(path);
-    viewer->show();
+    viewer_window_->set_image_path(path);
+
+    if (viewer_window_->isMinimized())
+    {
+        viewer_window_->showNormal();
+    }
+    viewer_window_->show();
+    viewer_window_->raise();
+    viewer_window_->activateWindow();
 }
