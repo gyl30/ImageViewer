@@ -15,6 +15,7 @@
 #include "image_loader.h"
 #include "common_types.h"
 #include "waterfall_view.h"
+#include "waterfall_item.h"
 #include "waterfall_scene.h"
 #include "image_viewer_window.h"
 
@@ -62,6 +63,8 @@ void main_window::setup_ui()
 
     status_label_ = new QLabel("Press Ctrl+O to load folder", this);
     statusBar()->addWidget(status_label_);
+    info_label_ = new QLabel(this);
+    statusBar()->addPermanentWidget(info_label_);
 }
 
 void main_window::setup_worker()
@@ -83,6 +86,7 @@ void main_window::setup_connections()
     connect(image_loader_, &image_loader::thumbnail_loaded, scene_, &waterfall_scene::on_image_loaded);
     connect(scene_, &waterfall_scene::image_double_clicked, this, &main_window::on_image_double_clicked);
     connect(scene_, &waterfall_scene::request_open_folder, this, &main_window::on_add_folder);
+    connect(scene_, &QGraphicsScene::selectionChanged, this, &main_window::on_selection_changed);
     connect(image_loader_, &image_loader::thumbnail_loaded, this, &main_window::on_image_loaded_stat);
     connect(scan_watcher_, &QFutureWatcher<std::vector<image_meta>>::finished, this, &main_window::on_scan_finished);
 }
@@ -177,4 +181,42 @@ void main_window::on_image_double_clicked(const QString& path)
     auto* viewer = new image_viewer_window(nullptr);
     viewer->set_image_path(path);
     viewer->show();
+}
+
+void main_window::on_selection_changed()
+{
+    QList<QGraphicsItem*> items = scene_->selectedItems();
+
+    if (items.isEmpty())
+    {
+        info_label_->clear();
+        return;
+    }
+
+    auto* item = dynamic_cast<waterfall_item*>(items.first());
+    if (item == nullptr)
+    {
+        return;
+    }
+
+    QFileInfo file_info(item->get_path());
+    QString file_name = file_info.fileName();
+    qint64 file_bytes = file_info.size();
+    QSize img_size = item->get_original_size();
+
+    QString size_str;
+    if (file_bytes < 1024)
+    {
+        size_str = QString("%1 B").arg(file_bytes);
+    }
+    else if (file_bytes < 1024L * 1024)
+    {
+        size_str = QString("%1 KB").arg(file_bytes / 1024.0, 0, 'f', 1);
+    }
+    else
+    {
+        size_str = QString("%1 MB").arg(file_bytes / (1024.0 * 1024.0), 0, 'f', 2);
+    }
+
+    info_label_->setText(QString("%1 | %2x%3 | %4").arg(file_name).arg(img_size.width()).arg(img_size.height()).arg(size_str));
 }

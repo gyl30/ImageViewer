@@ -3,7 +3,7 @@
 #include "waterfall_item.h"
 
 waterfall_item::waterfall_item(const image_meta& meta, QGraphicsItem* parent)
-    : QGraphicsPixmapItem(parent), path_(meta.path), loaded_(false), loading_(false), target_width_(kMinColWidth)
+    : QGraphicsPixmapItem(parent), path_(meta.path), original_size_(meta.original_size), loaded_(false), loading_(false), target_width_(kMinColWidth)
 {
     setFlag(QGraphicsItem::ItemIsSelectable);
     setShapeMode(QGraphicsPixmapItem::BoundingRectShape);
@@ -14,6 +14,7 @@ waterfall_item::waterfall_item(const image_meta& meta, QGraphicsItem* parent)
 }
 
 QString waterfall_item::get_path() const { return path_; }
+QSize waterfall_item::get_original_size() const { return original_size_; }
 
 bool waterfall_item::is_loaded() const { return loaded_; }
 void waterfall_item::set_loaded(bool loaded) { loaded_ = loaded; }

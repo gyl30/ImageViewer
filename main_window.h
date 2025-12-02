@@ -26,6 +26,7 @@ class main_window : public QMainWindow
     void setup_connections();
     void setup_worker();
     void update_status_bar();
+    void on_selection_changed();
 
     void on_add_folder();
     void on_scan_finished();
@@ -41,6 +42,7 @@ class main_window : public QMainWindow
     image_loader* image_loader_;
 
     QLabel* status_label_;
+    QLabel* info_label_;
     QElapsedTimer scan_timer_;
     qint64 scan_duration_;
     int total_count_;

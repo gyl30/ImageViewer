@@ -9,12 +9,13 @@ class waterfall_item : public QGraphicsPixmapItem
    public:
     explicit waterfall_item(const image_meta& meta, QGraphicsItem* parent = nullptr);
 
-    QString get_path() const;
+    [[nodiscard]] QSize get_original_size() const;
+    [[nodiscard]] QString get_path() const;
 
-    bool is_loaded() const;
+    [[nodiscard]] bool is_loaded() const;
     void set_loaded(bool loaded);
 
-    bool is_loading() const;
+    [[nodiscard]] bool is_loading() const;
     void set_loading(bool loading);
 
     void set_display_width(int width);
@@ -26,6 +27,7 @@ class waterfall_item : public QGraphicsPixmapItem
 
    private:
     QString path_;
+    QSize original_size_;
     bool loaded_;
     bool loading_;
     int target_width_;
