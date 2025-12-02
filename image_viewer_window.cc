@@ -7,6 +7,8 @@
 #include <QToolBar>
 #include <QAction>
 #include <QResizeEvent>
+#include <QEvent>
+#include <QWheelEvent>
 #include "image_viewer_window.h"
 
 image_viewer_window::image_viewer_window(QWidget* parent) : QMainWindow(parent), view_(nullptr), scene_(nullptr), image_item_(nullptr)
@@ -20,15 +22,6 @@ image_viewer_window::~image_viewer_window() = default;
 
 void image_viewer_window::setup_ui()
 {
-    QToolBar* toolbar = addToolBar("Tools");
-    toolbar->setMovable(false);
-
-    QAction* act_zoom_in = toolbar->addAction("Zoom In (+)");
-    QAction* act_zoom_out = toolbar->addAction("Zoom Out (-)");
-
-    connect(act_zoom_in, &QAction::triggered, this, &image_viewer_window::zoom_in);
-    connect(act_zoom_out, &QAction::triggered, this, &image_viewer_window::zoom_out);
-
     scene_ = new QGraphicsScene(this);
     view_ = new QGraphicsView(this);
     view_->setScene(scene_);
@@ -39,6 +32,9 @@ void image_viewer_window::setup_ui()
     view_->setTransformationAnchor(QGraphicsView::AnchorViewCenter);
     view_->setResizeAnchor(QGraphicsView::AnchorViewCenter);
     view_->setBackgroundBrush(Qt::black);
+
+    view_->viewport()->installEventFilter(this);
+
     setCentralWidget(view_);
 }
 
@@ -84,6 +80,28 @@ void image_viewer_window::resizeEvent(QResizeEvent* event)
     {
         view_->fitInView(image_item_, Qt::KeepAspectRatio);
     }
+}
+
+bool image_viewer_window::eventFilter(QObject* watched, QEvent* event)
+{
+    if (watched == view_->viewport() && event->type() == QEvent::Wheel)
+    {
+        auto* wheel_event = static_cast<QWheelEvent*>(event);
+
+        if ((wheel_event->modifiers() & Qt::ControlModifier) != 0U)
+        {
+            if (wheel_event->angleDelta().y() > 0)
+            {
+                zoom_in();
+            }
+            else
+            {
+                zoom_out();
+            }
+            return true;
+        }
+    }
+    return QMainWindow::eventFilter(watched, event);
 }
 
 void image_viewer_window::zoom_in() { view_->scale(1.2, 1.2); }
