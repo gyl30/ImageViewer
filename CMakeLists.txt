@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(waterfall_viewer LANGUAGES CXX)
+project(ImageViewer LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -12,7 +12,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets Concurrent)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Core Gui Concurrent)
 
 set(PROJECT_SOURCES
     main.cc
@@ -24,6 +24,6 @@ set(PROJECT_SOURCES
     image_viewer_window.cc
 )
 
-add_executable(waterfall_viewer ${PROJECT_SOURCES})
+add_executable(ImageViewer ${PROJECT_SOURCES})
 
-target_link_libraries(waterfall_viewer PRIVATE Qt6::Widgets Qt6::Concurrent)
+target_link_libraries(ImageViewer PRIVATE Qt6::Widgets Qt6::Core Qt6::Gui Qt6::Concurrent)
