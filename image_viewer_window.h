@@ -3,6 +3,8 @@
 
 #include <QFuture>
 #include <QMainWindow>
+#include <vector>
+#include <QString>
 
 class QGraphicsView;
 class QGraphicsScene;
@@ -18,6 +20,7 @@ class image_viewer_window : public QMainWindow
     ~image_viewer_window() override;
 
     void set_image_path(const QString& path);
+    void set_image_list(const std::vector<QString>& paths);
 
    protected:
     void showEvent(QShowEvent* event) override;
@@ -34,9 +37,13 @@ class image_viewer_window : public QMainWindow
     void setup_ui();
     void load_image(const QString& path);
     void navigate_image(int delta);
+    void update_index_from_path();
 
    private:
     QString current_path_;
+    std::vector<QString> image_list_;
+    ptrdiff_t current_index_;
+
     QGraphicsView* view_;
     QGraphicsScene* scene_;
     QGraphicsPixmapItem* image_item_;

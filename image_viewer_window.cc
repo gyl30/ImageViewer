@@ -13,10 +13,11 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QMessageBox>
+#include <algorithm>
 #include "image_viewer_window.h"
 
 image_viewer_window::image_viewer_window(QWidget* parent)
-    : QMainWindow(parent), view_(nullptr), scene_(nullptr), image_item_(nullptr), btn_prev_(nullptr), btn_next_(nullptr)
+    : QMainWindow(parent), current_index_(-1), view_(nullptr), scene_(nullptr), image_item_(nullptr), btn_prev_(nullptr), btn_next_(nullptr)
 {
     setup_ui();
     resize(1200, 800);
@@ -72,35 +73,67 @@ void image_viewer_window::load_image(const QString& path)
     QImageReader reader(path);
     QImageReader::setAllocationLimit(0);
     reader.setAutoTransform(true);
+
     QImage image = reader.read();
-    QMetaObject::invokeMethod(
-        this,
-        [this, image, path]()
-        {
-            if (image.isNull())
-            {
-                setWindowTitle("Error loading image");
-                return;
-            }
+    QMetaObject::invokeMethod(this,
+                              [this, image, path]()
+                              {
+                                  if (image.isNull())
+                                  {
+                                      setWindowTitle("Error loading image");
+                                      return;
+                                  }
 
-            current_path_ = path;
+                                  current_path_ = path;
+                                  update_index_from_path();
 
-            scene_->clear();
-            QPixmap pixmap = QPixmap::fromImage(image);
-            image_item_ = scene_->addPixmap(pixmap);
-            scene_->setSceneRect(pixmap.rect());
+                                  scene_->clear();
+                                  QPixmap pixmap = QPixmap::fromImage(image);
+                                  image_item_ = scene_->addPixmap(pixmap);
+                                  scene_->setSceneRect(pixmap.rect());
 
-            view_->fitInView(image_item_, Qt::KeepAspectRatio);
+                                  view_->fitInView(image_item_, Qt::KeepAspectRatio);
 
-            setWindowTitle(QString("Viewer - %1 (%2x%3)").arg(QFileInfo(path).fileName()).arg(pixmap.width()).arg(pixmap.height()));
-        });
+                                  setWindowTitle(QString("Viewer - %1 (%2x%3) [%4/%5]")
+                                                     .arg(QFileInfo(path).fileName())
+                                                     .arg(pixmap.width())
+                                                     .arg(pixmap.height())
+                                                     .arg(current_index_ + 1)
+                                                     .arg(image_list_.size()));
+                              });
 }
 
 void image_viewer_window::set_image_path(const QString& path)
 {
     current_path_ = path;
+    update_index_from_path();
     setWindowTitle("Loading...");
     load_future_ = QtConcurrent::run([this, path]() { load_image(path); });
+}
+
+void image_viewer_window::set_image_list(const std::vector<QString>& paths)
+{
+    image_list_ = paths;
+    update_index_from_path();
+}
+
+void image_viewer_window::update_index_from_path()
+{
+    if (image_list_.empty())
+    {
+        current_index_ = -1;
+        return;
+    }
+
+    auto it = std::find(image_list_.begin(), image_list_.end(), current_path_);
+    if (it != image_list_.end())
+    {
+        current_index_ = std::distance(image_list_.begin(), it);
+    }
+    else
+    {
+        current_index_ = -1;
+    }
 }
 
 void image_viewer_window::showEvent(QShowEvent* event) { QMainWindow::showEvent(event); }
@@ -157,45 +190,32 @@ void image_viewer_window::load_next_image() { navigate_image(1); }
 
 void image_viewer_window::navigate_image(int delta)
 {
-    if (current_path_.isEmpty())
+    if (image_list_.empty())
     {
         return;
     }
 
-    QFileInfo current_info(current_path_);
-    QDir dir = current_info.dir();
-
-    QStringList filters;
-    filters << "*.jpg" << "*.jpeg" << "*.png" << "*.bmp" << "*.webp";
-
-    QStringList files = dir.entryList(filters, QDir::Files, QDir::Name);
-
-    if (files.isEmpty())
+    if (current_index_ == -1)
     {
-        return;
+        update_index_from_path();
+        if (current_index_ == -1)
+        {
+            return;
+        }
     }
 
-    int current_idx = static_cast<int>(files.indexOf(current_info.fileName()));
-
-    if (current_idx == -1)
-    {
-        return;
-    }
-
-    int new_idx = current_idx + delta;
+    int64_t new_idx = current_index_ + delta;
 
     if (new_idx < 0)
     {
         QMessageBox::information(this, "Info", "这也是第一张图片了。");
         return;
     }
-    if (new_idx >= files.count())
+    if (new_idx >= image_list_.size())
     {
         QMessageBox::information(this, "Info", "这也是最后一张图片了。");
         return;
     }
 
-    QString new_path = dir.absoluteFilePath(files[new_idx]);
-
-    set_image_path(new_path);
+    set_image_path(image_list_[new_idx]);
 }

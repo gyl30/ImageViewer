@@ -26,13 +26,12 @@ class main_window : public QMainWindow
     void setup_connections();
     void setup_worker();
     void update_status_bar();
-    void on_selection_changed();
 
     void on_add_folder();
     void on_scan_finished();
     void on_image_loaded_stat();
-
-    static void on_image_double_clicked(const QString& path);
+    void on_selection_changed();
+    void on_image_double_clicked(const QString& path);
 
    private:
     waterfall_view* view_;
@@ -51,4 +50,4 @@ class main_window : public QMainWindow
     QFutureWatcher<std::vector<image_meta>>* scan_watcher_;
 };
 
-#endif    // MAIN_WINDOW_H
+#endif

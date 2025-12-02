@@ -15,8 +15,8 @@
 #include "image_loader.h"
 #include "common_types.h"
 #include "waterfall_view.h"
-#include "waterfall_item.h"
 #include "waterfall_scene.h"
+#include "waterfall_item.h"
 #include "image_viewer_window.h"
 
 main_window::main_window(QWidget* parent)
@@ -25,6 +25,8 @@ main_window::main_window(QWidget* parent)
       scene_(nullptr),
       worker_thread_(nullptr),
       image_loader_(nullptr),
+      status_label_(nullptr),
+      info_label_(nullptr),
       scan_duration_(0),
       total_count_(0),
       loaded_count_(0),
@@ -48,11 +50,8 @@ main_window::~main_window()
 void main_window::setup_ui()
 {
     auto* act_open = new QAction("Open", this);
-
     act_open->setShortcut(QKeySequence::Open);
-
     addAction(act_open);
-
     connect(act_open, &QAction::triggered, this, &main_window::on_add_folder);
 
     scene_ = new waterfall_scene(this);
@@ -63,6 +62,7 @@ void main_window::setup_ui()
 
     status_label_ = new QLabel("Press Ctrl+O to load folder", this);
     statusBar()->addWidget(status_label_);
+
     info_label_ = new QLabel(this);
     statusBar()->addPermanentWidget(info_label_);
 }
@@ -87,6 +87,7 @@ void main_window::setup_connections()
     connect(scene_, &waterfall_scene::image_double_clicked, this, &main_window::on_image_double_clicked);
     connect(scene_, &waterfall_scene::request_open_folder, this, &main_window::on_add_folder);
     connect(scene_, &QGraphicsScene::selectionChanged, this, &main_window::on_selection_changed);
+
     connect(image_loader_, &image_loader::thumbnail_loaded, this, &main_window::on_image_loaded_stat);
     connect(scan_watcher_, &QFutureWatcher<std::vector<image_meta>>::finished, this, &main_window::on_scan_finished);
 }
@@ -104,6 +105,7 @@ void main_window::on_add_folder()
     total_count_ = 0;
     loaded_count_ = 0;
     scan_duration_ = 0;
+    info_label_->clear();
 
     scan_timer_.start();
     status_label_->setText(QString("Scanning: %1").arg(dir_path));
@@ -176,13 +178,6 @@ void main_window::update_status_bar()
     status_label_->setText(status);
 }
 
-void main_window::on_image_double_clicked(const QString& path)
-{
-    auto* viewer = new image_viewer_window(nullptr);
-    viewer->set_image_path(path);
-    viewer->show();
-}
-
 void main_window::on_selection_changed()
 {
     QList<QGraphicsItem*> items = scene_->selectedItems();
@@ -209,7 +204,7 @@ void main_window::on_selection_changed()
     {
         size_str = QString("%1 B").arg(file_bytes);
     }
-    else if (file_bytes < 1024L * 1024)
+    else if (file_bytes < 1024 * 1024)
     {
         size_str = QString("%1 KB").arg(file_bytes / 1024.0, 0, 'f', 1);
     }
@@ -219,4 +214,24 @@ void main_window::on_selection_changed()
     }
 
     info_label_->setText(QString("%1 | %2x%3 | %4").arg(file_name).arg(img_size.width()).arg(img_size.height()).arg(size_str));
+}
+
+void main_window::on_image_double_clicked(const QString& path)
+{
+    auto* viewer = new image_viewer_window(nullptr);
+
+    if (scan_watcher_->isFinished())
+    {
+        std::vector<QString> paths;
+        std::vector<image_meta> metas = scan_watcher_->result();
+        paths.reserve(metas.size());
+        for (const auto& meta : metas)
+        {
+            paths.push_back(meta.path);
+        }
+        viewer->set_image_list(paths);
+    }
+
+    viewer->set_image_path(path);
+    viewer->show();
 }
