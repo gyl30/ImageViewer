@@ -1,6 +1,7 @@
 #include <QTimer>
 #include <QDebug>
-#include <QToolBar>
+#include <QAction>
+#include <QKeySequence>
 #include <QFileDialog>
 #include <QDirIterator>
 #include <QImageReader>
@@ -8,6 +9,7 @@
 #include <QtConcurrent>
 #include <QCoreApplication>
 #include <QResizeEvent>
+#include <QFileInfo>
 
 #include "main_window.h"
 #include "image_loader.h"
@@ -44,9 +46,13 @@ main_window::~main_window()
 
 void main_window::setup_ui()
 {
-    auto* toolbar = addToolBar("Main");
-    auto* act_add = toolbar->addAction("Add Folder");
-    connect(act_add, &QAction::triggered, this, &main_window::on_add_folder);
+    auto* act_open = new QAction("Open", this);
+
+    act_open->setShortcut(QKeySequence::Open);
+
+    addAction(act_open);
+
+    connect(act_open, &QAction::triggered, this, &main_window::on_add_folder);
 
     scene_ = new waterfall_scene(this);
     view_ = new waterfall_view(this);
@@ -54,7 +60,7 @@ void main_window::setup_ui()
 
     setCentralWidget(view_);
 
-    status_label_ = new QLabel("Ready", this);
+    status_label_ = new QLabel("Press Ctrl+O to load folder", this);
     statusBar()->addWidget(status_label_);
 }
 
@@ -83,7 +89,8 @@ void main_window::setup_connections()
 
 void main_window::on_add_folder()
 {
-    QString dir_path = QFileDialog::getExistingDirectory(this, "Select Folder");
+    QString dir_path = QFileDialog::getExistingDirectory(this, "Select Folder", QDir::homePath());
+
     if (dir_path.isEmpty())
     {
         return;
@@ -95,7 +102,7 @@ void main_window::on_add_folder()
     scan_duration_ = 0;
 
     scan_timer_.start();
-    status_label_->setText("Scanning folder...");
+    status_label_->setText(QString("Scanning: %1").arg(dir_path));
 
     QFuture<std::vector<image_meta>> future = QtConcurrent::run(
         [dir_path]()
@@ -156,6 +163,10 @@ void main_window::update_status_bar()
     if (loaded_count_ == total_count_ && total_count_ > 0)
     {
         status += " [All Done]";
+    }
+    else if (total_count_ == 0 && scan_duration_ > 0)
+    {
+        status = "No images found in selected folder.";
     }
 
     status_label_->setText(status);
