@@ -4,6 +4,7 @@
 #include <QMenu>
 #include <QClipboard>
 #include <QApplication>
+#include <QGraphicsView>
 #include <QGraphicsSceneMouseEvent>
 
 #include "waterfall_item.h"
@@ -75,6 +76,12 @@ void waterfall_scene::load_visible_items(const QRectF& visible_rect)
 {
     QRectF unload_rect = visible_rect.adjusted(-2000, -2000, 2000, 2000);
 
+    qreal dpr = 1.0;
+    if (!views().isEmpty())
+    {
+        dpr = views().first()->devicePixelRatio();
+    }
+
     for (auto* item : items_)
     {
         QRectF item_rect = item->sceneBoundingRect();
@@ -92,7 +99,9 @@ void waterfall_scene::load_visible_items(const QRectF& visible_rect)
                     req_height = static_cast<int>(current_col_width_ * ratio);
                 }
 
-                emit request_load_image(item->get_path(), QSize(current_col_width_, req_height));
+                QSize request_size(static_cast<int>(current_col_width_ * dpr), static_cast<int>(req_height * dpr));
+
+                emit request_load_image(item->get_path(), request_size);
             }
         }
         else if (!unload_rect.intersects(item_rect))
