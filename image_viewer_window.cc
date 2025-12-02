@@ -78,6 +78,7 @@ void image_viewer_window::load_image(const QString& path)
     reader.setAutoTransform(true);
 
     QImage image = reader.read();
+
     QMetaObject::invokeMethod(this,
                               [this, image, path]()
                               {
@@ -87,8 +88,10 @@ void image_viewer_window::load_image(const QString& path)
                                       return;
                                   }
 
-                                  current_path_ = path;
-                                  update_index_from_path();
+                                  if (current_path_ != path)
+                                  {
+                                      current_path_ = path;
+                                  }
 
                                   scene_->clear();
                                   QPixmap pixmap = QPixmap::fromImage(image);
@@ -110,6 +113,7 @@ void image_viewer_window::set_image_path(const QString& path)
 {
     current_path_ = path;
     update_index_from_path();
+
     setWindowTitle("Loading...");
     load_future_ = QtConcurrent::run([this, path]() { load_image(path); });
 }
@@ -223,21 +227,28 @@ void image_viewer_window::navigate_image(int delta)
         }
     }
 
-    int64_t new_idx = current_index_ + delta;
+    ptrdiff_t new_idx = current_index_ + delta;
 
     if (new_idx < 0)
     {
         QMessageBox::information(this, "Info", "这也是第一张图片了。");
         return;
     }
-    if (new_idx >= image_list_.size())
+
+    if (new_idx >= static_cast<ptrdiff_t>(image_list_.size()))
     {
         QMessageBox::information(this, "Info", "这也是最后一张图片了。");
         return;
     }
 
-    set_image_path(image_list_[new_idx]);
+    current_index_ = new_idx;
+    current_path_ = image_list_[current_index_];
+
+    setWindowTitle("Loading...");
+
+    load_future_ = QtConcurrent::run([this, path = current_path_]() { load_image(path); });
 }
+
 void image_viewer_window::keyPressEvent(QKeyEvent* event)
 {
     if (event->key() == Qt::Key_Left)
