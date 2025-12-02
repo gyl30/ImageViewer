@@ -127,11 +127,11 @@ void waterfall_scene::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     QGraphicsItem* item = itemAt(event->scenePos(), QTransform());
     auto* wf_item = dynamic_cast<waterfall_item*>(item);
 
+    QMenu menu;
+
     if (wf_item != nullptr)
     {
-        QMenu menu;
         QAction* copyPathAction = menu.addAction("复制文件绝对路径");
-
         connect(copyPathAction,
                 &QAction::triggered,
                 [wf_item]()
@@ -140,12 +140,13 @@ void waterfall_scene::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
                     clipboard->setText(wf_item->get_path());
                 });
 
-        menu.exec(event->screenPos());
+        menu.addSeparator();
+    }
 
-        event->accept();
-    }
-    else
-    {
-        QGraphicsScene::contextMenuEvent(event);
-    }
+    QAction* openAction = menu.addAction("打开文件夹");
+    connect(openAction, &QAction::triggered, this, &waterfall_scene::request_open_folder);
+
+    menu.exec(event->screenPos());
+    event->accept();
 }
+

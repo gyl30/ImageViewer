@@ -1,0 +1,846 @@
+#ifndef COMMON_TYPES_H
+#define COMMON_TYPES_H
+
+#include <QString>
+#include <QSize>
+
+struct image_meta
+{
+    QString path;
+    QSize original_size;
+};
+
+const int kColumnMargin = 10;
+const int kItemMargin = 10;
+const int kMinColWidth = 200;
+
+#endif    // COMMON_TYPES_H
+#ifndef IMAGE_LOADER_H
+#define IMAGE_LOADER_H
+
+#include <QObject>
+#include <QImage>
+#include <QMutex>
+#include <QCache>
+#include <QSize>
+
+class image_loader : public QObject
+{
+    Q_OBJECT
+
+   public:
+    explicit image_loader(QObject* parent = nullptr);
+    ~image_loader() override;
+
+   public slots:
+    void request_thumbnail(const QString& path, const QSize& target_size);
+
+   signals:
+    void thumbnail_loaded(QString path, QImage image);
+
+   private:
+    QCache<QString, QImage> cache_;
+};
+
+#endif    // IMAGE_LOADER_H
+#ifndef IMAGE_VIEWER_WINDOW_H
+#define IMAGE_VIEWER_WINDOW_H
+
+#include <QFuture>
+#include <QMainWindow>
+
+class QGraphicsView;
+class QGraphicsScene;
+class QGraphicsPixmapItem;
+
+class image_viewer_window : public QMainWindow
+{
+    Q_OBJECT
+
+   public:
+    explicit image_viewer_window(QWidget* parent = nullptr);
+    ~image_viewer_window() override;
+
+    void set_image_path(const QString& path);
+
+   protected:
+    void showEvent(QShowEvent* event) override;
+
+    void wheelEvent(QWheelEvent* event) override;
+
+   private:
+    void setup_ui();
+    void load_image(const QString& path);
+
+   private:
+    QString current_path_;
+    QGraphicsView* view_;
+    QGraphicsScene* scene_;
+    QGraphicsPixmapItem* image_item_;
+    QFuture<void> load_future_;
+};
+
+#endif    // IMAGE_VIEWER_WINDOW_H
+#ifndef MAIN_WINDOW_H
+#define MAIN_WINDOW_H
+
+#include <QMainWindow>
+#include <QThread>
+#include <QLabel>
+#include <QElapsedTimer>
+#include <QFutureWatcher>
+#include <vector>
+#include "common_types.h"
+
+class waterfall_view;
+class waterfall_scene;
+class image_loader;
+
+class main_window : public QMainWindow
+{
+    Q_OBJECT
+
+   public:
+    explicit main_window(QWidget* parent = nullptr);
+    ~main_window() override;
+
+   private:
+    void setup_ui();
+    void setup_connections();
+    void setup_worker();
+    void update_status_bar();
+
+    void on_add_folder();
+    void on_scan_finished();
+    void on_image_loaded_stat();
+
+    static void on_image_double_clicked(const QString& path);
+
+   private:
+    waterfall_view* view_;
+    waterfall_scene* scene_;
+
+    QThread* worker_thread_;
+    image_loader* image_loader_;
+
+    QLabel* status_label_;
+    QElapsedTimer scan_timer_;
+    qint64 scan_duration_;
+    int total_count_;
+    int loaded_count_;
+
+    QFutureWatcher<std::vector<image_meta>>* scan_watcher_;
+};
+
+#endif    // MAIN_WINDOW_H
+#ifndef WATERFALL_ITEM_H
+#define WATERFALL_ITEM_H
+
+#include <QGraphicsPixmapItem>
+#include "common_types.h"
+
+class waterfall_item : public QGraphicsPixmapItem
+{
+   public:
+    explicit waterfall_item(const image_meta& meta, QGraphicsItem* parent = nullptr);
+
+    QString get_path() const;
+
+    bool is_loaded() const;
+    void set_loaded(bool loaded);
+
+    bool is_loading() const;
+    void set_loading(bool loading);
+
+    void set_display_width(int width);
+
+    void set_pixmap_safe(const QPixmap& pixmap);
+
+   private:
+    void update_scale();
+
+   private:
+    QString path_;
+    bool loaded_;
+    bool loading_;
+    int target_width_;
+};
+
+#endif    // WATERFALL_ITEM_H
+#ifndef WATERFALL_SCENE_H
+#define WATERFALL_SCENE_H
+
+#include <vector>
+#include <QHash>
+#include <QObject>
+#include <QGraphicsScene>
+#include <QGraphicsSceneContextMenuEvent>
+#include "common_types.h"
+
+class waterfall_item;
+
+class waterfall_scene : public QGraphicsScene
+{
+    Q_OBJECT
+
+   public:
+    explicit waterfall_scene(QObject* parent = nullptr);
+
+    void add_image(const image_meta& meta);
+
+    void layout_items(int view_width);
+
+    void load_visible_items(const QRectF& visible_rect);
+
+   signals:
+    void request_load_image(QString path, QSize size);
+    void image_double_clicked(QString path);
+
+   public slots:
+    void on_image_loaded(const QString& path, const QImage& image);
+
+   protected:
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
+
+    void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
+
+   private:
+    std::vector<waterfall_item*> items_;
+    QHash<QString, waterfall_item*> item_map_;
+
+    int current_col_width_;
+};
+
+#endif    // WATERFALL_SCENE_H
+#ifndef WATERFALL_VIEW_H
+#define WATERFALL_VIEW_H
+
+#include <QTimer>
+#include <QGraphicsView>
+
+class waterfall_view : public QGraphicsView
+{
+    Q_OBJECT
+
+   public:
+    explicit waterfall_view(QWidget* parent = nullptr);
+
+    void check_visible_area();
+
+   signals:
+    void view_resized(int new_width);
+
+   protected:
+    void resizeEvent(QResizeEvent* event) override;
+    void scrollContentsBy(int dx, int dy) override;
+
+   private:
+    QTimer* debounce_timer_;
+};
+
+#endif    // WATERFALL_VIEW_H
+#include <QImageReader>
+#include <QDebug>
+#include "image_loader.h"
+
+image_loader::image_loader(QObject* parent) : QObject(parent) { cache_.setMaxCost(50L * 1024 * 1024); }
+
+image_loader::~image_loader() { cache_.clear(); }
+
+void image_loader::request_thumbnail(const QString& path, const QSize& target_size)
+{
+    if (cache_.contains(path))
+    {
+        emit thumbnail_loaded(path, *cache_.object(path));
+        return;
+    }
+
+    if (path.isEmpty())
+    {
+        return;
+    }
+
+    QImageReader reader(path);
+
+    if (reader.supportsOption(QImageIOHandler::ScaledSize))
+    {
+        reader.setScaledSize(target_size);
+    }
+
+    QImage image = reader.read();
+
+    if (image.isNull())
+    {
+        return;
+    }
+
+    if (image.width() != target_size.width())
+    {
+        image = image.scaled(target_size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    }
+
+    int cost = image.width() * image.height() * 4;
+
+    cache_.insert(path, new QImage(image), cost);
+    emit thumbnail_loaded(path, image);
+}
+#include <QScrollBar>
+#include <QWheelEvent>
+#include <QMessageBox>
+#include <QtConcurrent>
+#include <QImageReader>
+#include <QGraphicsView>
+#include <QGraphicsScene>
+#include <QGraphicsPixmapItem>
+#include "image_viewer_window.h"
+
+image_viewer_window::image_viewer_window(QWidget* parent) : QMainWindow(parent), view_(nullptr), scene_(nullptr), image_item_(nullptr)
+{
+    setup_ui();
+    resize(1200, 800);
+    setAttribute(Qt::WA_DeleteOnClose);
+}
+
+image_viewer_window::~image_viewer_window() {}
+
+void image_viewer_window::setup_ui()
+{
+    scene_ = new QGraphicsScene(this);
+    view_ = new QGraphicsView(this);
+    view_->setScene(scene_);
+    view_->setDragMode(QGraphicsView::ScrollHandDrag);
+    view_->setRenderHint(QPainter::Antialiasing);
+    view_->setRenderHint(QPainter::SmoothPixmapTransform);
+    view_->setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
+    view_->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+    view_->setResizeAnchor(QGraphicsView::AnchorUnderMouse);
+    view_->setBackgroundBrush(Qt::black);
+    setCentralWidget(view_);
+}
+
+void image_viewer_window::load_image(const QString& path)
+{
+    QImageReader reader(path);
+    QImageReader::setAllocationLimit(0);
+
+    QImage image = reader.read();
+    QMetaObject::invokeMethod(this,
+                              [this, image]()
+                              {
+                                  if (image.isNull())
+                                  {
+                                      setWindowTitle("Error loading image");
+                                      return;
+                                  }
+                                  scene_->clear();
+                                  QPixmap pixmap = QPixmap::fromImage(image);
+                                  image_item_ = scene_->addPixmap(pixmap);
+                                  scene_->setSceneRect(pixmap.rect());
+                                  setWindowTitle(QString("Viewer - %1 (%2x%3)").arg(current_path_).arg(pixmap.width()).arg(pixmap.height()));
+                              });
+}
+
+void image_viewer_window::set_image_path(const QString& path)
+{
+    current_path_ = path;
+
+    setWindowTitle("Loading...");
+
+    load_future_ = QtConcurrent::run([this, path]() { load_image(path); });
+}
+
+void image_viewer_window::showEvent(QShowEvent* event) { QMainWindow::showEvent(event); }
+
+void image_viewer_window::wheelEvent(QWheelEvent* event)
+{
+    const double scale_factor = 1.15;
+
+    if (event->angleDelta().y() > 0)
+    {
+        view_->scale(scale_factor, scale_factor);
+    }
+    else
+    {
+        view_->scale(1.0 / scale_factor, 1.0 / scale_factor);
+    }
+    QMainWindow::wheelEvent(event);
+}
+#include <QApplication>
+#include <QImageReader>
+#include "main_window.h"
+
+int main(int argc, char *argv[])
+{
+    QImageReader::setAllocationLimit(0);
+
+    QApplication app(argc, argv);
+
+    main_window w;
+    w.show();
+
+    return QApplication::exec();
+}
+#include <QTimer>
+#include <QDebug>
+#include <QAction>
+#include <QKeySequence>
+#include <QFileDialog>
+#include <QDirIterator>
+#include <QImageReader>
+#include <QStatusBar>
+#include <QtConcurrent>
+#include <QCoreApplication>
+#include <QResizeEvent>
+#include <QFileInfo>
+
+#include "main_window.h"
+#include "image_loader.h"
+#include "common_types.h"
+#include "waterfall_view.h"
+#include "waterfall_scene.h"
+#include "image_viewer_window.h"
+
+main_window::main_window(QWidget* parent)
+    : QMainWindow(parent),
+      view_(nullptr),
+      scene_(nullptr),
+      worker_thread_(nullptr),
+      image_loader_(nullptr),
+      scan_duration_(0),
+      total_count_(0),
+      loaded_count_(0),
+      scan_watcher_(new QFutureWatcher<std::vector<image_meta>>(this))
+{
+    setup_ui();
+    setup_worker();
+    setup_connections();
+    resize(1024, 768);
+}
+
+main_window::~main_window()
+{
+    if (worker_thread_ != nullptr)
+    {
+        worker_thread_->quit();
+        worker_thread_->wait();
+    }
+}
+
+void main_window::setup_ui()
+{
+    auto* act_open = new QAction("Open", this);
+
+    act_open->setShortcut(QKeySequence::Open);
+
+    addAction(act_open);
+
+    connect(act_open, &QAction::triggered, this, &main_window::on_add_folder);
+
+    scene_ = new waterfall_scene(this);
+    view_ = new waterfall_view(this);
+    view_->setScene(scene_);
+
+    setCentralWidget(view_);
+
+    status_label_ = new QLabel("Press Ctrl+O to load folder", this);
+    statusBar()->addWidget(status_label_);
+}
+
+void main_window::setup_worker()
+{
+    worker_thread_ = new QThread(this);
+    image_loader_ = new image_loader();
+
+    image_loader_->moveToThread(worker_thread_);
+
+    connect(worker_thread_, &QThread::finished, image_loader_, &QObject::deleteLater);
+
+    worker_thread_->start();
+}
+
+void main_window::setup_connections()
+{
+    connect(view_, &waterfall_view::view_resized, this, [this](int width) { scene_->layout_items(width); });
+    connect(scene_, &waterfall_scene::request_load_image, image_loader_, &image_loader::request_thumbnail);
+    connect(image_loader_, &image_loader::thumbnail_loaded, scene_, &waterfall_scene::on_image_loaded);
+    connect(scene_, &waterfall_scene::image_double_clicked, this, &main_window::on_image_double_clicked);
+
+    connect(image_loader_, &image_loader::thumbnail_loaded, this, &main_window::on_image_loaded_stat);
+    connect(scan_watcher_, &QFutureWatcher<std::vector<image_meta>>::finished, this, &main_window::on_scan_finished);
+}
+
+void main_window::on_add_folder()
+{
+    QString dir_path = QFileDialog::getExistingDirectory(this, "Select Folder", QDir::homePath());
+
+    if (dir_path.isEmpty())
+    {
+        return;
+    }
+
+    scene_->clear();
+    total_count_ = 0;
+    loaded_count_ = 0;
+    scan_duration_ = 0;
+
+    scan_timer_.start();
+    status_label_->setText(QString("Scanning: %1").arg(dir_path));
+
+    QFuture<std::vector<image_meta>> future = QtConcurrent::run(
+        [dir_path]()
+        {
+            std::vector<image_meta> results;
+            QDirIterator it(dir_path, QStringList() << "*.jpg" << "*.png" << "*.jpeg" << "*.webp", QDir::Files, QDirIterator::Subdirectories);
+
+            while (it.hasNext())
+            {
+                QString file_path = it.next();
+
+                QImageReader reader(file_path);
+                QSize size = reader.size();
+
+                if (size.isValid())
+                {
+                    image_meta meta;
+                    meta.path = file_path;
+                    meta.original_size = size;
+                    results.push_back(meta);
+                }
+            }
+            return results;
+        });
+
+    scan_watcher_->setFuture(future);
+}
+
+void main_window::on_scan_finished()
+{
+    std::vector<image_meta> metas = scan_watcher_->result();
+
+    total_count_ = static_cast<int>(metas.size());
+
+    for (const auto& meta : metas)
+    {
+        scene_->add_image(meta);
+    }
+
+    scene_->layout_items(view_->viewport()->width());
+
+    scan_duration_ = scan_timer_.elapsed();
+    update_status_bar();
+
+    QMetaObject::invokeMethod(view_, [this]() { view_->check_visible_area(); }, Qt::QueuedConnection);
+}
+
+void main_window::on_image_loaded_stat()
+{
+    loaded_count_++;
+    update_status_bar();
+}
+
+void main_window::update_status_bar()
+{
+    QString status = QString("Scan+Layout: %1 ms | Loaded: %2 / %3").arg(scan_duration_).arg(loaded_count_).arg(total_count_);
+
+    if (loaded_count_ == total_count_ && total_count_ > 0)
+    {
+        status += " [All Done]";
+    }
+    else if (total_count_ == 0 && scan_duration_ > 0)
+    {
+        status = "No images found in selected folder.";
+    }
+
+    status_label_->setText(status);
+}
+
+void main_window::on_image_double_clicked(const QString& path)
+{
+    auto* viewer = new image_viewer_window(nullptr);
+    viewer->set_image_path(path);
+    viewer->show();
+}
+#include <QBrush>
+#include <QPen>
+#include "waterfall_item.h"
+
+waterfall_item::waterfall_item(const image_meta& meta, QGraphicsItem* parent)
+    : QGraphicsPixmapItem(parent), path_(meta.path), loaded_(false), loading_(false), target_width_(kMinColWidth)
+{
+    setFlag(QGraphicsItem::ItemIsSelectable);
+    setShapeMode(QGraphicsPixmapItem::BoundingRectShape);
+
+    QPixmap placeholder(kMinColWidth, 200);
+    placeholder.fill(Qt::lightGray);
+    setPixmap(placeholder);
+}
+
+QString waterfall_item::get_path() const { return path_; }
+
+bool waterfall_item::is_loaded() const { return loaded_; }
+void waterfall_item::set_loaded(bool loaded) { loaded_ = loaded; }
+
+bool waterfall_item::is_loading() const { return loading_; }
+void waterfall_item::set_loading(bool loading) { loading_ = loading; }
+
+void waterfall_item::set_display_width(int width)
+{
+    if (width <= 0 || width == target_width_)
+    {
+        return;
+    }
+    target_width_ = width;
+    update_scale();
+}
+
+void waterfall_item::set_pixmap_safe(const QPixmap& pixmap)
+{
+    setPixmap(pixmap);
+    update_scale();
+}
+
+void waterfall_item::update_scale()
+{
+    if (pixmap().isNull() || pixmap().width() == 0)
+    {
+        return;
+    }
+
+    qreal s = static_cast<qreal>(target_width_) / pixmap().width();
+    setScale(s);
+}
+#include <algorithm>
+#include <cmath>
+#include <QPixmap>
+#include <QMenu>
+#include <QClipboard>
+#include <QApplication>
+#include <QGraphicsSceneMouseEvent>
+
+#include "waterfall_item.h"
+#include "waterfall_scene.h"
+
+waterfall_scene::waterfall_scene(QObject* parent) : QGraphicsScene(parent), current_col_width_(kMinColWidth) {}
+
+void waterfall_scene::add_image(const image_meta& meta)
+{
+    auto* item = new waterfall_item(meta);
+    addItem(item);
+    items_.push_back(item);
+    item_map_.insert(meta.path, item);
+
+    double ratio = 1.0;
+    if (meta.original_size.isValid() && meta.original_size.width() > 0)
+    {
+        ratio = static_cast<double>(meta.original_size.height()) / meta.original_size.width();
+    }
+
+    int thumb_height = static_cast<int>(kMinColWidth * ratio);
+
+    QPixmap placeholder(kMinColWidth, thumb_height);
+    placeholder.fill(QColor(230, 230, 230));
+    item->setPixmap(placeholder);
+}
+
+void waterfall_scene::layout_items(int view_width)
+{
+    if (items_.empty() || view_width <= 0)
+    {
+        return;
+    }
+
+    int available_width = view_width - (2 * kItemMargin);
+
+    int col_count = std::max(1, available_width / (kMinColWidth + kColumnMargin));
+
+    int total_spacing = (col_count - 1) * kColumnMargin;
+
+    int real_col_width = (available_width - total_spacing) / col_count;
+
+    current_col_width_ = real_col_width;
+
+    std::vector<int> col_heights(col_count, kItemMargin);
+
+    for (auto* item : items_)
+    {
+        auto min_itr = std::min_element(col_heights.begin(), col_heights.end());
+        int min_col_idx = static_cast<int>(std::distance(col_heights.begin(), min_itr));
+
+        int x = kItemMargin + (min_col_idx * (real_col_width + kColumnMargin));
+        int y = *min_itr;
+
+        item->setPos(x, y);
+
+        item->set_display_width(real_col_width);
+
+        int item_height = static_cast<int>(item->sceneBoundingRect().height());
+
+        col_heights[min_col_idx] += (item_height + kItemMargin);
+    }
+
+    int max_height = *std::max_element(col_heights.begin(), col_heights.end());
+    setSceneRect(0, 0, view_width, max_height + 50);
+}
+
+void waterfall_scene::load_visible_items(const QRectF& visible_rect)
+{
+    QList<QGraphicsItem*> visible_items = items(visible_rect);
+
+    for (QGraphicsItem* g_item : visible_items)
+    {
+        auto* item = dynamic_cast<waterfall_item*>(g_item);
+
+        if (item != nullptr && !item->is_loaded() && !item->is_loading())
+        {
+            item->set_loading(true);
+
+            int req_height = 0;
+            if (!item->pixmap().isNull() && item->pixmap().width() > 0)
+            {
+                double ratio = static_cast<double>(item->pixmap().height()) / item->pixmap().width();
+                req_height = static_cast<int>(current_col_width_ * ratio);
+            }
+
+            emit request_load_image(item->get_path(), QSize(current_col_width_, req_height));
+        }
+    }
+}
+
+void waterfall_scene::on_image_loaded(const QString& path, const QImage& image)
+{
+    if (auto it = item_map_.find(path); it != item_map_.end())
+    {
+        waterfall_item* item = it.value();
+
+        item->set_pixmap_safe(QPixmap::fromImage(image));
+
+        item->set_display_width(current_col_width_);
+
+        item->set_loaded(true);
+        item->set_loading(false);
+    }
+}
+
+void waterfall_scene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
+{
+    QGraphicsItem* item = itemAt(event->scenePos(), QTransform());
+    auto* wf_item = dynamic_cast<waterfall_item*>(item);
+
+    if (wf_item != nullptr)
+    {
+        emit image_double_clicked(wf_item->get_path());
+    }
+
+    QGraphicsScene::mouseDoubleClickEvent(event);
+}
+void waterfall_scene::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
+{
+    QGraphicsItem* item = itemAt(event->scenePos(), QTransform());
+    auto* wf_item = dynamic_cast<waterfall_item*>(item);
+
+    if (wf_item != nullptr)
+    {
+        QMenu menu;
+        QAction* copyPathAction = menu.addAction("复制文件绝对路径");
+
+        connect(copyPathAction,
+                &QAction::triggered,
+                [wf_item]()
+                {
+                    QClipboard* clipboard = QGuiApplication::clipboard();
+                    clipboard->setText(wf_item->get_path());
+                });
+
+        menu.exec(event->screenPos());
+
+        event->accept();
+    }
+    else
+    {
+        QGraphicsScene::contextMenuEvent(event);
+    }
+}
+#include <QScrollBar>
+#include <QResizeEvent>
+#include "waterfall_view.h"
+#include "waterfall_scene.h"
+
+waterfall_view::waterfall_view(QWidget* parent) : QGraphicsView(parent)
+{
+    setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setDragMode(QGraphicsView::ScrollHandDrag);
+
+    debounce_timer_ = new QTimer(this);
+    debounce_timer_->setSingleShot(true);
+    debounce_timer_->setInterval(150);
+
+    connect(debounce_timer_, &QTimer::timeout, this, &waterfall_view::check_visible_area);
+}
+
+void waterfall_view::resizeEvent(QResizeEvent* event)
+{
+    QGraphicsView::resizeEvent(event);
+
+    int content_width = event->size().width();
+    if (verticalScrollBar()->isVisible())
+    {
+        content_width -= verticalScrollBar()->width();
+    }
+
+    emit view_resized(content_width);
+
+    debounce_timer_->start();
+}
+
+void waterfall_view::scrollContentsBy(int dx, int dy)
+{
+    QGraphicsView::scrollContentsBy(dx, dy);
+
+    debounce_timer_->start();
+}
+
+void waterfall_view::check_visible_area()
+{
+    auto* wf_scene = qobject_cast<waterfall_scene*>(scene());
+    if (wf_scene == nullptr)
+    {
+        return;
+    }
+
+    QRect view_rect = viewport()->rect();
+    QRectF scene_rect = mapToScene(view_rect).boundingRect();
+
+    scene_rect.adjust(0, -500, 0, 500);
+
+    wf_scene->load_visible_items(scene_rect);
+}
+cmake_minimum_required(VERSION 3.16)
+
+project(ImageViewer LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+
+find_package(Qt6 REQUIRED COMPONENTS Widgets Core Gui Concurrent)
+
+set(PROJECT_SOURCES
+    main.cc
+    image_loader.cc
+    waterfall_item.cc
+    waterfall_scene.cc
+    waterfall_view.cc
+    main_window.cc
+    image_viewer_window.cc
+)
+
+add_executable(ImageViewer ${PROJECT_SOURCES})
+
+target_link_libraries(ImageViewer PRIVATE Qt6::Widgets Qt6::Core Qt6::Gui Qt6::Concurrent)

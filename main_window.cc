@@ -82,7 +82,7 @@ void main_window::setup_connections()
     connect(scene_, &waterfall_scene::request_load_image, image_loader_, &image_loader::request_thumbnail);
     connect(image_loader_, &image_loader::thumbnail_loaded, scene_, &waterfall_scene::on_image_loaded);
     connect(scene_, &waterfall_scene::image_double_clicked, this, &main_window::on_image_double_clicked);
-
+    connect(scene_, &waterfall_scene::request_open_folder, this, &main_window::on_add_folder);
     connect(image_loader_, &image_loader::thumbnail_loaded, this, &main_window::on_image_loaded_stat);
     connect(scan_watcher_, &QFutureWatcher<std::vector<image_meta>>::finished, this, &main_window::on_scan_finished);
 }

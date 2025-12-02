@@ -26,6 +26,7 @@ class waterfall_scene : public QGraphicsScene
    signals:
     void request_load_image(QString path, QSize size);
     void image_double_clicked(QString path);
+    void request_open_folder();
 
    public slots:
     void on_image_loaded(const QString& path, const QImage& image);
