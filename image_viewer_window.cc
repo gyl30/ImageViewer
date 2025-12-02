@@ -27,15 +27,6 @@ image_viewer_window::~image_viewer_window() = default;
 
 void image_viewer_window::setup_ui()
 {
-    QToolBar* toolbar = addToolBar("Tools");
-    toolbar->setMovable(false);
-
-    QAction* act_zoom_in = toolbar->addAction("Zoom In (+)");
-    QAction* act_zoom_out = toolbar->addAction("Zoom Out (-)");
-
-    connect(act_zoom_in, &QAction::triggered, this, &image_viewer_window::zoom_in);
-    connect(act_zoom_out, &QAction::triggered, this, &image_viewer_window::zoom_out);
-
     scene_ = new QGraphicsScene(this);
     view_ = new QGraphicsView(this);
     view_->setScene(scene_);

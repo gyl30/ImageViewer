@@ -73,24 +73,34 @@ void waterfall_scene::layout_items(int view_width)
 
 void waterfall_scene::load_visible_items(const QRectF& visible_rect)
 {
-    QList<QGraphicsItem*> visible_items = items(visible_rect);
+    QRectF unload_rect = visible_rect.adjusted(-2000, -2000, 2000, 2000);
 
-    for (QGraphicsItem* g_item : visible_items)
+    for (auto* item : items_)
     {
-        auto* item = dynamic_cast<waterfall_item*>(g_item);
+        QRectF item_rect = item->sceneBoundingRect();
 
-        if (item != nullptr && !item->is_loaded() && !item->is_loading())
+        if (visible_rect.intersects(item_rect))
         {
-            item->set_loading(true);
-
-            int req_height = 0;
-            if (!item->pixmap().isNull() && item->pixmap().width() > 0)
+            if (!item->is_loaded() && !item->is_loading())
             {
-                double ratio = static_cast<double>(item->pixmap().height()) / item->pixmap().width();
-                req_height = static_cast<int>(current_col_width_ * ratio);
-            }
+                item->set_loading(true);
 
-            emit request_load_image(item->get_path(), QSize(current_col_width_, req_height));
+                int req_height = 0;
+                if (!item->pixmap().isNull() && item->pixmap().width() > 0)
+                {
+                    double ratio = static_cast<double>(item->pixmap().height()) / item->pixmap().width();
+                    req_height = static_cast<int>(current_col_width_ * ratio);
+                }
+
+                emit request_load_image(item->get_path(), QSize(current_col_width_, req_height));
+            }
+        }
+        else if (!unload_rect.intersects(item_rect))
+        {
+            if (item->is_loaded())
+            {
+                item->unload();
+            }
         }
     }
 }
@@ -122,6 +132,7 @@ void waterfall_scene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 
     QGraphicsScene::mouseDoubleClickEvent(event);
 }
+
 void waterfall_scene::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 {
     QGraphicsItem* item = itemAt(event->scenePos(), QTransform());
@@ -149,4 +160,3 @@ void waterfall_scene::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     menu.exec(event->screenPos());
     event->accept();
 }
-

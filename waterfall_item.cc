@@ -14,6 +14,7 @@ waterfall_item::waterfall_item(const image_meta& meta, QGraphicsItem* parent)
 }
 
 QString waterfall_item::get_path() const { return path_; }
+
 QSize waterfall_item::get_original_size() const { return original_size_; }
 
 bool waterfall_item::is_loaded() const { return loaded_; }
@@ -35,6 +36,29 @@ void waterfall_item::set_display_width(int width)
 void waterfall_item::set_pixmap_safe(const QPixmap& pixmap)
 {
     setPixmap(pixmap);
+    update_scale();
+}
+
+void waterfall_item::unload()
+{
+    if (!loaded_)
+    {
+        return;
+    }
+
+    int h = 200;
+    if (original_size_.isValid() && original_size_.width() > 0)
+    {
+        double ratio = static_cast<double>(original_size_.height()) / original_size_.width();
+        h = static_cast<int>(target_width_ * ratio);
+    }
+
+    QPixmap placeholder(target_width_, h);
+    placeholder.fill(QColor(230, 230, 230));
+    setPixmap(placeholder);
+
+    loaded_ = false;
+    loading_ = false;
     update_scale();
 }
 
