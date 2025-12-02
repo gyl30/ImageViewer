@@ -1,3 +1,6 @@
+#include <cmath>
+#include <algorithm>
+#include <QDir>
 #include <QScrollBar>
 #include <QtConcurrent>
 #include <QImageReader>
@@ -11,9 +14,7 @@
 #include <QWheelEvent>
 #include <QPushButton>
 #include <QFileInfo>
-#include <QDir>
 #include <QMessageBox>
-#include <algorithm>
 #include "image_viewer_window.h"
 
 image_viewer_window::image_viewer_window(QWidget* parent)
@@ -74,8 +75,22 @@ void image_viewer_window::setup_ui()
 void image_viewer_window::load_image(const QString& path)
 {
     QImageReader reader(path);
-    QImageReader::setAllocationLimit(0);
+
     reader.setAutoTransform(true);
+    auto kMaxMemMB = QImageReader::allocationLimit();
+    QSize img_size = reader.size();
+    if (img_size.isValid())
+    {
+        double estimated_mb = (static_cast<double>(img_size.width()) * img_size.height() * 4) / (1024.0 * 1024.0);
+
+        if (estimated_mb > kMaxMemMB)
+        {
+            double scale_factor = std::sqrt(kMaxMemMB / estimated_mb);
+            QSize safe_size = img_size * scale_factor;
+
+            reader.setScaledSize(safe_size);
+        }
+    }
 
     QImage image = reader.read();
 
@@ -94,11 +109,15 @@ void image_viewer_window::load_image(const QString& path)
                                   }
 
                                   scene_->clear();
+
                                   QPixmap pixmap = QPixmap::fromImage(image);
                                   image_item_ = scene_->addPixmap(pixmap);
                                   scene_->setSceneRect(pixmap.rect());
 
-                                  view_->fitInView(image_item_, Qt::KeepAspectRatio);
+                                  if (image_item_)
+                                  {
+                                      view_->fitInView(image_item_, Qt::KeepAspectRatio);
+                                  }
 
                                   setWindowTitle(QString("Viewer - %1 (%2x%3) [%4/%5]")
                                                      .arg(QFileInfo(path).fileName())
