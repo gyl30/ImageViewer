@@ -20,8 +20,11 @@ class image_viewer_window : public QMainWindow
 
    protected:
     void showEvent(QShowEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
 
-    void wheelEvent(QWheelEvent* event) override;
+   private slots:
+    void zoom_in();
+    void zoom_out();
 
    private:
     void setup_ui();
@@ -35,4 +38,4 @@ class image_viewer_window : public QMainWindow
     QFuture<void> load_future_;
 };
 
-#endif    // IMAGE_VIEWER_WINDOW_H
+#endif
