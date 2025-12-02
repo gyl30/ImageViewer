@@ -1,0 +1,29 @@
+cmake_minimum_required(VERSION 3.16)
+
+project(waterfall_viewer LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+
+find_package(Qt6 REQUIRED COMPONENTS Widgets Concurrent)
+
+set(PROJECT_SOURCES
+    main.cc
+    image_loader.cc
+    waterfall_item.cc
+    waterfall_scene.cc
+    waterfall_view.cc
+    main_window.cc
+    image_viewer_window.cc
+)
+
+add_executable(waterfall_viewer ${PROJECT_SOURCES})
+
+target_link_libraries(waterfall_viewer PRIVATE Qt6::Widgets Qt6::Concurrent)
