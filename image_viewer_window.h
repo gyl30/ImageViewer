@@ -7,6 +7,7 @@
 class QGraphicsView;
 class QGraphicsScene;
 class QGraphicsPixmapItem;
+class QPushButton;
 
 class image_viewer_window : public QMainWindow
 {
@@ -26,10 +27,13 @@ class image_viewer_window : public QMainWindow
    private slots:
     void zoom_in();
     void zoom_out();
+    void load_prev_image();
+    void load_next_image();
 
    private:
     void setup_ui();
     void load_image(const QString& path);
+    void navigate_image(int delta);
 
    private:
     QString current_path_;
@@ -37,6 +41,9 @@ class image_viewer_window : public QMainWindow
     QGraphicsScene* scene_;
     QGraphicsPixmapItem* image_item_;
     QFuture<void> load_future_;
+
+    QPushButton* btn_prev_;
+    QPushButton* btn_next_;
 };
 
 #endif
