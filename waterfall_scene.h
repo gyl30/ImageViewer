@@ -1,10 +1,11 @@
 #ifndef WATERFALL_SCENE_H
 #define WATERFALL_SCENE_H
 
-#include <QGraphicsScene>
 #include <vector>
 #include <QHash>
 #include <QObject>
+#include <QGraphicsScene>
+#include <QGraphicsSceneContextMenuEvent>
 #include "common_types.h"
 
 class waterfall_item;
@@ -31,6 +32,8 @@ class waterfall_scene : public QGraphicsScene
 
    protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
+
+    void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
 
    private:
     std::vector<waterfall_item*> items_;

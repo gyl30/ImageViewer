@@ -1,7 +1,10 @@
 #include <algorithm>
 #include <cmath>
-#include <QGraphicsSceneMouseEvent>
 #include <QPixmap>
+#include <QMenu>
+#include <QClipboard>
+#include <QApplication>
+#include <QGraphicsSceneMouseEvent>
 
 #include "waterfall_item.h"
 #include "waterfall_scene.h"
@@ -118,4 +121,31 @@ void waterfall_scene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
     }
 
     QGraphicsScene::mouseDoubleClickEvent(event);
+}
+void waterfall_scene::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
+{
+    QGraphicsItem* item = itemAt(event->scenePos(), QTransform());
+    auto* wf_item = dynamic_cast<waterfall_item*>(item);
+
+    if (wf_item != nullptr)
+    {
+        QMenu menu;
+        QAction* copyPathAction = menu.addAction("复制文件绝对路径");
+
+        connect(copyPathAction,
+                &QAction::triggered,
+                [wf_item]()
+                {
+                    QClipboard* clipboard = QGuiApplication::clipboard();
+                    clipboard->setText(wf_item->get_path());
+                });
+
+        menu.exec(event->screenPos());
+
+        event->accept();
+    }
+    else
+    {
+        QGraphicsScene::contextMenuEvent(event);
+    }
 }
