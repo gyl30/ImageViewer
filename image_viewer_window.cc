@@ -40,6 +40,7 @@ void image_viewer_window::setup_ui()
     view_->setBackgroundBrush(Qt::black);
 
     view_->viewport()->installEventFilter(this);
+    view_->installEventFilter(this);
 
     setCentralWidget(view_);
 
@@ -160,6 +161,21 @@ void image_viewer_window::resizeEvent(QResizeEvent* event)
 
 bool image_viewer_window::eventFilter(QObject* watched, QEvent* event)
 {
+    if (event->type() == QEvent::KeyPress)
+    {
+        auto* key_event = static_cast<QKeyEvent*>(event);
+        if (key_event->key() == Qt::Key_Left)
+        {
+            load_prev_image();
+            return true;
+        }
+        if (key_event->key() == Qt::Key_Right)
+        {
+            load_next_image();
+            return true;
+        }
+    }
+
     if (watched == view_->viewport() && event->type() == QEvent::Wheel)
     {
         auto* wheel_event = static_cast<QWheelEvent*>(event);
@@ -177,6 +193,7 @@ bool image_viewer_window::eventFilter(QObject* watched, QEvent* event)
             return true;
         }
     }
+
     return QMainWindow::eventFilter(watched, event);
 }
 
@@ -218,4 +235,23 @@ void image_viewer_window::navigate_image(int delta)
     }
 
     set_image_path(image_list_[new_idx]);
+}
+void image_viewer_window::keyPressEvent(QKeyEvent* event)
+{
+    if (event->key() == Qt::Key_Left)
+    {
+        load_prev_image();
+    }
+    else if (event->key() == Qt::Key_Right)
+    {
+        load_next_image();
+    }
+    else if (event->key() == Qt::Key_Escape)
+    {
+        close();
+    }
+    else
+    {
+        QMainWindow::keyPressEvent(event);
+    }
 }

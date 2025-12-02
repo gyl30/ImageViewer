@@ -26,6 +26,7 @@ class image_viewer_window : public QMainWindow
     void showEvent(QShowEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
     bool eventFilter(QObject* watched, QEvent* event) override;
+    void keyPressEvent(QKeyEvent* event) override;
 
    private slots:
     void zoom_in();
