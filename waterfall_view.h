@@ -20,8 +20,12 @@ class waterfall_view : public QGraphicsView
     void resizeEvent(QResizeEvent* event) override;
     void scrollContentsBy(int dx, int dy) override;
 
+   private slots:
+    void on_interaction_finished();
+
    private:
     QTimer* debounce_timer_;
+    int last_width_ = -1;
 };
 
-#endif    // WATERFALL_VIEW_H
+#endif
