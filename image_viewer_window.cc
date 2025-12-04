@@ -25,7 +25,13 @@ image_viewer_window::image_viewer_window(QWidget* parent)
     setAttribute(Qt::WA_DeleteOnClose);
 }
 
-image_viewer_window::~image_viewer_window() = default;
+image_viewer_window::~image_viewer_window()
+{
+    if (load_future_.isRunning())
+    {
+        load_future_.waitForFinished();
+    }
+}
 
 void image_viewer_window::setup_ui()
 {

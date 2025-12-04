@@ -229,9 +229,8 @@ void main_window::on_image_double_clicked(const QString& path)
 {
     if (viewer_window_ == nullptr)
     {
-        viewer_window_ = new image_viewer_window(nullptr);
-
-        connect(viewer_window_, &QObject::destroyed, this, [this]() { viewer_window_ = nullptr; });
+        viewer_window_ = new image_viewer_window(this);
+        viewer_window_->setWindowFlags(Qt::Window);
     }
 
     if (scan_watcher_->isFinished())
