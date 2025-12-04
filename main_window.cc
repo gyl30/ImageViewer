@@ -41,11 +41,16 @@ main_window::main_window(QWidget* parent)
 
 main_window::~main_window()
 {
+    if (image_loader_ != nullptr)
+    {
+        image_loader_->stop_processing();
+    }
     if (worker_thread_ != nullptr)
     {
         worker_thread_->quit();
         worker_thread_->wait();
     }
+    delete image_loader_;
 }
 
 void main_window::setup_ui()
@@ -76,7 +81,6 @@ void main_window::setup_worker()
     image_loader_->moveToThread(worker_thread_);
 
     connect(worker_thread_, &QThread::started, image_loader_, &image_loader::start_processing);
-    connect(worker_thread_, &QThread::finished, image_loader_, &QObject::deleteLater);
 
     worker_thread_->start();
 }
