@@ -20,6 +20,7 @@ set(PROJECT_SOURCES
     waterfall_item.cc
     waterfall_scene.cc
     waterfall_view.cc
+    file_scanner.cpp
     main_window.cc
     image_viewer_window.cc
 )

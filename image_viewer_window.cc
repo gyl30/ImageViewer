@@ -22,7 +22,6 @@ image_viewer_window::image_viewer_window(QWidget* parent)
 {
     setup_ui();
     resize(1200, 800);
-    setAttribute(Qt::WA_DeleteOnClose);
 }
 
 image_viewer_window::~image_viewer_window()

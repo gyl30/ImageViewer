@@ -6,7 +6,6 @@
 #include <QDirIterator>
 #include <QImageReader>
 #include <QStatusBar>
-#include <QtConcurrent>
 #include <QCoreApplication>
 #include <QResizeEvent>
 #include <QFileInfo>
@@ -18,23 +17,13 @@
 #include "waterfall_scene.h"
 #include "waterfall_item.h"
 #include "image_viewer_window.h"
+#include "file_scanner.h"
 
-main_window::main_window(QWidget* parent)
-    : QMainWindow(parent),
-      view_(nullptr),
-      scene_(nullptr),
-      worker_thread_(nullptr),
-      image_loader_(nullptr),
-      status_label_(nullptr),
-      info_label_(nullptr),
-      scan_duration_(0),
-      total_count_(0),
-      loaded_count_(0),
-      scan_watcher_(new QFutureWatcher<std::vector<image_meta>>(this)),
-      viewer_window_(nullptr)
+main_window::main_window(QWidget* parent) : QMainWindow(parent)
 {
     setup_ui();
     setup_worker();
+    setup_scanner();
     setup_connections();
     resize(1024, 768);
 }
@@ -50,7 +39,16 @@ main_window::~main_window()
         worker_thread_->quit();
         worker_thread_->wait();
     }
-    delete image_loader_;
+
+    if (file_scanner_ != nullptr)
+    {
+        file_scanner_->stop_scan();
+    }
+    if (scan_thread_ != nullptr)
+    {
+        scan_thread_->quit();
+        scan_thread_->wait();
+    }
 }
 
 void main_window::setup_ui()
@@ -80,9 +78,25 @@ void main_window::setup_worker()
 
     image_loader_->moveToThread(worker_thread_);
 
+    connect(worker_thread_, &QThread::finished, image_loader_, &QObject::deleteLater);
     connect(worker_thread_, &QThread::started, image_loader_, &image_loader::start_processing);
 
     worker_thread_->start();
+}
+
+void main_window::setup_scanner()
+{
+    scan_thread_ = new QThread(this);
+    file_scanner_ = new file_scanner();
+
+    file_scanner_->moveToThread(scan_thread_);
+
+    connect(scan_thread_, &QThread::finished, file_scanner_, &QObject::deleteLater);
+    connect(this, &main_window::request_start_scan, file_scanner_, &file_scanner::start_scan);
+    connect(file_scanner_, &file_scanner::images_scanned_batch, this, &main_window::on_scan_batch_received);
+    connect(file_scanner_, &file_scanner::scan_finished, this, &main_window::on_scan_all_finished);
+
+    scan_thread_->start();
 }
 
 void main_window::setup_connections()
@@ -98,7 +112,6 @@ void main_window::setup_connections()
     connect(scene_, &QGraphicsScene::selectionChanged, this, &main_window::on_selection_changed);
 
     connect(image_loader_, &image_loader::thumbnail_loaded, this, &main_window::on_image_loaded_stat);
-    connect(scan_watcher_, &QFutureWatcher<std::vector<image_meta>>::finished, this, &main_window::on_scan_finished);
 }
 
 void main_window::on_add_folder()
@@ -110,59 +123,47 @@ void main_window::on_add_folder()
         return;
     }
 
+    if (file_scanner_ != nullptr)
+    {
+        file_scanner_->stop_scan();
+    }
+
     scene_->clear_items();
     total_count_ = 0;
     loaded_count_ = 0;
     scan_duration_ = 0;
     info_label_->clear();
 
-    scan_timer_.start();
     status_label_->setText(QString("Scanning: %1").arg(dir_path));
 
-    QFuture<std::vector<image_meta>> future = QtConcurrent::run(
-        [dir_path]()
-        {
-            std::vector<image_meta> results;
-            QDirIterator it(dir_path, QStringList() << "*.jpg" << "*.png" << "*.jpeg" << "*.webp", QDir::Files, QDirIterator::Subdirectories);
-
-            while (it.hasNext())
-            {
-                QString file_path = it.next();
-
-                QImageReader reader(file_path);
-                QSize size = reader.size();
-
-                if (size.isValid())
-                {
-                    image_meta meta;
-                    meta.path = file_path;
-                    meta.original_size = size;
-                    results.push_back(meta);
-                }
-            }
-            return results;
-        });
-
-    scan_watcher_->setFuture(future);
+    emit request_start_scan(dir_path);
 }
 
-void main_window::on_scan_finished()
+void main_window::on_scan_batch_received(const std::vector<image_meta>& batch)
 {
-    std::vector<image_meta> metas = scan_watcher_->result();
-
-    total_count_ = static_cast<int>(metas.size());
-
-    for (const auto& meta : metas)
+    for (const auto& meta : batch)
     {
         scene_->add_image(meta);
     }
 
+    total_count_ += static_cast<int>(batch.size());
+
     scene_->layout_items(view_->viewport()->width());
 
-    scan_duration_ = scan_timer_.elapsed();
-    update_status_bar();
-
     QMetaObject::invokeMethod(view_, [this]() { view_->check_visible_area(); }, Qt::QueuedConnection);
+
+    update_status_bar();
+}
+
+void main_window::on_scan_all_finished(int total, qint64 duration)
+{
+    scan_duration_ = duration;
+    total_count_ = total;
+
+    scene_->layout_items(view_->viewport()->width());
+    QMetaObject::invokeMethod(view_, [this]() { view_->check_visible_area(); }, Qt::QueuedConnection);
+
+    update_status_bar();
 }
 
 void main_window::on_image_loaded_stat()
@@ -233,17 +234,7 @@ void main_window::on_image_double_clicked(const QString& path)
         viewer_window_->setWindowFlags(Qt::Window);
     }
 
-    if (scan_watcher_->isFinished())
-    {
-        std::vector<QString> paths;
-        std::vector<image_meta> metas = scan_watcher_->result();
-        paths.reserve(metas.size());
-        for (const auto& meta : metas)
-        {
-            paths.push_back(meta.path);
-        }
-        viewer_window_->set_image_list(paths);
-    }
+    std::vector<QString> paths;
 
     viewer_window_->set_image_path(path);
 
