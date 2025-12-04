@@ -17,6 +17,8 @@ class waterfall_scene : public QGraphicsScene
    public:
     explicit waterfall_scene(QObject* parent = nullptr);
 
+    void clear_items();
+
     void add_image(const image_meta& meta);
 
     void layout_items(int view_width);

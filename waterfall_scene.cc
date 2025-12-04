@@ -12,6 +12,14 @@
 
 waterfall_scene::waterfall_scene(QObject* parent) : QGraphicsScene(parent), current_col_width_(kMinColWidth) {}
 
+void waterfall_scene::clear_items()
+{
+    items_.clear();
+    item_map_.clear();
+    this->clear();
+
+    setSceneRect(0, 0, 0, 0);
+}
 void waterfall_scene::add_image(const image_meta& meta)
 {
     auto* item = new waterfall_item(meta);

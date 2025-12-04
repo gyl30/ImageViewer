@@ -106,7 +106,7 @@ void main_window::on_add_folder()
         return;
     }
 
-    scene_->clear();
+    scene_->clear_items();
     total_count_ = 0;
     loaded_count_ = 0;
     scan_duration_ = 0;
