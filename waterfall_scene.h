@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <QHash>
+#include <QSet>
 #include <QObject>
 #include <QGraphicsScene>
 #include <QGraphicsSceneContextMenuEvent>
@@ -25,6 +26,8 @@ class waterfall_scene : public QGraphicsScene
 
     void load_visible_items(const QRectF& visible_rect);
 
+    [[nodiscard]] std::vector<QString> get_all_paths() const;
+
    signals:
     void request_load_image(QString path, QSize size);
     void request_cancel_image(QString path);
@@ -42,8 +45,11 @@ class waterfall_scene : public QGraphicsScene
    private:
     std::vector<waterfall_item*> items_;
     QHash<QString, waterfall_item*> item_map_;
+    QSet<waterfall_item*> loaded_items_;
 
     int current_col_width_;
+    std::vector<int> col_heights_;
+    size_t last_layout_item_index_;
 };
 
 #endif

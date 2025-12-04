@@ -25,23 +25,9 @@ void image_loader::request_thumbnail(const QString& path, const QSize& target_si
         return;
     }
 
-    if (pending_paths_.contains(path))
-    {
-        for (auto it = task_queue_.begin(); it != task_queue_.end(); ++it)
-        {
-            if (it->path == path)
-            {
-                task_queue_.erase(it);
-                break;
-            }
-        }
-        task_queue_.prepend({path, target_size});
-    }
-    else
-    {
-        task_queue_.prepend({path, target_size});
-        pending_paths_.insert(path);
-    }
+    task_queue_.prepend({path, target_size});
+
+    pending_paths_.insert(path);
 
     condition_.wakeOne();
 }
@@ -53,15 +39,6 @@ void image_loader::cancel_thumbnail(const QString& path)
     if (pending_paths_.contains(path))
     {
         pending_paths_.remove(path);
-
-        for (auto it = task_queue_.begin(); it != task_queue_.end(); ++it)
-        {
-            if (it->path == path)
-            {
-                task_queue_.erase(it);
-                break;
-            }
-        }
     }
 }
 
@@ -77,13 +54,18 @@ void image_loader::process_loop()
             {
                 condition_.wait(&mutex_);
             }
-
             if (stop_flag_)
             {
                 break;
             }
 
             current_task = task_queue_.takeFirst();
+
+            if (!pending_paths_.contains(current_task.path))
+            {
+                continue;
+            }
+
             pending_paths_.remove(current_task.path);
 
             current_loading_path_ = current_task.path;

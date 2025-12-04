@@ -19,6 +19,9 @@ class waterfall_item : public QGraphicsPixmapItem
     [[nodiscard]] bool is_loading() const;
     void set_loading(bool loading);
 
+    [[nodiscard]] bool wants_loading() const;
+    void set_wants_loading(bool wants);
+
     void set_display_width(int width);
 
     void set_pixmap_safe(const QPixmap& pixmap);
@@ -33,7 +36,8 @@ class waterfall_item : public QGraphicsPixmapItem
     QSize original_size_;
     bool loaded_;
     bool loading_;
+    bool wants_loading_;
     int target_width_;
 };
 
-#endif    // WATERFALL_ITEM_H
+#endif

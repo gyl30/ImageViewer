@@ -123,7 +123,7 @@ void main_window::on_add_folder()
         return;
     }
 
-    if (file_scanner_ != nullptr)
+    if (file_scanner_)
     {
         file_scanner_->stop_scan();
     }
@@ -234,7 +234,7 @@ void main_window::on_image_double_clicked(const QString& path)
         viewer_window_->setWindowFlags(Qt::Window);
     }
 
-    std::vector<QString> paths;
+    viewer_window_->set_image_list(scene_->get_all_paths());
 
     viewer_window_->set_image_path(path);
 

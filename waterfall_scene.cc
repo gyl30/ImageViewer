@@ -10,16 +10,20 @@
 #include "waterfall_item.h"
 #include "waterfall_scene.h"
 
-waterfall_scene::waterfall_scene(QObject* parent) : QGraphicsScene(parent), current_col_width_(kMinColWidth) {}
+waterfall_scene::waterfall_scene(QObject* parent) : QGraphicsScene(parent), current_col_width_(kMinColWidth), last_layout_item_index_(0) {}
 
 void waterfall_scene::clear_items()
 {
     items_.clear();
     item_map_.clear();
+    loaded_items_.clear();
+    col_heights_.clear();
+    last_layout_item_index_ = 0;
     this->clear();
 
     setSceneRect(0, 0, 0, 0);
 }
+
 void waterfall_scene::add_image(const image_meta& meta)
 {
     auto* item = new waterfall_item(meta);
@@ -48,41 +52,44 @@ void waterfall_scene::layout_items(int view_width)
     }
 
     int available_width = view_width - (2 * kItemMargin);
-
     int col_count = std::max(1, available_width / (kMinColWidth + kColumnMargin));
-
     int total_spacing = (col_count - 1) * kColumnMargin;
-
     int real_col_width = (available_width - total_spacing) / col_count;
 
-    current_col_width_ = real_col_width;
-
-    std::vector<int> col_heights(col_count, kItemMargin);
-
-    for (auto* item : items_)
+    if (real_col_width != current_col_width_ || col_heights_.size() != static_cast<size_t>(col_count))
     {
-        auto min_itr = std::min_element(col_heights.begin(), col_heights.end());
-        int min_col_idx = static_cast<int>(std::distance(col_heights.begin(), min_itr));
+        current_col_width_ = real_col_width;
+        col_heights_.assign(col_count, kItemMargin);
+        last_layout_item_index_ = 0;
+    }
+
+    for (size_t i = last_layout_item_index_; i < items_.size(); ++i)
+    {
+        waterfall_item* item = items_[i];
+
+        auto min_itr = std::min_element(col_heights_.begin(), col_heights_.end());
+        int min_col_idx = static_cast<int>(std::distance(col_heights_.begin(), min_itr));
 
         int x = kItemMargin + (min_col_idx * (real_col_width + kColumnMargin));
         int y = *min_itr;
 
         item->setPos(x, y);
-
         item->set_display_width(real_col_width);
 
         int item_height = static_cast<int>(item->sceneBoundingRect().height());
 
-        col_heights[min_col_idx] += (item_height + kItemMargin);
+        col_heights_[min_col_idx] += (item_height + kItemMargin);
     }
 
-    int max_height = *std::max_element(col_heights.begin(), col_heights.end());
+    last_layout_item_index_ = items_.size();
+
+    int max_height = *std::max_element(col_heights_.begin(), col_heights_.end());
     setSceneRect(0, 0, view_width, max_height + 50);
 }
+
 void waterfall_scene::load_visible_items(const QRectF& visible_rect)
 {
     QRectF load_rect = visible_rect.adjusted(0, -800, 0, 1200);
-
     QRectF unload_rect = visible_rect.adjusted(0, -2500, 0, 3000);
 
     qreal dpr = 1.0;
@@ -104,11 +111,12 @@ void waterfall_scene::load_visible_items(const QRectF& visible_rect)
             continue;
         }
 
-        if (item->is_loaded() || item->is_loading())
+        if (item->is_loaded() || item->wants_loading())
         {
             continue;
         }
 
+        item->set_wants_loading(true);
         item->set_loading(true);
 
         int req_width = static_cast<int>(current_col_width_ * dpr);
@@ -131,10 +139,13 @@ void waterfall_scene::load_visible_items(const QRectF& visible_rect)
         emit request_load_image(item->get_path(), target_size);
     }
 
-    for (auto* item : items_)
+    auto it = loaded_items_.begin();
+    while (it != loaded_items_.end())
     {
-        if (!item->is_loaded() && !item->is_loading())
+        waterfall_item* item = *it;
+        if (!item)
         {
+            it = loaded_items_.erase(it);
             continue;
         }
 
@@ -142,27 +153,51 @@ void waterfall_scene::load_visible_items(const QRectF& visible_rect)
 
         if (!unload_rect.intersects(item_rect))
         {
+            item->set_wants_loading(false);
+
             if (item->is_loading())
             {
                 emit request_cancel_image(item->get_path());
             }
 
             item->unload();
+            it = loaded_items_.erase(it);
+        }
+        else
+        {
+            ++it;
         }
     }
 }
+
 void waterfall_scene::on_image_loaded(const QString& path, const QImage& image)
 {
     if (auto it = item_map_.find(path); it != item_map_.end())
     {
         waterfall_item* item = it.value();
 
-        item->set_pixmap_safe(QPixmap::fromImage(image));
-        item->set_display_width(current_col_width_);
+        if (item->wants_loading())
+        {
+            item->set_pixmap_safe(QPixmap::fromImage(image));
+            item->set_display_width(current_col_width_);
 
-        item->set_loaded(true);
-        item->set_loading(false);
+            item->set_loaded(true);
+            item->set_loading(false);
+
+            loaded_items_.insert(item);
+        }
     }
+}
+
+std::vector<QString> waterfall_scene::get_all_paths() const
+{
+    std::vector<QString> paths;
+    paths.reserve(items_.size());
+    for (const auto* item : items_)
+    {
+        paths.push_back(item->get_path());
+    }
+    return paths;
 }
 
 void waterfall_scene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)

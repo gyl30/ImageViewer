@@ -1,16 +1,28 @@
 #include <QBrush>
 #include <QPen>
 #include "waterfall_item.h"
-
+static QPixmap& get_placeholder()
+{
+    static QPixmap p(1, 1);
+    if (p.width() == 1)
+    {
+        p = QPixmap(200, 200);
+        p.fill(Qt::lightGray);
+    }
+    return p;
+}
 waterfall_item::waterfall_item(const image_meta& meta, QGraphicsItem* parent)
-    : QGraphicsPixmapItem(parent), path_(meta.path), original_size_(meta.original_size), loaded_(false), loading_(false), target_width_(kMinColWidth)
+    : QGraphicsPixmapItem(parent),
+      path_(meta.path),
+      original_size_(meta.original_size),
+      loaded_(false),
+      loading_(false),
+      wants_loading_(false),
+      target_width_(kMinColWidth)
 {
     setFlag(QGraphicsItem::ItemIsSelectable);
     setShapeMode(QGraphicsPixmapItem::BoundingRectShape);
-
-    QPixmap placeholder(kMinColWidth, 200);
-    placeholder.fill(Qt::lightGray);
-    setPixmap(placeholder);
+    setPixmap(get_placeholder());
 }
 
 QString waterfall_item::get_path() const { return path_; }
@@ -22,6 +34,9 @@ void waterfall_item::set_loaded(bool loaded) { loaded_ = loaded; }
 
 bool waterfall_item::is_loading() const { return loading_; }
 void waterfall_item::set_loading(bool loading) { loading_ = loading; }
+
+bool waterfall_item::wants_loading() const { return wants_loading_; }
+void waterfall_item::set_wants_loading(bool wants) { wants_loading_ = wants; }
 
 void waterfall_item::set_display_width(int width)
 {
@@ -53,12 +68,11 @@ void waterfall_item::unload()
         h = static_cast<int>(target_width_ * ratio);
     }
 
-    QPixmap placeholder(target_width_, h);
-    placeholder.fill(QColor(230, 230, 230));
-    setPixmap(placeholder);
+    setPixmap(get_placeholder());
 
     loaded_ = false;
     loading_ = false;
+    wants_loading_ = false;
     update_scale();
 }
 
