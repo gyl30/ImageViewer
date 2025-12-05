@@ -110,7 +110,7 @@ void image_viewer_window::load_image(const QString& path)
 
                                   if (current_path_ != path)
                                   {
-                                      current_path_ = path;
+                                      return;
                                   }
 
                                   scene_->clear();

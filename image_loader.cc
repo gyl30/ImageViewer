@@ -97,7 +97,7 @@ void image_loader::process_loop()
                 image = image.scaled(current_task.target_size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
             }
 
-            int cost = image.width() * image.height() * 4;
+            auto cost = image.sizeInBytes();
 
             {
                 QMutexLocker locker(&mutex_);
