@@ -30,10 +30,6 @@ main_window::main_window(QWidget* parent) : QMainWindow(parent)
 
 main_window::~main_window()
 {
-    if (image_loader_ != nullptr)
-    {
-        image_loader_->stop_processing();
-    }
     if (worker_thread_ != nullptr)
     {
         worker_thread_->quit();
@@ -79,7 +75,6 @@ void main_window::setup_worker()
     image_loader_->moveToThread(worker_thread_);
 
     connect(worker_thread_, &QThread::finished, image_loader_, &QObject::deleteLater);
-    connect(worker_thread_, &QThread::started, image_loader_, &image_loader::start_processing);
 
     worker_thread_->start();
 }
@@ -103,8 +98,8 @@ void main_window::setup_connections()
 {
     connect(view_, &waterfall_view::view_resized, this, [this](int width) { scene_->layout_items(width); });
 
-    connect(scene_, &waterfall_scene::request_load_image, image_loader_, &image_loader::request_thumbnail, Qt::DirectConnection);
-    connect(scene_, &waterfall_scene::request_cancel_image, image_loader_, &image_loader::cancel_thumbnail, Qt::DirectConnection);
+    connect(scene_, &waterfall_scene::request_load_image, image_loader_, &image_loader::request_thumbnail, Qt::QueuedConnection);
+    connect(scene_, &waterfall_scene::request_cancel_image, image_loader_, &image_loader::cancel_thumbnail, Qt::QueuedConnection);
 
     connect(image_loader_, &image_loader::thumbnail_loaded, scene_, &waterfall_scene::on_image_loaded);
     connect(scene_, &waterfall_scene::image_double_clicked, this, &main_window::on_image_double_clicked);

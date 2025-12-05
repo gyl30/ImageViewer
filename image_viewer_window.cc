@@ -3,6 +3,7 @@
 #include <QDir>
 #include <QScrollBar>
 #include <QtConcurrent>
+#include <QFutureWatcher>
 #include <QImageReader>
 #include <QGraphicsView>
 #include <QGraphicsScene>
@@ -26,9 +27,9 @@ image_viewer_window::image_viewer_window(QWidget* parent)
 
 image_viewer_window::~image_viewer_window()
 {
-    if (load_future_.isRunning())
+    if (image_watcher_ != nullptr)
     {
-        load_future_.waitForFinished();
+        image_watcher_->disconnect();
     }
 }
 
@@ -77,69 +78,81 @@ void image_viewer_window::setup_ui()
     connect(btn_next_, &QPushButton::clicked, this, &image_viewer_window::load_next_image);
 }
 
-void image_viewer_window::load_image(const QString& path)
-{
-    QImageReader reader(path);
-
-    reader.setAutoTransform(true);
-    auto kMaxMemMB = QImageReader::allocationLimit();
-    QSize img_size = reader.size();
-    if (img_size.isValid())
-    {
-        double estimated_mb = (static_cast<double>(img_size.width()) * img_size.height() * 4) / (1024.0 * 1024.0);
-
-        if (estimated_mb > kMaxMemMB)
-        {
-            double scale_factor = std::sqrt(kMaxMemMB / estimated_mb);
-            QSize safe_size = img_size * scale_factor;
-
-            reader.setScaledSize(safe_size);
-        }
-    }
-
-    QImage image = reader.read();
-
-    QMetaObject::invokeMethod(this,
-                              [this, image, path]()
-                              {
-                                  if (image.isNull())
-                                  {
-                                      setWindowTitle("Error loading image");
-                                      return;
-                                  }
-
-                                  if (current_path_ != path)
-                                  {
-                                      return;
-                                  }
-
-                                  scene_->clear();
-
-                                  QPixmap pixmap = QPixmap::fromImage(image);
-                                  image_item_ = scene_->addPixmap(pixmap);
-                                  scene_->setSceneRect(pixmap.rect());
-
-                                  if (image_item_)
-                                  {
-                                      view_->fitInView(image_item_, Qt::KeepAspectRatio);
-                                  }
-
-                                  setWindowTitle(QString("Viewer - %1 (%2x%3) [%4/%5]")
-                                                     .arg(QFileInfo(path).fileName())
-                                                     .arg(pixmap.width())
-                                                     .arg(pixmap.height())
-                                                     .arg(current_index_ + 1)
-                                                     .arg(image_list_.size()));
-                              });
-}
-
 void image_viewer_window::set_image_path(const QString& path)
 {
     current_path_ = path;
     update_index_from_path();
 
+    if (image_watcher_ == nullptr)
+    {
+        image_watcher_ = new QFutureWatcher<QImage>(this);
+    }
+
+    scene_->clear();
+    image_item_ = nullptr;
     setWindowTitle("Loading...");
-    load_future_ = QtConcurrent::run([this, path]() { load_image(path); });
+
+    disconnect(image_watcher_, &QFutureWatcher<QImage>::finished, this, nullptr);
+
+    auto load_task = [path]() -> QImage
+    {
+        QImageReader reader(path);
+        reader.setAutoTransform(true);
+
+        const int kMaxMemMB = 512;
+        QSize img_size = reader.size();
+
+        if (img_size.isValid())
+        {
+            double estimated_mb = (static_cast<double>(img_size.width()) * img_size.height() * 4) / (1024.0 * 1024.0);
+
+            if (estimated_mb > kMaxMemMB)
+            {
+                double scale_factor = std::sqrt(kMaxMemMB / estimated_mb);
+                QSize safe_size = img_size * scale_factor;
+                reader.setScaledSize(safe_size);
+            }
+        }
+
+        return reader.read();
+    };
+
+    connect(image_watcher_,
+            &QFutureWatcher<QImage>::finished,
+            this,
+            [this, path]()
+            {
+                if (current_path_ != path)
+                {
+                    return;
+                }
+
+                QImage image = image_watcher_->result();
+
+                if (image.isNull())
+                {
+                    setWindowTitle("Error loading image");
+                    return;
+                }
+
+                QPixmap pixmap = QPixmap::fromImage(image);
+                image_item_ = scene_->addPixmap(pixmap);
+                scene_->setSceneRect(pixmap.rect());
+
+                if (image_item_ != nullptr)
+                {
+                    view_->fitInView(image_item_, Qt::KeepAspectRatio);
+                }
+
+                setWindowTitle(QString("Viewer - %1 (%2x%3) [%4/%5]")
+                                   .arg(QFileInfo(path).fileName())
+                                   .arg(pixmap.width())
+                                   .arg(pixmap.height())
+                                   .arg(current_index_ + 1)
+                                   .arg(image_list_.size()));
+            });
+
+    image_watcher_->setFuture(QtConcurrent::run(load_task));
 }
 
 void image_viewer_window::set_image_list(const std::vector<QString>& paths)
@@ -265,12 +278,7 @@ void image_viewer_window::navigate_image(int delta)
         return;
     }
 
-    current_index_ = new_idx;
-    current_path_ = image_list_[current_index_];
-
-    setWindowTitle("Loading...");
-
-    load_future_ = QtConcurrent::run([this, path = current_path_]() { load_image(path); });
+    set_image_path(image_list_[new_idx]);
 }
 
 void image_viewer_window::keyPressEvent(QKeyEvent* event)

@@ -1,110 +1,93 @@
-#include <cmath>
-#include <QDebug>
-#include <QImageReader>
 #include "image_loader.h"
+#include <QImageReader>
+#include <QDebug>
+#include <QMetaObject>
 
-image_loader::image_loader(QObject* parent) : QObject(parent), stop_flag_(false) { cache_.setMaxCost(200L * 1024 * 1024); }
+image_loader::image_loader(QObject* parent) : QObject(parent) { cache_.setMaxCost(200L * 1024 * 1024); }
 
-image_loader::~image_loader() { stop_processing(); }
-
-void image_loader::start_processing() { process_loop(); }
-
-void image_loader::stop_processing()
-{
-    stop_flag_ = true;
-    condition_.wakeAll();
-}
+image_loader::~image_loader() = default;
 
 void image_loader::request_thumbnail(const QString& path, const QSize& target_size)
 {
-    QMutexLocker locker(&mutex_);
-
     if (cache_.contains(path))
     {
         emit thumbnail_loaded(path, *cache_.object(path));
         return;
     }
 
-    task_queue_.prepend({path, target_size});
+    if (pending_paths_.contains(path))
+    {
+        return;
+    }
 
+    task_queue_.append({path, target_size});
     pending_paths_.insert(path);
 
-    condition_.wakeOne();
+    if (!is_processing_)
+    {
+        is_processing_ = true;
+        process_next_task();
+    }
 }
 
 void image_loader::cancel_thumbnail(const QString& path)
 {
-    QMutexLocker locker(&mutex_);
-
     if (pending_paths_.contains(path))
     {
         pending_paths_.remove(path);
+
+        auto it = std::remove_if(task_queue_.begin(), task_queue_.end(), [&path](const load_task& task) { return task.path == path; });
+        task_queue_.erase(it, task_queue_.end());
     }
 }
 
-void image_loader::process_loop()
+void image_loader::clear_all()
 {
-    while (!stop_flag_)
+    task_queue_.clear();
+    pending_paths_.clear();
+    cache_.clear();
+}
+
+void image_loader::process_next_task()
+{
+    if (task_queue_.isEmpty())
     {
-        load_task current_task;
-
-        {
-            QMutexLocker locker(&mutex_);
-            while (task_queue_.isEmpty() && !stop_flag_)
-            {
-                condition_.wait(&mutex_);
-            }
-            if (stop_flag_)
-            {
-                break;
-            }
-
-            current_task = task_queue_.takeFirst();
-
-            if (!pending_paths_.contains(current_task.path))
-            {
-                continue;
-            }
-
-            pending_paths_.remove(current_task.path);
-
-            current_loading_path_ = current_task.path;
-        }
-
-        {
-            QMutexLocker locker(&mutex_);
-            if (cache_.contains(current_task.path))
-            {
-                emit thumbnail_loaded(current_task.path, *cache_.object(current_task.path));
-                continue;
-            }
-        }
-
-        QImageReader reader(current_task.path);
-        reader.setAutoTransform(true);
-
-        if (reader.supportsOption(QImageIOHandler::ScaledSize) && !current_task.target_size.isEmpty())
-        {
-            reader.setScaledSize(current_task.target_size);
-        }
-
-        QImage image = reader.read();
-
-        if (!image.isNull())
-        {
-            if (image.width() != current_task.target_size.width() && !current_task.target_size.isEmpty())
-            {
-                image = image.scaled(current_task.target_size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-            }
-
-            auto cost = image.sizeInBytes();
-
-            {
-                QMutexLocker locker(&mutex_);
-                cache_.insert(current_task.path, new QImage(image), cost);
-            }
-
-            emit thumbnail_loaded(current_task.path, image);
-        }
+        is_processing_ = false;
+        return;
     }
+
+    load_task current_task = task_queue_.takeLast();
+    if (!pending_paths_.contains(current_task.path))
+    {
+        QMetaObject::invokeMethod(this, "process_next_task", Qt::QueuedConnection);
+        return;
+    }
+    if (cache_.contains(current_task.path))
+    {
+        emit thumbnail_loaded(current_task.path, *cache_.object(current_task.path));
+        pending_paths_.remove(current_task.path);
+        QMetaObject::invokeMethod(this, "process_next_task", Qt::QueuedConnection);
+        return;
+    }
+
+    QImageReader reader(current_task.path);
+    reader.setAutoTransform(true);
+    if (reader.supportsOption(QImageIOHandler::ScaledSize) && !current_task.target_size.isEmpty())
+    {
+        reader.setScaledSize(current_task.target_size);
+    }
+
+    QImage image = reader.read();
+    if (!image.isNull())
+    {
+        if (!current_task.target_size.isEmpty() && image.size() != current_task.target_size)
+        {
+            image = image.scaled(current_task.target_size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        }
+        auto cost = image.sizeInBytes();
+        cache_.insert(current_task.path, new QImage(image), cost);
+        emit thumbnail_loaded(current_task.path, image);
+    }
+    pending_paths_.remove(current_task.path);
+    QMetaObject::invokeMethod(this, "process_next_task", Qt::QueuedConnection);
 }

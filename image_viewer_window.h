@@ -1,8 +1,8 @@
 #ifndef IMAGE_VIEWER_WINDOW_H
 #define IMAGE_VIEWER_WINDOW_H
 
-#include <QFuture>
 #include <QMainWindow>
+#include <QFutureWatcher>
 #include <vector>
 #include <QString>
 
@@ -48,10 +48,10 @@ class image_viewer_window : public QMainWindow
     QGraphicsView* view_;
     QGraphicsScene* scene_;
     QGraphicsPixmapItem* image_item_;
-    QFuture<void> load_future_;
 
     QPushButton* btn_prev_;
     QPushButton* btn_next_;
+    QFutureWatcher<QImage>* image_watcher_ = nullptr;
 };
 
 #endif
