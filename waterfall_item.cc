@@ -50,6 +50,10 @@ void waterfall_item::set_display_width(int width)
 
 void waterfall_item::set_pixmap_safe(const QPixmap& pixmap)
 {
+    if (this->pixmap().cacheKey() == pixmap.cacheKey())
+    {
+        return;
+    }
     setPixmap(pixmap);
     update_scale();
 }

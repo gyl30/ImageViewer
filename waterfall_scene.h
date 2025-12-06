@@ -26,13 +26,13 @@ class waterfall_scene : public QGraphicsScene
 
    signals:
     void request_cancel_all();
-    void request_load_image(quint64 id, QString path, QSize size);
+    void request_load_image(quint64 id, QString path, QSize size, int session_id);
     void request_cancel_image(QString path);
     void image_double_clicked(QString path);
     void request_open_folder();
 
    public slots:
-    void on_image_loaded(quint64 id, const QString& path, const QImage& image);
+    void on_image_loaded(quint64 id, const QString& path, const QImage& image, int session_id);
 
    protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
@@ -46,6 +46,7 @@ class waterfall_scene : public QGraphicsScene
     int current_col_width_;
     std::vector<int> col_heights_;
     size_t last_layout_item_index_;
+    int current_session_id_ = 0;
 };
 
 #endif

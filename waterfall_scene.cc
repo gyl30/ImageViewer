@@ -13,19 +13,21 @@
 
 static std::atomic<quint64> s_request_counter{0};
 
-waterfall_scene::waterfall_scene(QObject* parent) : QGraphicsScene(parent), current_col_width_(kMinColWidth), last_layout_item_index_(0) {}
+waterfall_scene::waterfall_scene(QObject* parent)
+    : QGraphicsScene(parent), current_col_width_(kMinColWidth), last_layout_item_index_(0), current_session_id_(0)
+{
+}
 
 void waterfall_scene::clear_items()
 {
     emit request_cancel_all();
-
+    current_session_id_++;
+    this->clear();
     items_.clear();
     item_map_.clear();
     loaded_items_.clear();
     col_heights_.clear();
     last_layout_item_index_ = 0;
-
-    this->clear();
     setSceneRect(0, 0, 0, 0);
 }
 
@@ -139,7 +141,8 @@ void waterfall_scene::load_visible_items(const QRectF& visible_rect)
         QSize target_size(req_width, req_height);
         quint64 request_id = ++s_request_counter;
         item->set_request_id(request_id);
-        emit request_load_image(request_id, item->get_path(), target_size);
+
+        emit request_load_image(request_id, item->get_path(), target_size, current_session_id_);
     }
 
     auto it = loaded_items_.begin();
@@ -169,8 +172,13 @@ void waterfall_scene::load_visible_items(const QRectF& visible_rect)
     }
 }
 
-void waterfall_scene::on_image_loaded(quint64 id, const QString& path, const QImage& image)
+void waterfall_scene::on_image_loaded(quint64 id, const QString& path, const QImage& image, int session_id)
 {
+    if (session_id != current_session_id_)
+    {
+        return;
+    }
+
     auto it = item_map_.find(path);
     if (it == item_map_.end())
     {
@@ -184,14 +192,17 @@ void waterfall_scene::on_image_loaded(quint64 id, const QString& path, const QIm
         return;
     }
 
-    if (item->wants_loading())
+    if (!item->wants_loading())
     {
-        item->set_pixmap_safe(QPixmap::fromImage(image));
-        item->set_display_width(current_col_width_);
-        item->set_loaded(true);
-        item->set_loading(false);
-        loaded_items_.insert(item);
+        return;
     }
+
+    item->set_pixmap_safe(QPixmap::fromImage(image));
+
+    item->set_display_width(current_col_width_);
+    item->set_loaded(true);
+    item->set_loading(false);
+    loaded_items_.insert(item);
 }
 
 std::vector<QString> waterfall_scene::get_all_paths() const

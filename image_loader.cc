@@ -7,15 +7,15 @@ image_loader::image_loader(QObject* parent) : QObject(parent) { cache_.setMaxCos
 
 image_loader::~image_loader() = default;
 
-void image_loader::request_thumbnail(quint64 id, const QString& path, const QSize& target_size)
+void image_loader::request_thumbnail(quint64 id, const QString& path, const QSize& target_size, int session_id)
 {
     if (cache_.contains(path))
     {
-        emit thumbnail_loaded(id, path, *cache_.object(path));
+        emit thumbnail_loaded(id, path, *cache_.object(path), session_id);
         return;
     }
 
-    task_queue_.prepend({id, path, target_size});
+    task_queue_.prepend({id, path, target_size, session_id});
 
     if (task_queue_.size() > 200)
     {
@@ -36,8 +36,7 @@ void image_loader::cancel_thumbnail(const QString& path)
         return;
     }
 
-    auto it = std::remove_if(task_queue_.begin(), task_queue_.end(), [&path](const load_task& task) { return task.path == path; });
-    task_queue_.erase(it, task_queue_.end());
+    task_queue_.removeIf([&path](const load_task& task) { return task.path == path; });
 }
 
 void image_loader::clear_all()
@@ -58,7 +57,7 @@ void image_loader::process_next_task()
 
     if (cache_.contains(current_task.path))
     {
-        emit thumbnail_loaded(current_task.id, current_task.path, *cache_.object(current_task.path));
+        emit thumbnail_loaded(current_task.id, current_task.path, *cache_.object(current_task.path), current_task.session_id);
 
         QMetaObject::invokeMethod(this, "process_next_task", Qt::QueuedConnection);
         return;
@@ -83,7 +82,7 @@ void image_loader::process_next_task()
         auto cost = image.sizeInBytes();
         cache_.insert(current_task.path, new QImage(image), cost);
 
-        emit thumbnail_loaded(current_task.id, current_task.path, image);
+        emit thumbnail_loaded(current_task.id, current_task.path, image, current_task.session_id);
     }
 
     QMetaObject::invokeMethod(this, "process_next_task", Qt::QueuedConnection);

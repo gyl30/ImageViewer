@@ -12,6 +12,7 @@ struct load_task
     quint64 id;
     QString path;
     QSize target_size;
+    int session_id;
 };
 
 class image_loader : public QObject
@@ -23,12 +24,12 @@ class image_loader : public QObject
     ~image_loader() override;
 
    public slots:
-    void request_thumbnail(quint64 id, const QString& path, const QSize& target_size);
+    void request_thumbnail(quint64 id, const QString& path, const QSize& target_size, int session_id);
     void cancel_thumbnail(const QString& path);
     void clear_all();
 
    signals:
-    void thumbnail_loaded(quint64 id, QString path, QImage image);
+    void thumbnail_loaded(quint64 id, QString path, QImage image, int session_id);
 
    private slots:
     void process_next_task();
