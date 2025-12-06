@@ -6,6 +6,7 @@
 #include <QCache>
 #include <QList>
 #include <QSize>
+#include <QSet>
 
 struct load_task
 {
@@ -36,8 +37,9 @@ class image_loader : public QObject
 
    private:
     QCache<QString, QImage> cache_;
-
     QList<load_task> task_queue_;
+
+    QSet<QString> pending_cancels_;
 
     bool is_processing_ = false;
 };
