@@ -30,6 +30,10 @@ main_window::main_window(QWidget* parent) : QMainWindow(parent)
 
 main_window::~main_window()
 {
+    if (scene_ != nullptr)
+    {
+        scene_->disconnect(this);
+    }
     if (worker_thread_ != nullptr)
     {
         worker_thread_->quit();
