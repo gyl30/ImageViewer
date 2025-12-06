@@ -24,6 +24,7 @@ class image_loader : public QObject
 
    signals:
     void thumbnail_loaded(quint64 id, QString path, QImage image, int session_id);
+    void tasks_dropped(const QList<QString>& paths);
 
    private slots:
     void process_next_task();

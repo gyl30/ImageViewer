@@ -216,6 +216,24 @@ void waterfall_scene::on_image_loaded(quint64 id, const QString& path, const QIm
     loaded_items_.insert(item);
 }
 
+void waterfall_scene::on_tasks_dropped(const QList<QString>& paths)
+{
+    for (const QString& path : paths)
+    {
+        auto it = item_map_.find(path);
+        if (it == item_map_.end())
+        {
+            continue;
+        }
+        waterfall_item* item = it.value();
+        if (item->is_loading() && !item->is_loaded())
+        {
+            item->set_loading(false);
+            item->set_wants_loading(false);
+        }
+    }
+}
+
 std::vector<QString> waterfall_scene::get_all_paths() const
 {
     std::vector<QString> paths;

@@ -101,6 +101,7 @@ void main_window::setup_connections()
     connect(scene_, &waterfall_scene::request_cancel_batch, image_loader_, &image_loader::cancel_thumbnails, Qt::QueuedConnection);
 
     connect(image_loader_, &image_loader::thumbnail_loaded, scene_, &waterfall_scene::on_image_loaded);
+    connect(image_loader_, &image_loader::tasks_dropped, scene_, &waterfall_scene::on_tasks_dropped, Qt::QueuedConnection);
 
     connect(view_, &waterfall_view::view_resized, this, [this](int width) { scene_->layout_items(width); });
 

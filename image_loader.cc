@@ -28,9 +28,15 @@ void image_loader::request_thumbnails(const QList<load_task>& tasks)
         has_new_tasks = true;
     }
 
+    QList<QString> dropped_paths;
     while (task_queue_.size() > 200)
     {
-        task_queue_.removeLast();
+        load_task task = task_queue_.takeLast();
+        dropped_paths.append(task.path);
+    }
+    if (!dropped_paths.isEmpty())
+    {
+        emit tasks_dropped(dropped_paths);
     }
 
     if (has_new_tasks && !is_processing_)

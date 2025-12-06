@@ -33,6 +33,7 @@ class waterfall_scene : public QGraphicsScene
 
    public slots:
     void on_image_loaded(quint64 id, const QString& path, const QImage& image, int session_id);
+    void on_tasks_dropped(const QList<QString>& paths);
 
    protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
