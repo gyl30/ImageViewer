@@ -7,14 +7,7 @@
 #include <QList>
 #include <QSize>
 #include <QSet>
-
-struct load_task
-{
-    quint64 id;
-    QString path;
-    QSize target_size;
-    int session_id;
-};
+#include "common_types.h"
 
 class image_loader : public QObject
 {
@@ -25,8 +18,8 @@ class image_loader : public QObject
     ~image_loader() override;
 
    public slots:
-    void request_thumbnail(quint64 id, const QString& path, const QSize& target_size, int session_id);
-    void cancel_thumbnail(const QString& path);
+    void request_thumbnails(const QList<load_task>& tasks);
+    void cancel_thumbnails(const QList<QString>& paths);
     void clear_all();
 
    signals:
@@ -38,9 +31,7 @@ class image_loader : public QObject
    private:
     QCache<QString, QImage> cache_;
     QList<load_task> task_queue_;
-
     QSet<QString> pending_cancels_;
-
     bool is_processing_ = false;
 };
 

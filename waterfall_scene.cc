@@ -6,12 +6,9 @@
 #include <QApplication>
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsView>
-#include <atomic>
 
 #include "waterfall_item.h"
 #include "waterfall_scene.h"
-
-static std::atomic<quint64> s_request_counter{0};
 
 waterfall_scene::waterfall_scene(QObject* parent)
     : QGraphicsScene(parent), current_col_width_(kMinColWidth), last_layout_item_index_(0), current_session_id_(0)
@@ -28,6 +25,7 @@ void waterfall_scene::clear_items()
     col_heights_.clear();
     this->clear();
     last_layout_item_index_ = 0;
+    request_counter_ = 0;
     setSceneRect(0, 0, 0, 0);
 }
 
@@ -105,6 +103,9 @@ void waterfall_scene::load_visible_items(const QRectF& visible_rect)
         }
     }
 
+    QList<load_task> tasks_to_load;
+    QList<QString> paths_to_cancel;
+
     QList<QGraphicsItem*> visible_graphics_items = items(load_rect);
 
     for (auto* g_item : visible_graphics_items)
@@ -139,10 +140,10 @@ void waterfall_scene::load_visible_items(const QRectF& visible_rect)
         }
 
         QSize target_size(req_width, req_height);
-        quint64 request_id = ++s_request_counter;
+        quint64 request_id = ++request_counter_;
         item->set_request_id(request_id);
 
-        emit request_load_image(request_id, item->get_path(), target_size, current_session_id_);
+        tasks_to_load.append({request_id, item->get_path(), target_size, current_session_id_});
     }
 
     auto it = loaded_items_.begin();
@@ -160,7 +161,7 @@ void waterfall_scene::load_visible_items(const QRectF& visible_rect)
             item->set_wants_loading(false);
             if (item->is_loading())
             {
-                emit request_cancel_image(item->get_path());
+                paths_to_cancel.append(item->get_path());
             }
             item->unload();
             it = loaded_items_.erase(it);
@@ -169,6 +170,16 @@ void waterfall_scene::load_visible_items(const QRectF& visible_rect)
         {
             ++it;
         }
+    }
+
+    if (!tasks_to_load.isEmpty())
+    {
+        emit request_load_batch(tasks_to_load);
+    }
+
+    if (!paths_to_cancel.isEmpty())
+    {
+        emit request_cancel_batch(paths_to_cancel);
     }
 }
 

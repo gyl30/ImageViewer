@@ -3,6 +3,8 @@
 
 #include <QString>
 #include <QSize>
+#include <QList>
+#include <QMetaType>
 
 struct image_meta
 {
@@ -10,8 +12,19 @@ struct image_meta
     QSize original_size;
 };
 
+struct load_task
+{
+    quint64 id;
+    QString path;
+    QSize target_size;
+    int session_id;
+};
+
+Q_DECLARE_METATYPE(load_task)
+Q_DECLARE_METATYPE(QList<load_task>)
+
 const int kColumnMargin = 10;
 const int kItemMargin = 10;
 const int kMinColWidth = 200;
 
-#endif    // COMMON_TYPES_H
+#endif

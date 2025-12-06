@@ -7,34 +7,46 @@ image_loader::image_loader(QObject* parent) : QObject(parent) { cache_.setMaxCos
 
 image_loader::~image_loader() = default;
 
-void image_loader::request_thumbnail(quint64 id, const QString& path, const QSize& target_size, int session_id)
+void image_loader::request_thumbnails(const QList<load_task>& tasks)
 {
-    if (pending_cancels_.contains(path))
+    bool has_new_tasks = false;
+
+    for (const auto& task : tasks)
     {
-        pending_cancels_.remove(path);
+        if (pending_cancels_.contains(task.path))
+        {
+            pending_cancels_.remove(task.path);
+        }
+
+        if (cache_.contains(task.path))
+        {
+            emit thumbnail_loaded(task.id, task.path, *cache_.object(task.path), task.session_id);
+            continue;
+        }
+
+        task_queue_.prepend(task);
+        has_new_tasks = true;
     }
 
-    if (cache_.contains(path))
-    {
-        emit thumbnail_loaded(id, path, *cache_.object(path), session_id);
-        return;
-    }
-
-    task_queue_.prepend({id, path, target_size, session_id});
-
-    if (task_queue_.size() > 200)
+    while (task_queue_.size() > 200)
     {
         task_queue_.removeLast();
     }
 
-    if (!is_processing_)
+    if (has_new_tasks && !is_processing_)
     {
         is_processing_ = true;
         process_next_task();
     }
 }
 
-void image_loader::cancel_thumbnail(const QString& path) { pending_cancels_.insert(path); }
+void image_loader::cancel_thumbnails(const QList<QString>& paths)
+{
+    for (const auto& path : paths)
+    {
+        pending_cancels_.insert(path);
+    }
+}
 
 void image_loader::clear_all()
 {
@@ -98,6 +110,7 @@ void image_loader::process_next_task()
 
         auto cost = image.sizeInBytes();
         cache_.insert(current_task.path, new QImage(image), cost);
+
         emit thumbnail_loaded(current_task.id, current_task.path, image, current_task.session_id);
     }
 

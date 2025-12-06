@@ -97,8 +97,8 @@ void main_window::setup_scanner()
 void main_window::setup_connections()
 {
     connect(scene_, &waterfall_scene::request_cancel_all, image_loader_, &image_loader::clear_all, Qt::QueuedConnection);
-    connect(scene_, &waterfall_scene::request_load_image, image_loader_, &image_loader::request_thumbnail, Qt::QueuedConnection);
-    connect(scene_, &waterfall_scene::request_cancel_image, image_loader_, &image_loader::cancel_thumbnail, Qt::QueuedConnection);
+    connect(scene_, &waterfall_scene::request_load_batch, image_loader_, &image_loader::request_thumbnails, Qt::QueuedConnection);
+    connect(scene_, &waterfall_scene::request_cancel_batch, image_loader_, &image_loader::cancel_thumbnails, Qt::QueuedConnection);
 
     connect(image_loader_, &image_loader::thumbnail_loaded, scene_, &waterfall_scene::on_image_loaded);
 

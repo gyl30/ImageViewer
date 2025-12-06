@@ -26,8 +26,8 @@ class waterfall_scene : public QGraphicsScene
 
    signals:
     void request_cancel_all();
-    void request_load_image(quint64 id, QString path, QSize size, int session_id);
-    void request_cancel_image(QString path);
+    void request_load_batch(const QList<load_task>& tasks);
+    void request_cancel_batch(const QList<QString>& paths);
     void image_double_clicked(QString path);
     void request_open_folder();
 
@@ -47,6 +47,7 @@ class waterfall_scene : public QGraphicsScene
     std::vector<int> col_heights_;
     size_t last_layout_item_index_;
     int current_session_id_ = 0;
+    quint64 request_counter_ = 0;
 };
 
 #endif
