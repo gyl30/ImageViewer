@@ -300,3 +300,16 @@ void image_viewer_window::keyPressEvent(QKeyEvent* event)
         QMainWindow::keyPressEvent(event);
     }
 }
+
+void image_viewer_window::closeEvent(QCloseEvent* event)
+{
+    if (image_watcher_ != nullptr && image_watcher_->isRunning())
+    {
+        image_watcher_->disconnect();
+    }
+
+    scene_->clear();
+    image_item_ = nullptr;
+    current_path_.clear();
+    QMainWindow::closeEvent(event);
+}
