@@ -22,11 +22,11 @@ void waterfall_scene::clear_items()
 {
     emit request_cancel_all();
     current_session_id_++;
-    this->clear();
     items_.clear();
     item_map_.clear();
     loaded_items_.clear();
     col_heights_.clear();
+    this->clear();
     last_layout_item_index_ = 0;
     setSceneRect(0, 0, 0, 0);
 }

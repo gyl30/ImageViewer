@@ -19,7 +19,7 @@ void file_scanner::start_scan(const QString& dir_path)
     QElapsedTimer timer;
     timer.start();
 
-    std::vector<image_meta> batch_buffer;
+    QList<image_meta> batch_buffer;
     batch_buffer.reserve(100);
 
     int total_scanned = 0;

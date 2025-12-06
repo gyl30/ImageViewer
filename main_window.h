@@ -5,7 +5,7 @@
 #include <QThread>
 #include <QLabel>
 #include <QElapsedTimer>
-#include <vector>
+#include <QList>
 #include "common_types.h"
 #include "file_scanner.h"
 
@@ -34,7 +34,7 @@ class main_window : public QMainWindow
     void on_selection_changed();
     void on_image_double_clicked(const QString& path);
 
-    void on_scan_batch_received(const std::vector<image_meta>& batch);
+    void on_scan_batch_received(const QList<image_meta>& batch);
     void on_scan_all_finished(int total, qint64 duration);
 
    signals:

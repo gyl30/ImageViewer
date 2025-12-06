@@ -58,7 +58,6 @@ void image_loader::process_next_task()
     if (cache_.contains(current_task.path))
     {
         emit thumbnail_loaded(current_task.id, current_task.path, *cache_.object(current_task.path), current_task.session_id);
-
         QMetaObject::invokeMethod(this, "process_next_task", Qt::QueuedConnection);
         return;
     }
@@ -79,7 +78,13 @@ void image_loader::process_next_task()
             image = image.scaled(current_task.target_size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }
 
+        if (image.format() != QImage::Format_ARGB32_Premultiplied)
+        {
+            image.convertTo(QImage::Format_ARGB32_Premultiplied);
+        }
+
         auto cost = image.sizeInBytes();
+
         cache_.insert(current_task.path, new QImage(image), cost);
 
         emit thumbnail_loaded(current_task.id, current_task.path, image, current_task.session_id);

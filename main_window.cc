@@ -119,7 +119,7 @@ void main_window::on_add_folder()
         return;
     }
 
-    if (file_scanner_)
+    if (file_scanner_ != nullptr)
     {
         file_scanner_->stop_scan();
     }
@@ -135,7 +135,7 @@ void main_window::on_add_folder()
     emit request_start_scan(dir_path);
 }
 
-void main_window::on_scan_batch_received(const std::vector<image_meta>& batch)
+void main_window::on_scan_batch_received(const QList<image_meta>& batch)
 {
     for (const auto& meta : batch)
     {

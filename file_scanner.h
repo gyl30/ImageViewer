@@ -4,11 +4,11 @@
 #include <QObject>
 #include <QMutex>
 #include <QWaitCondition>
-#include <vector>
+#include <QList>
 #include <atomic>
 #include "common_types.h"
 
-Q_DECLARE_METATYPE(std::vector<image_meta>)
+Q_DECLARE_METATYPE(QList<image_meta>)
 
 class file_scanner : public QObject
 {
@@ -22,7 +22,7 @@ class file_scanner : public QObject
     void stop_scan();
 
    signals:
-    void images_scanned_batch(std::vector<image_meta> batch);
+    void images_scanned_batch(QList<image_meta> batch);
 
     void scan_finished(int total_count, qint64 duration_ms);
 
