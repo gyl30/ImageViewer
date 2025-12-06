@@ -6,21 +6,26 @@
 #include <QApplication>
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsView>
+#include <atomic>
 
 #include "waterfall_item.h"
 #include "waterfall_scene.h"
+
+static std::atomic<quint64> s_request_counter{0};
 
 waterfall_scene::waterfall_scene(QObject* parent) : QGraphicsScene(parent), current_col_width_(kMinColWidth), last_layout_item_index_(0) {}
 
 void waterfall_scene::clear_items()
 {
+    emit request_cancel_all();
+
     items_.clear();
     item_map_.clear();
     loaded_items_.clear();
     col_heights_.clear();
     last_layout_item_index_ = 0;
-    this->clear();
 
+    this->clear();
     setSceneRect(0, 0, 0, 0);
 }
 
@@ -66,7 +71,6 @@ void waterfall_scene::layout_items(int view_width)
     for (size_t i = last_layout_item_index_; i < items_.size(); ++i)
     {
         waterfall_item* item = items_[i];
-
         auto min_itr = std::min_element(col_heights_.begin(), col_heights_.end());
         int min_col_idx = static_cast<int>(std::distance(col_heights_.begin(), min_itr));
 
@@ -77,12 +81,10 @@ void waterfall_scene::layout_items(int view_width)
         item->set_display_width(real_col_width);
 
         int item_height = static_cast<int>(item->sceneBoundingRect().height());
-
         col_heights_[min_col_idx] += (item_height + kItemMargin);
     }
 
     last_layout_item_index_ = items_.size();
-
     int max_height = *std::max_element(col_heights_.begin(), col_heights_.end());
     setSceneRect(0, 0, view_width, max_height + 50);
 }
@@ -135,31 +137,28 @@ void waterfall_scene::load_visible_items(const QRectF& visible_rect)
         }
 
         QSize target_size(req_width, req_height);
-
-        emit request_load_image(item->get_path(), target_size);
+        quint64 request_id = ++s_request_counter;
+        item->set_request_id(request_id);
+        emit request_load_image(request_id, item->get_path(), target_size);
     }
 
     auto it = loaded_items_.begin();
     while (it != loaded_items_.end())
     {
         waterfall_item* item = *it;
-        if (!item)
+        if (item == nullptr)
         {
             it = loaded_items_.erase(it);
             continue;
         }
 
-        QRectF item_rect = item->sceneBoundingRect();
-
-        if (!unload_rect.intersects(item_rect))
+        if (!unload_rect.intersects(item->sceneBoundingRect()))
         {
             item->set_wants_loading(false);
-
             if (item->is_loading())
             {
                 emit request_cancel_image(item->get_path());
             }
-
             item->unload();
             it = loaded_items_.erase(it);
         }
@@ -170,22 +169,28 @@ void waterfall_scene::load_visible_items(const QRectF& visible_rect)
     }
 }
 
-void waterfall_scene::on_image_loaded(const QString& path, const QImage& image)
+void waterfall_scene::on_image_loaded(quint64 id, const QString& path, const QImage& image)
 {
-    if (auto it = item_map_.find(path); it != item_map_.end())
+    auto it = item_map_.find(path);
+    if (it == item_map_.end())
     {
-        waterfall_item* item = it.value();
+        return;
+    }
 
-        if (item->wants_loading())
-        {
-            item->set_pixmap_safe(QPixmap::fromImage(image));
-            item->set_display_width(current_col_width_);
+    waterfall_item* item = it.value();
 
-            item->set_loaded(true);
-            item->set_loading(false);
+    if (item->get_request_id() != id)
+    {
+        return;
+    }
 
-            loaded_items_.insert(item);
-        }
+    if (item->wants_loading())
+    {
+        item->set_pixmap_safe(QPixmap::fromImage(image));
+        item->set_display_width(current_col_width_);
+        item->set_loaded(true);
+        item->set_loading(false);
+        loaded_items_.insert(item);
     }
 }
 
@@ -209,7 +214,6 @@ void waterfall_scene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
     {
         emit image_double_clicked(wf_item->get_path());
     }
-
     QGraphicsScene::mouseDoubleClickEvent(event);
 }
 
@@ -217,7 +221,6 @@ void waterfall_scene::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 {
     QGraphicsItem* item = itemAt(event->scenePos(), QTransform());
     auto* wf_item = dynamic_cast<waterfall_item*>(item);
-
     QMenu menu;
 
     if (wf_item != nullptr)
@@ -230,13 +233,10 @@ void waterfall_scene::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
                     QClipboard* clipboard = QGuiApplication::clipboard();
                     clipboard->setText(wf_item->get_path());
                 });
-
         menu.addSeparator();
     }
-
     QAction* openAction = menu.addAction("打开文件夹");
     connect(openAction, &QAction::triggered, this, &waterfall_scene::request_open_folder);
-
     menu.exec(event->screenPos());
     event->accept();
 }

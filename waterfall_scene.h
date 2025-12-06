@@ -19,27 +19,23 @@ class waterfall_scene : public QGraphicsScene
     explicit waterfall_scene(QObject* parent = nullptr);
 
     void clear_items();
-
     void add_image(const image_meta& meta);
-
     void layout_items(int view_width);
-
     void load_visible_items(const QRectF& visible_rect);
-
     [[nodiscard]] std::vector<QString> get_all_paths() const;
 
    signals:
-    void request_load_image(QString path, QSize size);
+    void request_cancel_all();
+    void request_load_image(quint64 id, QString path, QSize size);
     void request_cancel_image(QString path);
     void image_double_clicked(QString path);
     void request_open_folder();
 
    public slots:
-    void on_image_loaded(const QString& path, const QImage& image);
+    void on_image_loaded(quint64 id, const QString& path, const QImage& image);
 
    protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
-
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
 
    private:

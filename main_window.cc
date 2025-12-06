@@ -96,16 +96,17 @@ void main_window::setup_scanner()
 
 void main_window::setup_connections()
 {
-    connect(view_, &waterfall_view::view_resized, this, [this](int width) { scene_->layout_items(width); });
-
+    connect(scene_, &waterfall_scene::request_cancel_all, image_loader_, &image_loader::clear_all, Qt::QueuedConnection);
     connect(scene_, &waterfall_scene::request_load_image, image_loader_, &image_loader::request_thumbnail, Qt::QueuedConnection);
     connect(scene_, &waterfall_scene::request_cancel_image, image_loader_, &image_loader::cancel_thumbnail, Qt::QueuedConnection);
 
     connect(image_loader_, &image_loader::thumbnail_loaded, scene_, &waterfall_scene::on_image_loaded);
+
+    connect(view_, &waterfall_view::view_resized, this, [this](int width) { scene_->layout_items(width); });
+
     connect(scene_, &waterfall_scene::image_double_clicked, this, &main_window::on_image_double_clicked);
     connect(scene_, &waterfall_scene::request_open_folder, this, &main_window::on_add_folder);
     connect(scene_, &QGraphicsScene::selectionChanged, this, &main_window::on_selection_changed);
-
     connect(image_loader_, &image_loader::thumbnail_loaded, this, &main_window::on_image_loaded_stat);
 }
 

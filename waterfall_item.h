@@ -23,10 +23,11 @@ class waterfall_item : public QGraphicsPixmapItem
     void set_wants_loading(bool wants);
 
     void set_display_width(int width);
-
     void set_pixmap_safe(const QPixmap& pixmap);
-
     void unload();
+
+    void set_request_id(quint64 id) { current_request_id_ = id; }
+    [[nodiscard]] quint64 get_request_id() const { return current_request_id_; }
 
    private:
     void update_scale();
@@ -38,6 +39,7 @@ class waterfall_item : public QGraphicsPixmapItem
     bool loading_;
     bool wants_loading_;
     int target_width_;
+    quint64 current_request_id_ = 0;
 };
 
 #endif
