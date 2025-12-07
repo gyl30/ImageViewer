@@ -91,6 +91,7 @@ void main_window::setup_scanner()
     file_scanner_->moveToThread(scan_thread_);
 
     connect(scan_thread_, &QThread::finished, file_scanner_, &QObject::deleteLater);
+
     connect(this, &main_window::request_start_scan, file_scanner_, &file_scanner::start_scan);
     connect(file_scanner_, &file_scanner::images_scanned_batch, this, &main_window::on_scan_batch_received);
     connect(file_scanner_, &file_scanner::scan_finished, this, &main_window::on_scan_all_finished);
@@ -141,13 +142,21 @@ void main_window::on_add_folder()
     scan_duration_ = 0;
     info_label_->clear();
 
+    current_scan_session_id_++;
+
     status_label_->setText(QString("Scanning: %1").arg(dir_path));
 
-    emit request_start_scan(dir_path);
+    emit request_start_scan(dir_path, current_scan_session_id_);
 }
 
-void main_window::on_scan_batch_received(const QList<image_meta>& batch)
+void main_window::on_scan_batch_received(const QList<image_meta>& batch, int session_id)
 {
+    if (session_id != current_scan_session_id_)
+    {
+        qDebug() << "Dropped stale batch from session:" << session_id << "Current:" << current_scan_session_id_;
+        return;
+    }
+
     for (const auto& meta : batch)
     {
         scene_->add_image(meta);
@@ -162,8 +171,13 @@ void main_window::on_scan_batch_received(const QList<image_meta>& batch)
     update_status_bar();
 }
 
-void main_window::on_scan_all_finished(int total, qint64 duration)
+void main_window::on_scan_all_finished(int total, qint64 duration, int session_id)
 {
+    if (session_id != current_scan_session_id_)
+    {
+        return;
+    }
+
     scan_duration_ = duration;
     total_count_ = total;
 

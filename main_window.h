@@ -34,28 +34,25 @@ class main_window : public QMainWindow
     void on_selection_changed();
     void on_image_double_clicked(const QString& path);
 
-    void on_scan_batch_received(const QList<image_meta>& batch);
-    void on_scan_all_finished(int total, qint64 duration);
+    void on_scan_batch_received(const QList<image_meta>& batch, int session_id);
+    void on_scan_all_finished(int total, qint64 duration, int session_id);
 
    signals:
-    void request_start_scan(const QString& path);
+    void request_start_scan(const QString& path, int session_id);
 
    private:
     waterfall_view* view_ = nullptr;
     waterfall_scene* scene_ = nullptr;
-
     QThread* worker_thread_ = nullptr;
     image_loader* image_loader_ = nullptr;
-
     QThread* scan_thread_ = nullptr;
     file_scanner* file_scanner_ = nullptr;
-
     QLabel* status_label_ = nullptr;
     QLabel* info_label_ = nullptr;
-    qint64 scan_duration_;
+    qint64 scan_duration_ = 0;
     int total_count_ = 0;
     int loaded_count_ = 0;
-
+    int current_scan_session_id_ = 0;
     image_viewer_window* viewer_window_ = nullptr;
 };
 
