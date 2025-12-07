@@ -4,12 +4,21 @@
 #include <QString>
 #include <QSize>
 #include <QList>
+#include <QRectF>
 #include <QMetaType>
 
 struct image_meta
 {
     QString path;
     QSize original_size;
+};
+
+struct layout_model
+{
+    int index;
+    QString path;
+    QSize original_size;
+    QRectF layout_rect;
 };
 
 struct load_task

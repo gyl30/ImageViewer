@@ -108,7 +108,7 @@ void main_window::setup_connections()
     connect(image_loader_, &image_loader::thumbnail_loaded, scene_, &waterfall_scene::on_image_loaded);
     connect(image_loader_, &image_loader::tasks_dropped, scene_, &waterfall_scene::on_tasks_dropped, Qt::QueuedConnection);
 
-    connect(view_, &waterfall_view::view_resized, this, [this](int width) { scene_->layout_items(width); });
+    connect(view_, &waterfall_view::view_resized, this, [this](int width) { scene_->layout_models(width); });
 
     connect(scene_, &waterfall_scene::image_double_clicked, this, &main_window::on_image_double_clicked);
     connect(scene_, &waterfall_scene::request_open_folder, this, &main_window::on_add_folder);
@@ -153,21 +153,13 @@ void main_window::on_scan_batch_received(const QList<image_meta>& batch, int ses
 {
     if (session_id != current_scan_session_id_)
     {
-        qDebug() << "Dropped stale batch from session:" << session_id << "Current:" << current_scan_session_id_;
         return;
     }
 
-    for (const auto& meta : batch)
-    {
-        scene_->add_image(meta);
-    }
-
+    scene_->add_images(batch);
     total_count_ += static_cast<int>(batch.size());
-
-    scene_->layout_items(view_->viewport()->width());
-
+    scene_->layout_models(view_->viewport()->width());
     QMetaObject::invokeMethod(view_, [this]() { view_->check_visible_area(); }, Qt::QueuedConnection);
-
     update_status_bar();
 }
 
@@ -180,10 +172,8 @@ void main_window::on_scan_all_finished(int total, qint64 duration, int session_i
 
     scan_duration_ = duration;
     total_count_ = total;
-
-    scene_->layout_items(view_->viewport()->width());
+    scene_->layout_models(view_->viewport()->width());
     QMetaObject::invokeMethod(view_, [this]() { view_->check_visible_area(); }, Qt::QueuedConnection);
-
     update_status_bar();
 }
 

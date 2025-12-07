@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <QHash>
-#include <QSet>
+#include <QStack>
 #include <QObject>
 #include <QGraphicsScene>
 #include <QGraphicsSceneContextMenuEvent>
@@ -19,9 +19,9 @@ class waterfall_scene : public QGraphicsScene
     explicit waterfall_scene(QObject* parent = nullptr);
 
     void clear_items();
-    void add_image(const image_meta& meta);
-    void layout_items(int view_width);
-    void load_visible_items(const QRectF& visible_rect);
+    void add_images(const QList<image_meta>& batch);
+    void layout_models(int view_width);
+    void update_viewport(const QRectF& visible_rect);
     [[nodiscard]] std::vector<QString> get_all_paths() const;
 
    signals:
@@ -40,13 +40,17 @@ class waterfall_scene : public QGraphicsScene
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
 
    private:
-    std::vector<waterfall_item*> items_;
-    QHash<QString, waterfall_item*> item_map_;
-    QSet<waterfall_item*> loaded_items_;
+    waterfall_item* obtain_item();
+    void recycle_item(waterfall_item* item);
 
-    int current_col_width_;
+   private:
+    std::vector<layout_model> all_models_;
+    std::vector<int> item_y_index_;
+    QStack<waterfall_item*> pool_;
+    QHash<int, waterfall_item*> active_items_;
+    int current_col_width_ = kMinColWidth;
     std::vector<int> col_heights_;
-    size_t last_layout_item_index_;
+    size_t last_layout_index_ = 0;
     int current_session_id_ = 0;
     quint64 request_counter_ = 0;
 };
