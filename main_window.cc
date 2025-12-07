@@ -117,8 +117,14 @@ void main_window::setup_connections()
 
 void main_window::on_add_folder()
 {
-    QString dir_path = QFileDialog::getExistingDirectory(this, "Select Folder", QDir::homePath());
-
+    QFileDialog dialog(this, "Select Folder", QDir::homePath());
+    dialog.setFileMode(QFileDialog::Directory);
+    dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+    if (dialog.exec() == 0)
+    {
+        return;
+    }
+    QString dir_path = dialog.selectedFiles().first();
     if (dir_path.isEmpty())
     {
         return;
