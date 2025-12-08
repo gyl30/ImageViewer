@@ -8,6 +8,7 @@
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include <QGraphicsPixmapItem>
+#include <QGraphicsTextItem>
 #include <QToolBar>
 #include <QAction>
 #include <QResizeEvent>
@@ -16,6 +17,7 @@
 #include <QPushButton>
 #include <QFileInfo>
 #include <QMessageBox>
+#include <QFont>
 #include "image_viewer_window.h"
 
 image_viewer_window::image_viewer_window(QWidget* parent)
@@ -30,6 +32,10 @@ image_viewer_window::~image_viewer_window()
     if (image_watcher_ != nullptr)
     {
         image_watcher_->disconnect();
+        if (image_watcher_->isRunning())
+        {
+            image_watcher_->waitForFinished();
+        }
     }
 }
 
@@ -85,22 +91,30 @@ void image_viewer_window::set_image_path(const QString& path)
 
     if (image_watcher_ == nullptr)
     {
-        image_watcher_ = new QFutureWatcher<QImage>(this);
+        image_watcher_ = new QFutureWatcher<std::pair<QImage, QString>>(this);
     }
 
     scene_->clear();
     image_item_ = nullptr;
-    setWindowTitle("Loading...");
+    setWindowTitle(QString("Loading %1...").arg(QFileInfo(path).fileName()));
 
-    disconnect(image_watcher_, &QFutureWatcher<QImage>::finished, this, nullptr);
+    disconnect(image_watcher_, &QFutureWatcher<std::pair<QImage, QString>>::finished, this, nullptr);
 
-    auto load_task = [path]() -> QImage
+    auto load_task = [path]() -> std::pair<QImage, QString>
     {
         QImageReader reader(path);
         reader.setAutoTransform(true);
 
         const int kMaxMemMB = 512;
         QSize img_size = reader.size();
+
+        if (!img_size.isValid())
+        {
+            if (reader.error() != QImageReader::UnknownError)
+            {
+                return {QImage(), reader.errorString()};
+            }
+        }
 
         if (img_size.isValid())
         {
@@ -114,11 +128,23 @@ void image_viewer_window::set_image_path(const QString& path)
             }
         }
 
-        return reader.read();
+        QImage image = reader.read();
+
+        if (image.isNull())
+        {
+            QString err = reader.errorString();
+            if (err.isEmpty())
+            {
+                err = "Unknown error (Format not supported or file corrupted)";
+            }
+            return {QImage(), err};
+        }
+
+        return {image, QString()};
     };
 
     connect(image_watcher_,
-            &QFutureWatcher<QImage>::finished,
+            &QFutureWatcher<std::pair<QImage, QString>>::finished,
             this,
             [this, path]()
             {
@@ -127,11 +153,26 @@ void image_viewer_window::set_image_path(const QString& path)
                     return;
                 }
 
-                QImage image = image_watcher_->result();
+                auto result = image_watcher_->result();
+                QImage image = result.first;
+                QString error_msg = result.second;
 
                 if (image.isNull())
                 {
                     setWindowTitle("Error loading image");
+
+                    scene_->clear();
+                    QGraphicsTextItem* text_item = scene_->addText(QString("Failed to load image:\n%1").arg(error_msg));
+
+                    text_item->setDefaultTextColor(Qt::red);
+                    QFont font = text_item->font();
+                    font.setPointSize(16);
+                    font.setBold(true);
+                    text_item->setFont(font);
+
+                    QRectF text_rect = text_item->boundingRect();
+                    text_item->setPos(-text_rect.width() / 2, -text_rect.height() / 2);
+
                     return;
                 }
 
@@ -281,6 +322,8 @@ void image_viewer_window::navigate_image(int delta)
     set_image_path(image_list_[new_idx]);
 }
 
+void image_viewer_window::load_image(const QString& path) { set_image_path(path); }
+
 void image_viewer_window::keyPressEvent(QKeyEvent* event)
 {
     if (event->key() == Qt::Key_Left)
@@ -303,9 +346,13 @@ void image_viewer_window::keyPressEvent(QKeyEvent* event)
 
 void image_viewer_window::closeEvent(QCloseEvent* event)
 {
-    if (image_watcher_ != nullptr && image_watcher_->isRunning())
+    if (image_watcher_ != nullptr)
     {
         image_watcher_->disconnect();
+        if (image_watcher_->isRunning())
+        {
+            image_watcher_->waitForFinished();
+        }
     }
 
     scene_->clear();

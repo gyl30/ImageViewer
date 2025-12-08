@@ -5,6 +5,7 @@
 #include <QFutureWatcher>
 #include <vector>
 #include <QString>
+#include <utility>
 
 class QGraphicsView;
 class QGraphicsScene;
@@ -51,7 +52,8 @@ class image_viewer_window : public QMainWindow
 
     QPushButton* btn_prev_;
     QPushButton* btn_next_;
-    QFutureWatcher<QImage>* image_watcher_ = nullptr;
+
+    QFutureWatcher<std::pair<QImage, QString>>* image_watcher_ = nullptr;
 };
 
 #endif
