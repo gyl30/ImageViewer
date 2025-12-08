@@ -1,6 +1,7 @@
-#include "waterfall_item.h"
+#include <QPen>
 #include <QBrush>
-#include <QGraphicsDropShadowEffect>
+#include <QPainter>
+#include "waterfall_item.h"
 
 static QPixmap& get_placeholder()
 {
@@ -19,6 +20,7 @@ waterfall_item::waterfall_item(QGraphicsItem* parent) : QGraphicsPixmapItem(pare
     setShapeMode(QGraphicsPixmapItem::BoundingRectShape);
     setAcceptHoverEvents(true);
     setPixmap(get_placeholder());
+    setTransformationMode(Qt::SmoothTransformation);
 }
 
 void waterfall_item::bind_model(const layout_model& model, int display_width, quint64 request_id)
@@ -29,8 +31,9 @@ void waterfall_item::bind_model(const layout_model& model, int display_width, qu
     target_width_ = display_width;
     current_request_id_ = request_id;
 
-    setGraphicsEffect(nullptr);
+    is_hovered_ = false;
     setZValue(0);
+    setGraphicsEffect(nullptr);
 
     setPos(model.layout_rect.topLeft());
     setPixmap(get_placeholder());
@@ -44,11 +47,11 @@ void waterfall_item::reset()
     path_.clear();
     original_size_ = QSize();
     current_request_id_ = 0;
-    setPixmap(get_placeholder());
+    is_hovered_ = false;
 
+    setPixmap(get_placeholder());
     setGraphicsEffect(nullptr);
     setZValue(0);
-
     setVisible(false);
 }
 
@@ -73,26 +76,53 @@ void waterfall_item::update_scale()
 
     setTransformOriginPoint(pixmap().rect().center());
 
-    setScale(base_scale_);
+    if (is_hovered_)
+    {
+        setScale(base_scale_ * 1.08);
+    }
+    else
+    {
+        setScale(base_scale_);
+    }
 }
 
 void waterfall_item::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
 {
     setZValue(1.0);
-    setScale(base_scale_ * 1.25);
 
-    auto* shadow = new QGraphicsDropShadowEffect();
-    shadow->setBlurRadius(20);
-    shadow->setColor(QColor(0, 0, 0, 160));
-    shadow->setOffset(0, 5);
-    setGraphicsEffect(shadow);
+    setScale(base_scale_ * 1.08);
+
+    is_hovered_ = true;
+
+    update();
+
     QGraphicsPixmapItem::hoverEnterEvent(event);
 }
 
 void waterfall_item::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
 {
     setZValue(0.0);
+
     setScale(base_scale_);
-    setGraphicsEffect(nullptr);
+
+    is_hovered_ = false;
+
+    update();
+
     QGraphicsPixmapItem::hoverLeaveEvent(event);
+}
+
+void waterfall_item::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
+{
+    QGraphicsPixmapItem::paint(painter, option, widget);
+    if (!is_hovered_)
+    {
+        return;
+    }
+    painter->save();
+    QPen pen(QColor(255, 255, 255, 200), 6);
+    pen.setJoinStyle(Qt::MiterJoin);
+    painter->setPen(pen);
+    painter->drawRect(pixmap().rect());
+    painter->restore();
 }

@@ -1,8 +1,8 @@
 #ifndef WATERFALL_ITEM_H
 #define WATERFALL_ITEM_H
 
-#include <QGraphicsPixmapItem>
 #include <QSize>
+#include <QGraphicsPixmapItem>
 #include <QGraphicsSceneHoverEvent>
 #include "common_types.h"
 
@@ -23,6 +23,7 @@ class waterfall_item : public QGraphicsPixmapItem
    protected:
     void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;
     void hoverLeaveEvent(QGraphicsSceneHoverEvent* event) override;
+    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
    private:
     void update_scale();
@@ -34,6 +35,7 @@ class waterfall_item : public QGraphicsPixmapItem
     int target_width_ = 0;
     quint64 current_request_id_ = 0;
     qreal base_scale_ = 1.0;
+    bool is_hovered_ = false;
 };
 
 #endif
