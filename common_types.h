@@ -29,8 +29,19 @@ struct load_task
     int session_id;
 };
 
+struct layout_result
+{
+    std::vector<QRectF> rects;
+    std::vector<int> col_heights;
+    std::vector<int> item_y_index;
+    int max_height = 0;
+    int view_width = 0;
+    size_t count = 0;
+};
+
 Q_DECLARE_METATYPE(load_task)
 Q_DECLARE_METATYPE(QList<load_task>)
+Q_DECLARE_METATYPE(layout_result)
 
 const int kColumnMargin = 10;
 const int kItemMargin = 10;

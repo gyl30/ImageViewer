@@ -1,5 +1,3 @@
-#include "waterfall_scene.h"
-#include "waterfall_item.h"
 #include <algorithm>
 #include <cmath>
 #include <QPixmap>
@@ -9,9 +7,60 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsView>
 #include <QDebug>
+#include <QtConcurrent>
+#include "common_types.h"
+#include "waterfall_scene.h"
+#include "waterfall_item.h"
+
+static layout_result calculate_layout_job(const std::vector<QSize>& sizes, int view_width, int kItemMargin, int kColumnMargin, int kMinColWidth)
+{
+    layout_result result;
+    result.view_width = view_width;
+    result.count = sizes.size();
+
+    if (sizes.empty() || view_width <= 0)
+    {
+        return result;
+    }
+
+    int available_width = view_width - (2 * kItemMargin);
+    int col_count = std::max(1, available_width / (kMinColWidth + kColumnMargin));
+    int total_spacing = (col_count - 1) * kColumnMargin;
+    int real_col_width = (available_width - total_spacing) / col_count;
+
+    result.col_heights.assign(col_count, kItemMargin);
+    result.rects.reserve(sizes.size());
+    result.item_y_index.reserve(sizes.size());
+
+    for (const auto& original_size : sizes)
+    {
+        auto min_itr = std::min_element(result.col_heights.begin(), result.col_heights.end());
+        int min_col_idx = static_cast<int>(std::distance(result.col_heights.begin(), min_itr));
+
+        int x = kItemMargin + (min_col_idx * (real_col_width + kColumnMargin));
+        int y = *min_itr;
+
+        double ratio = 1.0;
+        if (original_size.isValid() && original_size.width() > 0)
+        {
+            ratio = static_cast<double>(original_size.height()) / original_size.width();
+        }
+        int h = static_cast<int>(real_col_width * ratio);
+
+        result.rects.emplace_back(x, y, real_col_width, h);
+        result.item_y_index.push_back(y);
+
+        result.col_heights[min_col_idx] += (h + kItemMargin);
+    }
+
+    result.max_height = *std::max_element(result.col_heights.begin(), result.col_heights.end());
+    return result;
+}
 
 waterfall_scene::waterfall_scene(QObject* parent) : QGraphicsScene(parent)
 {
+    connect(&layout_watcher_, &QFutureWatcher<layout_result>::finished, this, &waterfall_scene::on_layout_finished);
+
     for (int i = 0; i < 20; ++i)
     {
         auto* item = new waterfall_item();
@@ -21,8 +70,24 @@ waterfall_scene::waterfall_scene(QObject* parent) : QGraphicsScene(parent)
     }
 }
 
+waterfall_scene::~waterfall_scene()
+{
+    if (layout_watcher_.isRunning())
+    {
+        layout_watcher_.cancel();
+        layout_watcher_.waitForFinished();
+    }
+}
+
 void waterfall_scene::clear_items()
 {
+    if (layout_watcher_.isRunning())
+    {
+        layout_watcher_.disconnect();
+
+        connect(&layout_watcher_, &QFutureWatcher<layout_result>::finished, this, &waterfall_scene::on_layout_finished);
+    }
+
     emit request_cancel_all();
     current_session_id_++;
 
@@ -37,6 +102,7 @@ void waterfall_scene::clear_items()
     col_heights_.clear();
     last_layout_index_ = 0;
     request_counter_ = 0;
+    pending_view_width_ = 0;
 
     setSceneRect(0, 0, 0, 0);
 }
@@ -71,41 +137,124 @@ void waterfall_scene::layout_models(int view_width)
     int total_spacing = (col_count - 1) * kColumnMargin;
     int real_col_width = (available_width - total_spacing) / col_count;
 
-    bool full_relayout = (real_col_width != current_col_width_) || (col_heights_.size() != static_cast<size_t>(col_count));
+    bool need_full_relayout = (real_col_width != current_col_width_) || (col_heights_.size() != static_cast<size_t>(col_count));
 
-    if (full_relayout)
+    if (!need_full_relayout)
     {
-        current_col_width_ = real_col_width;
-        col_heights_.assign(col_count, kItemMargin);
-        last_layout_index_ = 0;
-    }
-
-    for (size_t i = last_layout_index_; i < all_models_.size(); ++i)
-    {
-        layout_model& model = all_models_[i];
-
-        auto min_itr = std::min_element(col_heights_.begin(), col_heights_.end());
-        int min_col_idx = static_cast<int>(std::distance(col_heights_.begin(), min_itr));
-
-        int x = kItemMargin + (min_col_idx * (real_col_width + kColumnMargin));
-        int y = *min_itr;
-
-        double ratio = 1.0;
-        if (model.original_size.isValid() && model.original_size.width() > 0)
+        if (last_layout_index_ < all_models_.size())
         {
-            ratio = static_cast<double>(model.original_size.height()) / model.original_size.width();
+            if (col_heights_.empty())
+            {
+                col_heights_.assign(col_count, kItemMargin);
+            }
+
+            for (size_t i = last_layout_index_; i < all_models_.size(); ++i)
+            {
+                layout_model& model = all_models_[i];
+
+                auto min_itr = std::min_element(col_heights_.begin(), col_heights_.end());
+                int min_col_idx = static_cast<int>(std::distance(col_heights_.begin(), min_itr));
+
+                int x = kItemMargin + (min_col_idx * (real_col_width + kColumnMargin));
+                int y = *min_itr;
+
+                double ratio = 1.0;
+                if (model.original_size.isValid() && model.original_size.width() > 0)
+                {
+                    ratio = static_cast<double>(model.original_size.height()) / model.original_size.width();
+                }
+                int h = static_cast<int>(real_col_width * ratio);
+
+                model.layout_rect = QRectF(x, y, real_col_width, h);
+                item_y_index_[i] = y;
+
+                col_heights_[min_col_idx] += (h + kItemMargin);
+            }
+
+            last_layout_index_ = all_models_.size();
+            int max_height = *std::max_element(col_heights_.begin(), col_heights_.end());
+
+            setSceneRect(0, 0, view_width, max_height + 50);
+
+            if (!views().isEmpty())
+            {
+                update_viewport(views().first()->mapToScene(views().first()->viewport()->rect()).boundingRect());
+            }
         }
-        int h = static_cast<int>(real_col_width * ratio);
-
-        model.layout_rect = QRectF(x, y, real_col_width, h);
-        item_y_index_[i] = y;
-
-        col_heights_[min_col_idx] += (h + kItemMargin);
+        return;
     }
 
-    last_layout_index_ = all_models_.size();
-    int max_height = *std::max_element(col_heights_.begin(), col_heights_.end());
-    setSceneRect(0, 0, view_width, max_height + 50);
+    if (layout_watcher_.isRunning())
+    {
+        pending_view_width_ = view_width;
+        return;
+    }
+
+    std::vector<QSize> sizes;
+    sizes.reserve(all_models_.size());
+    for (const auto& m : all_models_)
+    {
+        sizes.push_back(m.original_size);
+    }
+
+    QFuture<layout_result> future = QtConcurrent::run(calculate_layout_job, sizes, view_width, kItemMargin, kColumnMargin, kMinColWidth);
+
+    layout_watcher_.setFuture(future);
+}
+
+void waterfall_scene::on_layout_finished()
+{
+    layout_result result = layout_watcher_.result();
+
+    if (pending_view_width_ > 0 && pending_view_width_ != result.view_width)
+    {
+        int next_width = pending_view_width_;
+        pending_view_width_ = 0;
+
+        layout_models(next_width);
+        return;
+    }
+
+    size_t count = std::min(result.count, all_models_.size());
+
+    for (size_t i = 0; i < count; ++i)
+    {
+        all_models_[i].layout_rect = result.rects[i];
+        item_y_index_[i] = result.item_y_index[i];
+    }
+
+    col_heights_ = result.col_heights;
+
+    current_col_width_ = static_cast<int>(result.rects.empty() ? kMinColWidth : (result.rects[0].width()));
+    last_layout_index_ = count;
+
+    if (count < all_models_.size())
+    {
+        layout_models(result.view_width);
+    }
+    else
+    {
+        setSceneRect(0, 0, result.view_width, result.max_height + 50);
+
+        if (!views().isEmpty())
+        {
+            QGraphicsView* v = views().first();
+            QRectF visible_rect = v->mapToScene(v->viewport()->rect()).boundingRect();
+
+            for (auto it = active_items_.begin(); it != active_items_.end(); ++it)
+            {
+                waterfall_item* item = it.value();
+                int idx = it.key();
+
+                if (idx < static_cast<int>(all_models_.size()))
+                {
+                    item->bind_model(all_models_[idx], current_col_width_, item->get_request_id());
+                }
+            }
+
+            update_viewport(visible_rect);
+        }
+    }
 }
 
 void waterfall_scene::update_viewport(const QRectF& visible_rect)
@@ -121,7 +270,6 @@ void waterfall_scene::update_viewport(const QRectF& visible_rect)
 
     auto it_start = std::lower_bound(item_y_index_.begin(), item_y_index_.end(), top_y);
     int start_idx = static_cast<int>(std::distance(item_y_index_.begin(), it_start));
-
     start_idx = std::max(0, start_idx - 20);
 
     int end_idx = start_idx;
@@ -199,7 +347,9 @@ waterfall_item* waterfall_scene::obtain_item()
 {
     if (!pool_.isEmpty())
     {
-        return pool_.pop();
+        waterfall_item* item = pool_.pop();
+
+        return item;
     }
     auto* item = new waterfall_item();
     addItem(item);

@@ -7,6 +7,9 @@
 #include <QObject>
 #include <QGraphicsScene>
 #include <QGraphicsSceneContextMenuEvent>
+
+#include <QtConcurrent>
+#include <QFutureWatcher>
 #include "common_types.h"
 
 class waterfall_item;
@@ -17,6 +20,7 @@ class waterfall_scene : public QGraphicsScene
 
    public:
     explicit waterfall_scene(QObject* parent = nullptr);
+    ~waterfall_scene() override;
 
     void clear_items();
     void add_images(const QList<image_meta>& batch);
@@ -35,6 +39,9 @@ class waterfall_scene : public QGraphicsScene
     void on_image_loaded(quint64 id, const QString& path, const QImage& image, int session_id);
     void on_tasks_dropped(const QList<QString>& paths);
 
+   private slots:
+    void on_layout_finished();
+
    protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
@@ -48,11 +55,16 @@ class waterfall_scene : public QGraphicsScene
     std::vector<int> item_y_index_;
     QStack<waterfall_item*> pool_;
     QHash<int, waterfall_item*> active_items_;
+
     int current_col_width_ = kMinColWidth;
     std::vector<int> col_heights_;
     size_t last_layout_index_ = 0;
     int current_session_id_ = 0;
     quint64 request_counter_ = 0;
+
+    QFutureWatcher<layout_result> layout_watcher_;
+    bool is_laying_out_ = false;
+    int pending_view_width_ = 0;
 };
 
 #endif
