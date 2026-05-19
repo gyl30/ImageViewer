@@ -17,6 +17,9 @@
 #include <QPushButton>
 #include <QFileInfo>
 #include <QFont>
+#include <QGuiApplication>
+#include <QScreen>
+#include <QWindow>
 #include "common_types.h"
 #include "image_viewer_window.h"
 
@@ -184,6 +187,7 @@ void image_viewer_window::set_image_path(const QString& path)
                 if (image_item_ != nullptr)
                 {
                     has_manual_zoom_ = false;
+                    resize_window_to_image(pixmap.size());
                     apply_auto_view();
                 }
 
@@ -203,6 +207,40 @@ void image_viewer_window::set_image_list(const std::vector<QString>& paths)
     image_list_ = paths;
     update_index_from_path();
     update_navigation_buttons();
+}
+
+void image_viewer_window::resize_window_to_image(const QSize& image_size)
+{
+    if (!image_size.isValid() || isMaximized() || isFullScreen())
+    {
+        return;
+    }
+
+    QScreen* current_screen = screen();
+    if (current_screen == nullptr && windowHandle() != nullptr)
+    {
+        current_screen = windowHandle()->screen();
+    }
+    if (current_screen == nullptr)
+    {
+        current_screen = QGuiApplication::primaryScreen();
+    }
+    if (current_screen == nullptr)
+    {
+        return;
+    }
+
+    const QSize frame_padding = frameGeometry().size() - size();
+    const QSize viewport_size = view_->viewport()->size();
+    const QSize viewport_padding = size() - viewport_size;
+    const QRect available_geometry = current_screen->availableGeometry().adjusted(40, 40, -40, -40);
+    const QSize max_window_size =
+        (available_geometry.size() - frame_padding).expandedTo(QSize(0, 0));
+    const QSize target_window_size =
+        QSize(image_size.width() + viewport_padding.width(), image_size.height() + viewport_padding.height())
+            .boundedTo(max_window_size);
+
+    resize(target_window_size);
 }
 
 void image_viewer_window::apply_auto_view()

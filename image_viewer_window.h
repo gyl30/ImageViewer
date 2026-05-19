@@ -39,6 +39,7 @@ class image_viewer_window : public QMainWindow
     void setup_ui();
     void load_image(const QString& path);
     void navigate_image(int delta);
+    void resize_window_to_image(const QSize& image_size);
     void apply_auto_view();
     void update_index_from_path();
     void update_navigation_buttons();
