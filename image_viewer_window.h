@@ -40,11 +40,13 @@ class image_viewer_window : public QMainWindow
     void load_image(const QString& path);
     void navigate_image(int delta);
     void update_index_from_path();
+    void update_navigation_buttons();
 
    private:
     QString current_path_;
     std::vector<QString> image_list_;
     ptrdiff_t current_index_;
+    bool has_manual_zoom_ = false;
 
     QGraphicsView* view_;
     QGraphicsScene* scene_;

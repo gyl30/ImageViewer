@@ -16,7 +16,6 @@
 #include <QWheelEvent>
 #include <QPushButton>
 #include <QFileInfo>
-#include <QMessageBox>
 #include <QFont>
 #include "common_types.h"
 #include "image_viewer_window.h"
@@ -83,12 +82,14 @@ void image_viewer_window::setup_ui()
 
     connect(btn_prev_, &QPushButton::clicked, this, &image_viewer_window::load_prev_image);
     connect(btn_next_, &QPushButton::clicked, this, &image_viewer_window::load_next_image);
+    update_navigation_buttons();
 }
 
 void image_viewer_window::set_image_path(const QString& path)
 {
     current_path_ = path;
     update_index_from_path();
+    update_navigation_buttons();
 
     if (image_watcher_ == nullptr)
     {
@@ -183,6 +184,7 @@ void image_viewer_window::set_image_path(const QString& path)
                 if (image_item_ != nullptr)
                 {
                     view_->fitInView(image_item_, Qt::KeepAspectRatio);
+                    has_manual_zoom_ = false;
                 }
 
                 setWindowTitle(QString("Viewer - %1 (%2x%3) [%4/%5]")
@@ -200,6 +202,7 @@ void image_viewer_window::set_image_list(const std::vector<QString>& paths)
 {
     image_list_ = paths;
     update_index_from_path();
+    update_navigation_buttons();
 }
 
 void image_viewer_window::update_index_from_path()
@@ -227,7 +230,7 @@ void image_viewer_window::resizeEvent(QResizeEvent* event)
 {
     QMainWindow::resizeEvent(event);
 
-    if (image_item_ != nullptr)
+    if (image_item_ != nullptr && !has_manual_zoom_)
     {
         view_->fitInView(image_item_, Qt::KeepAspectRatio);
     }
@@ -281,9 +284,17 @@ bool image_viewer_window::eventFilter(QObject* watched, QEvent* event)
     return QMainWindow::eventFilter(watched, event);
 }
 
-void image_viewer_window::zoom_in() { view_->scale(1.2, 1.2); }
+void image_viewer_window::zoom_in()
+{
+    has_manual_zoom_ = true;
+    view_->scale(1.2, 1.2);
+}
 
-void image_viewer_window::zoom_out() { view_->scale(1.0 / 1.2, 1.0 / 1.2); }
+void image_viewer_window::zoom_out()
+{
+    has_manual_zoom_ = true;
+    view_->scale(1.0 / 1.2, 1.0 / 1.2);
+}
 
 void image_viewer_window::load_prev_image() { navigate_image(-1); }
 
@@ -309,17 +320,24 @@ void image_viewer_window::navigate_image(int delta)
 
     if (new_idx < 0)
     {
-        QMessageBox::information(this, "Info", "这也是第一张图片了。");
         return;
     }
 
     if (new_idx >= static_cast<ptrdiff_t>(image_list_.size()))
     {
-        QMessageBox::information(this, "Info", "这也是最后一张图片了。");
         return;
     }
 
     set_image_path(image_list_[new_idx]);
+}
+
+void image_viewer_window::update_navigation_buttons()
+{
+    bool has_prev = current_index_ > 0;
+    bool has_next = current_index_ >= 0 && current_index_ < static_cast<ptrdiff_t>(image_list_.size()) - 1;
+
+    btn_prev_->setEnabled(has_prev);
+    btn_next_->setEnabled(has_next);
 }
 
 void image_viewer_window::load_image(const QString& path) { set_image_path(path); }
@@ -358,5 +376,7 @@ void image_viewer_window::closeEvent(QCloseEvent* event)
     scene_->clear();
     image_item_ = nullptr;
     current_path_.clear();
+    has_manual_zoom_ = false;
+    update_navigation_buttons();
     QMainWindow::closeEvent(event);
 }
