@@ -1,6 +1,7 @@
 #include <QCryptographicHash>
 #include <QDebug>
 #include <QDir>
+#include <QFile>
 #include <QFileInfo>
 #include <QMetaObject>
 #include <QImageReader>
@@ -12,6 +13,7 @@ image_loader::image_loader(QObject* parent) : QObject(parent), abort_(false)
     cache_.setMaxCost(200L * 1024 * 1024);
     disk_cache_dir_ = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + "/thumbnails";
     QDir().mkpath(disk_cache_dir_);
+    cleanup_disk_cache();
 }
 
 image_loader::~image_loader() { stop(); }
@@ -48,7 +50,7 @@ QImage image_loader::load_disk_cached_image(const load_task& task) const
     return reader.read();
 }
 
-void image_loader::save_disk_cached_image(const load_task& task, const QImage& image) const
+void image_loader::save_disk_cached_image(const load_task& task, const QImage& image)
 {
     if (image.isNull())
     {
@@ -56,6 +58,30 @@ void image_loader::save_disk_cached_image(const load_task& task, const QImage& i
     }
 
     image.save(disk_cache_path(task), "PNG");
+    cleanup_disk_cache();
+}
+
+void image_loader::cleanup_disk_cache()
+{
+    constexpr qint64 kMaxDiskCacheBytes = 512LL * 1024 * 1024;
+    constexpr int kMaxDiskCacheFiles = 2000;
+
+    QDir cache_dir(disk_cache_dir_);
+    QFileInfoList files =
+        cache_dir.entryInfoList(QStringList() << "*.png", QDir::Files, QDir::Time | QDir::Reversed);
+
+    qint64 total_size = 0;
+    for (const QFileInfo& file_info : files)
+    {
+        total_size += file_info.size();
+    }
+
+    while ((total_size > kMaxDiskCacheBytes || files.size() > kMaxDiskCacheFiles) && !files.isEmpty())
+    {
+        QFileInfo file_info = files.takeFirst();
+        total_size -= file_info.size();
+        QFile::remove(file_info.absoluteFilePath());
+    }
 }
 
 void image_loader::request_thumbnails(const QList<load_task>& tasks)
