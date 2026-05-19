@@ -24,6 +24,7 @@
 #include <QScreen>
 #include <QSettings>
 #include <QStatusBar>
+#include <QTimer>
 #include <QWindow>
 #include "common_types.h"
 #include "image_viewer_window.h"
@@ -177,6 +178,13 @@ void image_viewer_window::setup_ui()
     flip_vertical_action_->setShortcut(QKeySequence("Ctrl+Shift+H"));
     connect(flip_vertical_action_, &QAction::triggered, this, &image_viewer_window::flip_vertical);
 
+    toolbar->addSeparator();
+
+    slideshow_action_ = toolbar->addAction("幻灯片");
+    slideshow_action_->setCheckable(true);
+    slideshow_action_->setShortcut(QKeySequence(Qt::Key_F5));
+    connect(slideshow_action_, &QAction::triggered, this, &image_viewer_window::toggle_slideshow);
+
     addAction(fit_window_action_);
     addAction(actual_size_action_);
     addAction(fit_width_action_);
@@ -185,7 +193,12 @@ void image_viewer_window::setup_ui()
     addAction(rotate_right_action_);
     addAction(flip_horizontal_action_);
     addAction(flip_vertical_action_);
+    addAction(slideshow_action_);
     update_view_mode_actions();
+
+    slideshow_timer_ = new QTimer(this);
+    slideshow_timer_->setInterval(3000);
+    connect(slideshow_timer_, &QTimer::timeout, this, &image_viewer_window::advance_slideshow);
 
     const QString btn_style = R"(
         QPushButton {
@@ -706,6 +719,35 @@ void image_viewer_window::flip_vertical()
     apply_image_transform();
 }
 
+void image_viewer_window::toggle_slideshow()
+{
+    if (slideshow_timer_ == nullptr)
+    {
+        return;
+    }
+
+    if (slideshow_action_->isChecked())
+    {
+        slideshow_timer_->start();
+    }
+    else
+    {
+        slideshow_timer_->stop();
+    }
+}
+
+void image_viewer_window::advance_slideshow()
+{
+    if (current_index_ < 0 || current_index_ >= static_cast<ptrdiff_t>(image_list_.size()) - 1)
+    {
+        slideshow_timer_->stop();
+        slideshow_action_->setChecked(false);
+        return;
+    }
+
+    load_next_image();
+}
+
 void image_viewer_window::navigate_image(int delta)
 {
     if (image_list_.empty())
@@ -793,6 +835,11 @@ void image_viewer_window::closeEvent(QCloseEvent* event)
     scene_->clear();
     image_item_ = nullptr;
     current_path_.clear();
+    if (slideshow_timer_ != nullptr)
+    {
+        slideshow_timer_->stop();
+    }
+    slideshow_action_->setChecked(false);
     rotation_degrees_ = 0;
     flip_horizontal_ = false;
     flip_vertical_ = false;

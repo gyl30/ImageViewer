@@ -17,6 +17,7 @@ class QPushButton;
 class QLabel;
 class QAction;
 class QActionGroup;
+class QTimer;
 
 class image_viewer_window : public QMainWindow
 {
@@ -52,6 +53,8 @@ class image_viewer_window : public QMainWindow
     void rotate_right();
     void flip_horizontal();
     void flip_vertical();
+    void toggle_slideshow();
+    void advance_slideshow();
     void zoom_in();
     void zoom_out();
     void load_prev_image();
@@ -103,10 +106,12 @@ class image_viewer_window : public QMainWindow
     QAction* rotate_right_action_ = nullptr;
     QAction* flip_horizontal_action_ = nullptr;
     QAction* flip_vertical_action_ = nullptr;
+    QAction* slideshow_action_ = nullptr;
     QCache<QString, QImage> image_cache_;
     QStringList pending_preload_paths_;
     QLabel* image_info_label_ = nullptr;
     QLabel* zoom_label_ = nullptr;
+    QTimer* slideshow_timer_ = nullptr;
 
     QFutureWatcher<std::pair<QImage, QString>>* image_watcher_ = nullptr;
     QFutureWatcher<std::pair<QString, QImage>>* preload_watcher_ = nullptr;
