@@ -1,11 +1,11 @@
 #include <QApplication>
 #include <QImageReader>
+#include "common_types.h"
 #include "main_window.h"
 
-const int kMaxAllocMB = 256;
 int main(int argc, char *argv[])
 {
-    QImageReader::setAllocationLimit(kMaxAllocMB);
+    QImageReader::setAllocationLimit(kMaxImageAllocMB);
 
     QApplication app(argc, argv);
 

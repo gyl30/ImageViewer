@@ -18,6 +18,7 @@
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QFont>
+#include "common_types.h"
 #include "image_viewer_window.h"
 
 image_viewer_window::image_viewer_window(QWidget* parent)
@@ -105,7 +106,6 @@ void image_viewer_window::set_image_path(const QString& path)
         QImageReader reader(path);
         reader.setAutoTransform(true);
 
-        const int kMaxMemMB = 512;
         QSize img_size = reader.size();
 
         if (!img_size.isValid())
@@ -120,9 +120,9 @@ void image_viewer_window::set_image_path(const QString& path)
         {
             double estimated_mb = (static_cast<double>(img_size.width()) * img_size.height() * 4) / (1024.0 * 1024.0);
 
-            if (estimated_mb > kMaxMemMB)
+            if (estimated_mb > kMaxImageAllocMB)
             {
-                double scale_factor = std::sqrt(kMaxMemMB / estimated_mb);
+                double scale_factor = std::sqrt(kMaxImageAllocMB / estimated_mb);
                 QSize safe_size = img_size * scale_factor;
                 reader.setScaledSize(safe_size);
             }

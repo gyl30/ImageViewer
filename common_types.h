@@ -47,5 +47,6 @@ Q_DECLARE_METATYPE(layout_result)
 const int kColumnMargin = 10;
 const int kItemMargin = 10;
 const int kMinColWidth = 200;
+const int kMaxImageAllocMB = 256;
 
 #endif
