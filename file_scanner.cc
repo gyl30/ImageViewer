@@ -9,6 +9,8 @@
 
 namespace
 {
+constexpr qsizetype kEmitBatchSize = 500;
+
 struct scanned_image
 {
     image_meta meta;
@@ -53,6 +55,11 @@ void file_scanner::start_scan(const QString& dir_path, int session_id)
         total_count++;
     }
 
+    if (stop_flag_)
+    {
+        return;
+    }
+
     QCollator collator;
     collator.setNumericMode(true);
     collator.setCaseSensitivity(Qt::CaseInsensitive);
@@ -69,12 +76,16 @@ void file_scanner::start_scan(const QString& dir_path, int session_id)
                   return left.meta.path < right.meta.path;
               });
 
-    const qsizetype batch_size = 100;
-    for (qsizetype i = 0; i < scanned_images.size(); i += batch_size)
+    for (qsizetype i = 0; i < scanned_images.size(); i += kEmitBatchSize)
     {
+        if (stop_flag_)
+        {
+            return;
+        }
+
         QList<image_meta> batch;
-        batch.reserve(static_cast<int>(batch_size));
-        qsizetype end = std::min(i + batch_size, scanned_images.size());
+        batch.reserve(static_cast<int>(kEmitBatchSize));
+        qsizetype end = std::min(i + kEmitBatchSize, scanned_images.size());
         for (qsizetype j = i; j < end; ++j)
         {
             batch.append(scanned_images[j].meta);
