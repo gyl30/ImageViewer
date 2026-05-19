@@ -9,6 +9,7 @@
 #include <QCoreApplication>
 #include <QResizeEvent>
 #include <QFileInfo>
+#include <QSettings>
 #include <vector>
 
 #include "main_window.h"
@@ -26,7 +27,8 @@ main_window::main_window(QWidget* parent) : QMainWindow(parent)
     setup_worker();
     setup_scanner();
     setup_connections();
-    resize(1024, 768);
+    last_open_dir_ = QDir::homePath();
+    load_settings();
 }
 
 main_window::~main_window()
@@ -119,9 +121,42 @@ void main_window::setup_connections()
     connect(image_loader_, &image_loader::thumbnail_loaded, this, &main_window::on_image_loaded_stat);
 }
 
+void main_window::load_settings()
+{
+    QSettings settings("gyl30", "ImageViewer");
+
+    restoreGeometry(settings.value("main_window/geometry").toByteArray());
+
+    recent_paths_ = settings.value("main_window/recent_paths").toStringList();
+    recent_paths_.erase(std::remove_if(recent_paths_.begin(),
+                                       recent_paths_.end(),
+                                       [](const QString& path) { return !QFileInfo::exists(path); }),
+                        recent_paths_.end());
+    scene_->set_recent_paths(recent_paths_);
+
+    QString saved_dir = settings.value("main_window/last_open_dir", QDir::homePath()).toString();
+    if (QFileInfo::exists(saved_dir))
+    {
+        last_open_dir_ = saved_dir;
+    }
+
+    if (!isVisible() && !settings.contains("main_window/geometry"))
+    {
+        resize(1024, 768);
+    }
+}
+
+void main_window::save_settings() const
+{
+    QSettings settings("gyl30", "ImageViewer");
+    settings.setValue("main_window/geometry", saveGeometry());
+    settings.setValue("main_window/recent_paths", recent_paths_);
+    settings.setValue("main_window/last_open_dir", last_open_dir_);
+}
+
 void main_window::on_add_folder()
 {
-    QFileDialog dialog(this, "Select Folder", QDir::homePath());
+    QFileDialog dialog(this, "Select Folder", last_open_dir_);
     dialog.setFileMode(QFileDialog::Directory);
     dialog.setOption(QFileDialog::DontUseNativeDialog, true);
     if (dialog.exec() == 0)
@@ -147,6 +182,7 @@ void main_window::open_path(const QString& path, bool add_to_recent)
 
     if (file_info.isFile())
     {
+        last_open_dir_ = file_info.absolutePath();
         std::vector<QString> image_list = scene_->get_all_paths();
         if (std::find(image_list.begin(), image_list.end(), path) == image_list.end())
         {
@@ -160,6 +196,8 @@ void main_window::open_path(const QString& path, bool add_to_recent)
         show_image_viewer(path, image_list);
         return;
     }
+
+    last_open_dir_ = path;
 
     if (file_scanner_ != nullptr)
     {
@@ -322,4 +360,10 @@ void main_window::on_image_double_clicked(const QString& path)
 void main_window::on_open_recent_path(const QString& path)
 {
     open_path(path, true);
+}
+
+void main_window::closeEvent(QCloseEvent* event)
+{
+    save_settings();
+    QMainWindow::closeEvent(event);
 }

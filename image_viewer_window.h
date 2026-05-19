@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QFutureWatcher>
+#include <QCloseEvent>
 #include <vector>
 #include <QString>
 #include <utility>
@@ -41,6 +42,8 @@ class image_viewer_window : public QMainWindow
     void navigate_image(int delta);
     void resize_window_to_image(const QSize& image_size);
     void apply_auto_view();
+    void load_settings();
+    void save_settings() const;
     void update_index_from_path();
     void update_navigation_buttons();
 

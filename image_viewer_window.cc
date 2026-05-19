@@ -19,6 +19,7 @@
 #include <QFont>
 #include <QGuiApplication>
 #include <QScreen>
+#include <QSettings>
 #include <QWindow>
 #include "common_types.h"
 #include "image_viewer_window.h"
@@ -27,7 +28,7 @@ image_viewer_window::image_viewer_window(QWidget* parent)
     : QMainWindow(parent), current_index_(-1), view_(nullptr), scene_(nullptr), image_item_(nullptr), btn_prev_(nullptr), btn_next_(nullptr)
 {
     setup_ui();
-    resize(1200, 800);
+    load_settings();
 }
 
 image_viewer_window::~image_viewer_window()
@@ -207,6 +208,21 @@ void image_viewer_window::set_image_list(const std::vector<QString>& paths)
     image_list_ = paths;
     update_index_from_path();
     update_navigation_buttons();
+}
+
+void image_viewer_window::load_settings()
+{
+    QSettings settings("gyl30", "ImageViewer");
+    if (!restoreGeometry(settings.value("viewer_window/geometry").toByteArray()))
+    {
+        resize(1200, 800);
+    }
+}
+
+void image_viewer_window::save_settings() const
+{
+    QSettings settings("gyl30", "ImageViewer");
+    settings.setValue("viewer_window/geometry", saveGeometry());
 }
 
 void image_viewer_window::resize_window_to_image(const QSize& image_size)
@@ -423,6 +439,8 @@ void image_viewer_window::keyPressEvent(QKeyEvent* event)
 
 void image_viewer_window::closeEvent(QCloseEvent* event)
 {
+    save_settings();
+
     if (image_watcher_ != nullptr)
     {
         image_watcher_->disconnect();
