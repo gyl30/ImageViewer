@@ -384,7 +384,36 @@ void waterfall_scene::on_image_loaded(quint64 id, const QString& /*path*/, const
     }
 }
 
-void waterfall_scene::on_tasks_dropped(const QList<QString>& paths) {}
+void waterfall_scene::on_tasks_dropped(const QList<QString>& paths)
+{
+    if (paths.isEmpty() || views().isEmpty())
+    {
+        return;
+    }
+
+    QSet<QString> dropped_set(paths.begin(), paths.end());
+    QList<load_task> retry_tasks;
+    qreal dpr = views().first()->devicePixelRatio();
+
+    for (auto it = active_items_.begin(); it != active_items_.end(); ++it)
+    {
+        waterfall_item* item = it.value();
+        if (item == nullptr || !dropped_set.contains(item->get_path()))
+        {
+            continue;
+        }
+
+        const layout_model& model = all_models_[it.key()];
+        int req_w = static_cast<int>(model.layout_rect.width() * dpr);
+        int req_h = static_cast<int>(model.layout_rect.height() * dpr);
+        retry_tasks.append({item->get_request_id(), model.path, QSize(req_w, req_h), current_session_id_});
+    }
+
+    if (!retry_tasks.isEmpty())
+    {
+        emit request_load_batch(retry_tasks);
+    }
+}
 
 std::vector<QString> waterfall_scene::get_all_paths() const
 {
