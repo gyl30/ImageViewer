@@ -9,6 +9,7 @@
 #include <QCoreApplication>
 #include <QResizeEvent>
 #include <QFileInfo>
+#include <vector>
 
 #include "main_window.h"
 #include "image_loader.h"
@@ -113,6 +114,7 @@ void main_window::setup_connections()
 
     connect(scene_, &waterfall_scene::image_double_clicked, this, &main_window::on_image_double_clicked);
     connect(scene_, &waterfall_scene::request_open_folder, this, &main_window::on_add_folder);
+    connect(scene_, &waterfall_scene::request_open_recent, this, &main_window::on_open_recent_path);
     connect(scene_, &QGraphicsScene::selectionChanged, this, &main_window::on_selection_changed);
     connect(image_loader_, &image_loader::thumbnail_loaded, this, &main_window::on_image_loaded_stat);
 }
@@ -132,6 +134,33 @@ void main_window::on_add_folder()
         return;
     }
 
+    open_path(dir_path, true);
+}
+
+void main_window::open_path(const QString& path, bool add_to_recent)
+{
+    QFileInfo file_info(path);
+    if (!file_info.exists())
+    {
+        return;
+    }
+
+    if (file_info.isFile())
+    {
+        std::vector<QString> image_list = scene_->get_all_paths();
+        if (std::find(image_list.begin(), image_list.end(), path) == image_list.end())
+        {
+            image_list = {path};
+        }
+
+        if (add_to_recent)
+        {
+            add_recent_path(path);
+        }
+        show_image_viewer(path, image_list);
+        return;
+    }
+
     if (file_scanner_ != nullptr)
     {
         file_scanner_->stop_scan();
@@ -146,9 +175,49 @@ void main_window::on_add_folder()
 
     current_scan_session_id_++;
 
-    status_label_->setText(QString("Scanning: %1").arg(dir_path));
+    status_label_->setText(QString("Scanning: %1").arg(path));
 
-    emit request_start_scan(dir_path, current_scan_session_id_);
+    if (add_to_recent)
+    {
+        add_recent_path(path);
+    }
+
+    emit request_start_scan(path, current_scan_session_id_);
+}
+
+void main_window::add_recent_path(const QString& path)
+{
+    static constexpr qsizetype kMaxRecentPaths = 10;
+
+    recent_paths_.removeAll(path);
+    recent_paths_.prepend(path);
+
+    while (recent_paths_.size() > kMaxRecentPaths)
+    {
+        recent_paths_.removeLast();
+    }
+
+    scene_->set_recent_paths(recent_paths_);
+}
+
+void main_window::show_image_viewer(const QString& path, const std::vector<QString>& image_list)
+{
+    if (viewer_window_ == nullptr)
+    {
+        viewer_window_ = new image_viewer_window(this);
+        viewer_window_->setWindowFlags(Qt::Window);
+    }
+
+    viewer_window_->set_image_list(image_list);
+    viewer_window_->set_image_path(path);
+
+    if (viewer_window_->isMinimized())
+    {
+        viewer_window_->showNormal();
+    }
+    viewer_window_->show();
+    viewer_window_->raise();
+    viewer_window_->activateWindow();
 }
 
 void main_window::on_scan_batch_received(const QList<image_meta>& batch, int session_id)
@@ -247,21 +316,10 @@ void main_window::on_selection_changed()
 
 void main_window::on_image_double_clicked(const QString& path)
 {
-    if (viewer_window_ == nullptr)
-    {
-        viewer_window_ = new image_viewer_window(this);
-        viewer_window_->setWindowFlags(Qt::Window);
-    }
+    show_image_viewer(path, scene_->get_all_paths());
+}
 
-    viewer_window_->set_image_list(scene_->get_all_paths());
-
-    viewer_window_->set_image_path(path);
-
-    if (viewer_window_->isMinimized())
-    {
-        viewer_window_->showNormal();
-    }
-    viewer_window_->show();
-    viewer_window_->raise();
-    viewer_window_->activateWindow();
+void main_window::on_open_recent_path(const QString& path)
+{
+    open_path(path, true);
 }

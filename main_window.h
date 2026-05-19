@@ -7,6 +7,7 @@
 #include <QElapsedTimer>
 #include <QList>
 #include <QSet>
+#include <QStringList>
 #include "common_types.h"
 #include "file_scanner.h"
 
@@ -30,11 +31,15 @@ class main_window : public QMainWindow
     void setup_worker();
     void setup_scanner();
     void update_status_bar();
+    void open_path(const QString& path, bool add_to_recent);
+    void add_recent_path(const QString& path);
+    void show_image_viewer(const QString& path, const std::vector<QString>& image_list);
 
     void on_add_folder();
     void on_image_loaded_stat(quint64 id, const QString& path, const QImage& image, int session_id);
     void on_selection_changed();
     void on_image_double_clicked(const QString& path);
+    void on_open_recent_path(const QString& path);
 
     void on_scan_batch_received(const QList<image_meta>& batch, int session_id);
     void on_scan_all_finished(int total, qint64 duration, int session_id);
@@ -55,6 +60,7 @@ class main_window : public QMainWindow
     int total_count_ = 0;
     int loaded_count_ = 0;
     QSet<QString> loaded_paths_;
+    QStringList recent_paths_;
     int current_scan_session_id_ = 0;
     image_viewer_window* viewer_window_ = nullptr;
 };

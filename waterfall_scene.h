@@ -5,6 +5,7 @@
 #include <QHash>
 #include <QStack>
 #include <QObject>
+#include <QStringList>
 #include <QGraphicsScene>
 #include <QGraphicsSceneContextMenuEvent>
 
@@ -26,6 +27,7 @@ class waterfall_scene : public QGraphicsScene
     void add_images(const QList<image_meta>& batch);
     void layout_models(int view_width);
     void update_viewport(const QRectF& visible_rect);
+    void set_recent_paths(const QStringList& recent_paths);
     [[nodiscard]] std::vector<QString> get_all_paths() const;
 
    signals:
@@ -34,6 +36,7 @@ class waterfall_scene : public QGraphicsScene
     void request_cancel_batch(const QList<QString>& paths);
     void image_double_clicked(QString path);
     void request_open_folder();
+    void request_open_recent(QString path);
 
    public slots:
     void on_image_loaded(quint64 id, const QString& path, const QImage& image, int session_id);
@@ -66,6 +69,7 @@ class waterfall_scene : public QGraphicsScene
     QFutureWatcher<layout_result> layout_watcher_;
     bool is_laying_out_ = false;
     int pending_view_width_ = 0;
+    QStringList recent_paths_;
 };
 
 #endif

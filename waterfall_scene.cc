@@ -120,6 +120,8 @@ void waterfall_scene::add_images(const QList<image_meta>& batch)
     }
 }
 
+void waterfall_scene::set_recent_paths(const QStringList& recent_paths) { recent_paths_ = recent_paths; }
+
 void waterfall_scene::layout_models(int view_width)
 {
     if (all_models_.empty() || view_width <= 0)
@@ -455,6 +457,17 @@ void waterfall_scene::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     {
         QAction* copyPathAction = menu.addAction("复制图片路径");
         connect(copyPathAction, &QAction::triggered, [wf_item]() { QGuiApplication::clipboard()->setText(wf_item->get_path()); });
+        menu.addSeparator();
+    }
+
+    if (!recent_paths_.isEmpty())
+    {
+        QMenu* recent_menu = menu.addMenu("最近打开");
+        for (const QString& path : recent_paths_)
+        {
+            QAction* recent_action = recent_menu->addAction(path);
+            connect(recent_action, &QAction::triggered, this, [this, path]() { emit request_open_recent(path); });
+        }
         menu.addSeparator();
     }
 
