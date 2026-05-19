@@ -18,7 +18,7 @@ class file_scanner : public QObject
     ~file_scanner() override;
 
    public slots:
-    void start_scan(const QString& dir_path, int session_id);
+    void start_scan(const QString& dir_path, int session_id, int sort_mode, bool descending);
     void stop_scan();
 
    signals:

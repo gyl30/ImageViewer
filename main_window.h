@@ -15,6 +15,7 @@
 #include "file_scanner.h"
 
 class QImage;
+class QActionGroup;
 class waterfall_view;
 class waterfall_scene;
 class image_loader;
@@ -29,6 +30,13 @@ class main_window : public QMainWindow
     ~main_window() override;
 
    private:
+    enum class scan_sort_mode
+    {
+        file_name = 0,
+        modified_time = 1,
+        file_size = 2
+    };
+
     void setup_ui();
     void setup_connections();
     void setup_worker();
@@ -58,7 +66,7 @@ class main_window : public QMainWindow
     void dropEvent(QDropEvent* event) override;
 
    signals:
-    void request_start_scan(const QString& path, int session_id);
+    void request_start_scan(const QString& path, int session_id, int sort_mode, bool descending);
 
    private:
     waterfall_view* view_ = nullptr;
@@ -78,6 +86,9 @@ class main_window : public QMainWindow
     QString last_open_dir_;
     QString current_root_path_;
     int current_scan_session_id_ = 0;
+    scan_sort_mode current_sort_mode_ = scan_sort_mode::file_name;
+    bool sort_descending_ = false;
+    QActionGroup* sort_group_ = nullptr;
     image_viewer_window* viewer_window_ = nullptr;
 };
 

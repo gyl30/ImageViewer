@@ -1,6 +1,7 @@
 #include <QTimer>
 #include <QDebug>
 #include <QAction>
+#include <QActionGroup>
 #include <QKeySequence>
 #include <QFileDialog>
 #include <QDirIterator>
@@ -18,6 +19,7 @@
 #include <QDesktopServices>
 #include <QProcess>
 #include <QStandardPaths>
+#include <QToolBar>
 #include <vector>
 
 #include "main_window.h"
@@ -68,6 +70,16 @@ main_window::~main_window()
 
 void main_window::setup_ui()
 {
+    auto rescan_current_folder =
+        [this]()
+    {
+        if (current_root_path_.isEmpty())
+        {
+            return;
+        }
+        open_path(current_root_path_, false);
+    };
+
     auto* act_open = new QAction("Open", this);
     act_open->setShortcut(QKeySequence::Open);
     addAction(act_open);
@@ -128,6 +140,79 @@ void main_window::setup_ui()
                     "Ctrl+2 适应宽度\n"
                     "F11 全屏\n"
                     "F5 幻灯片");
+            });
+
+    auto* sort_toolbar = addToolBar("Sort");
+    sort_toolbar->setMovable(false);
+
+    sort_group_ = new QActionGroup(this);
+    sort_group_->setExclusive(true);
+
+    auto* act_sort_name = sort_toolbar->addAction("文件名");
+    act_sort_name->setCheckable(true);
+    act_sort_name->setChecked(true);
+    sort_group_->addAction(act_sort_name);
+    connect(act_sort_name,
+            &QAction::triggered,
+            this,
+            [this, rescan_current_folder]()
+            {
+                if (current_sort_mode_ == scan_sort_mode::file_name)
+                {
+                    return;
+                }
+                current_sort_mode_ = scan_sort_mode::file_name;
+                rescan_current_folder();
+            });
+
+    auto* act_sort_time = sort_toolbar->addAction("修改时间");
+    act_sort_time->setCheckable(true);
+    sort_group_->addAction(act_sort_time);
+    connect(act_sort_time,
+            &QAction::triggered,
+            this,
+            [this, rescan_current_folder]()
+            {
+                if (current_sort_mode_ == scan_sort_mode::modified_time)
+                {
+                    return;
+                }
+                current_sort_mode_ = scan_sort_mode::modified_time;
+                rescan_current_folder();
+            });
+
+    auto* act_sort_size = sort_toolbar->addAction("文件大小");
+    act_sort_size->setCheckable(true);
+    sort_group_->addAction(act_sort_size);
+    connect(act_sort_size,
+            &QAction::triggered,
+            this,
+            [this, rescan_current_folder]()
+            {
+                if (current_sort_mode_ == scan_sort_mode::file_size)
+                {
+                    return;
+                }
+                current_sort_mode_ = scan_sort_mode::file_size;
+                rescan_current_folder();
+            });
+
+    sort_toolbar->addSeparator();
+
+    auto* act_sort_desc = sort_toolbar->addAction("倒序");
+    act_sort_desc->setCheckable(true);
+    connect(act_sort_desc,
+            &QAction::triggered,
+            this,
+            [this, act_sort_desc, rescan_current_folder]()
+            {
+                const bool descending = act_sort_desc->isChecked();
+                if (sort_descending_ == descending)
+                {
+                    return;
+                }
+                sort_descending_ = descending;
+                rescan_current_folder();
             });
 
     scene_ = new waterfall_scene(this);
@@ -297,7 +382,7 @@ void main_window::open_path(const QString& path, bool add_to_recent)
         add_recent_path(path);
     }
 
-    emit request_start_scan(path, current_scan_session_id_);
+    emit request_start_scan(path, current_scan_session_id_, static_cast<int>(current_sort_mode_), sort_descending_);
 }
 
 void main_window::add_recent_path(const QString& path)

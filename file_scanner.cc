@@ -5,16 +5,22 @@
 #include <QImageReader>
 #include <QElapsedTimer>
 #include <QFileInfo>
+#include <QDateTime>
 #include <QDebug>
 
 namespace
 {
 constexpr qsizetype kEmitBatchSize = 500;
+constexpr int kSortByFileName = 0;
+constexpr int kSortByModifiedTime = 1;
+constexpr int kSortByFileSize = 2;
 
 struct scanned_image
 {
     QString path;
     QString file_name;
+    qint64 modified_time = 0;
+    qint64 file_size = 0;
 };
 }
 
@@ -22,7 +28,7 @@ file_scanner::file_scanner(QObject* parent) : QObject(parent), stop_flag_(false)
 
 file_scanner::~file_scanner() { stop_scan(); }
 
-void file_scanner::start_scan(const QString& dir_path, int session_id)
+void file_scanner::start_scan(const QString& dir_path, int session_id, int sort_mode, bool descending)
 {
     stop_flag_ = false;
     QElapsedTimer timer;
@@ -42,7 +48,9 @@ void file_scanner::start_scan(const QString& dir_path, int session_id)
         }
 
         QString file_path = it.next();
-        scanned_images.append({file_path, QFileInfo(file_path).fileName()});
+        QFileInfo file_info(file_path);
+        scanned_images.append(
+            {file_path, file_info.fileName(), file_info.lastModified().toMSecsSinceEpoch(), file_info.size()});
     }
 
     if (stop_flag_)
@@ -54,16 +62,36 @@ void file_scanner::start_scan(const QString& dir_path, int session_id)
     collator.setNumericMode(true);
     collator.setCaseSensitivity(Qt::CaseInsensitive);
 
+    const auto compare_file_name =
+        [&collator](const scanned_image& left, const scanned_image& right)
+    {
+        int cmp = collator.compare(left.file_name, right.file_name);
+        if (cmp != 0)
+        {
+            return cmp;
+        }
+        return QString::compare(left.path, right.path, Qt::CaseInsensitive);
+    };
+
     std::sort(scanned_images.begin(),
               scanned_images.end(),
-              [&collator](const scanned_image& left, const scanned_image& right)
+              [sort_mode, descending, &compare_file_name](const scanned_image& left, const scanned_image& right)
               {
-                  int cmp = collator.compare(left.file_name, right.file_name);
-                  if (cmp != 0)
+                  int cmp = 0;
+                  if (sort_mode == kSortByModifiedTime && left.modified_time != right.modified_time)
                   {
-                      return cmp < 0;
+                      cmp = left.modified_time < right.modified_time ? -1 : 1;
                   }
-                  return left.path < right.path;
+                  else if (sort_mode == kSortByFileSize && left.file_size != right.file_size)
+                  {
+                      cmp = left.file_size < right.file_size ? -1 : 1;
+                  }
+                  else
+                  {
+                      cmp = compare_file_name(left, right);
+                  }
+
+                  return descending ? cmp > 0 : cmp < 0;
               });
 
     int total_count = 0;
