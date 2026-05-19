@@ -183,8 +183,8 @@ void image_viewer_window::set_image_path(const QString& path)
 
                 if (image_item_ != nullptr)
                 {
-                    view_->fitInView(image_item_, Qt::KeepAspectRatio);
                     has_manual_zoom_ = false;
+                    apply_auto_view();
                 }
 
                 setWindowTitle(QString("Viewer - %1 (%2x%3) [%4/%5]")
@@ -203,6 +203,27 @@ void image_viewer_window::set_image_list(const std::vector<QString>& paths)
     image_list_ = paths;
     update_index_from_path();
     update_navigation_buttons();
+}
+
+void image_viewer_window::apply_auto_view()
+{
+    if (image_item_ == nullptr)
+    {
+        return;
+    }
+
+    view_->resetTransform();
+
+    const QSize viewport_size = view_->viewport()->size();
+    const QRectF image_rect = image_item_->boundingRect();
+
+    if (image_rect.width() > viewport_size.width() || image_rect.height() > viewport_size.height())
+    {
+        view_->fitInView(image_item_, Qt::KeepAspectRatio);
+        return;
+    }
+
+    view_->centerOn(image_item_);
 }
 
 void image_viewer_window::update_index_from_path()
@@ -232,7 +253,7 @@ void image_viewer_window::resizeEvent(QResizeEvent* event)
 
     if (image_item_ != nullptr && !has_manual_zoom_)
     {
-        view_->fitInView(image_item_, Qt::KeepAspectRatio);
+        apply_auto_view();
     }
 
     int btn_w = 80;
