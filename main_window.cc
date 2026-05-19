@@ -511,9 +511,9 @@ void main_window::on_move_path_to_trash(const QString& path)
     recent_image_paths_.removeAll(path);
     scene_->set_recent_paths(recent_folder_paths_, recent_image_paths_);
 
-    if (viewer_window_ != nullptr && viewer_window_->current_image_path() == path)
+    if (viewer_window_ != nullptr)
     {
-        viewer_window_->close();
+        viewer_window_->remove_image_path(path);
     }
 
     if (!current_root_path_.isEmpty() && QFileInfo::exists(current_root_path_))

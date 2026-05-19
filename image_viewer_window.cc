@@ -321,6 +321,37 @@ void image_viewer_window::set_image_list(const std::vector<QString>& paths)
     update_navigation_buttons();
 }
 
+void image_viewer_window::remove_image_path(const QString& path)
+{
+    auto it = std::find(image_list_.begin(), image_list_.end(), path);
+    if (it == image_list_.end())
+    {
+        return;
+    }
+
+    const ptrdiff_t removed_index = std::distance(image_list_.begin(), it);
+    const bool removing_current = (current_path_ == path);
+
+    image_list_.erase(it);
+
+    if (image_list_.empty())
+    {
+        close();
+        return;
+    }
+
+    if (!removing_current)
+    {
+        update_index_from_path();
+        update_navigation_buttons();
+        return;
+    }
+
+    ptrdiff_t next_index = std::min(removed_index, static_cast<ptrdiff_t>(image_list_.size()) - 1);
+    set_image_list(image_list_);
+    set_image_path(image_list_[next_index]);
+}
+
 void image_viewer_window::load_settings()
 {
     QSettings settings("gyl30", "ImageViewer");

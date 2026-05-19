@@ -37,6 +37,7 @@ class image_viewer_window : public QMainWindow
 
     void set_image_path(const QString& path);
     void set_image_list(const std::vector<QString>& paths);
+    void remove_image_path(const QString& path);
     [[nodiscard]] QString current_image_path() const { return current_path_; }
 
    protected:
