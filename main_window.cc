@@ -104,6 +104,32 @@ void main_window::setup_ui()
                 show_recent_menu(mapToGlobal(QPoint(rect.width() / 2, rect.height() / 2)));
             });
 
+    auto* act_shortcuts = new QAction("Shortcuts", this);
+    act_shortcuts->setShortcut(QKeySequence(Qt::Key_F1));
+    addAction(act_shortcuts);
+    connect(act_shortcuts,
+            &QAction::triggered,
+            this,
+            [this]()
+            {
+                QMessageBox::information(
+                    this,
+                    "快捷键",
+                    "主窗口:\n"
+                    "Ctrl+O 打开文件夹\n"
+                    "Ctrl+Shift+O 打开图片\n"
+                    "Ctrl+Alt+O 打开最近项\n"
+                    "F1 查看快捷键\n\n"
+                    "预览窗口:\n"
+                    "Left/Right 上一张/下一张\n"
+                    "Ctrl+滚轮 缩放\n"
+                    "Ctrl+0 适应窗口\n"
+                    "Ctrl+1 1:1\n"
+                    "Ctrl+2 适应宽度\n"
+                    "F11 全屏\n"
+                    "F5 幻灯片");
+            });
+
     scene_ = new waterfall_scene(this);
     view_ = new waterfall_view(this);
     view_->setScene(scene_);

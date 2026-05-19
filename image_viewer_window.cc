@@ -22,6 +22,7 @@
 #include <QLabel>
 #include <QGuiApplication>
 #include <QInputDialog>
+#include <QMessageBox>
 #include <QMovie>
 #include <QScreen>
 #include <QSettings>
@@ -202,6 +203,29 @@ void image_viewer_window::setup_ui()
     slideshow_interval_action_ = toolbar->addAction("播放间隔");
     connect(slideshow_interval_action_, &QAction::triggered, this, &image_viewer_window::configure_slideshow_interval);
 
+    auto* shortcuts_action = toolbar->addAction("快捷键");
+    shortcuts_action->setShortcut(QKeySequence(Qt::Key_F1));
+    connect(shortcuts_action,
+            &QAction::triggered,
+            this,
+            [this]()
+            {
+                QMessageBox::information(
+                    this,
+                    "快捷键",
+                    "Left/Right 上一张/下一张\n"
+                    "Ctrl+滚轮 缩放\n"
+                    "Ctrl+0 适应窗口\n"
+                    "Ctrl+1 1:1\n"
+                    "Ctrl+2 适应宽度\n"
+                    "Ctrl+L 左转\n"
+                    "Ctrl+R 右转\n"
+                    "Ctrl+H 水平翻转\n"
+                    "Ctrl+Shift+H 垂直翻转\n"
+                    "F5 幻灯片\n"
+                    "F11 全屏");
+            });
+
     addAction(fit_window_action_);
     addAction(actual_size_action_);
     addAction(fit_width_action_);
@@ -211,6 +235,7 @@ void image_viewer_window::setup_ui()
     addAction(flip_horizontal_action_);
     addAction(flip_vertical_action_);
     addAction(slideshow_action_);
+    addAction(shortcuts_action);
     update_view_mode_actions();
 
     slideshow_timer_ = new QTimer(this);
