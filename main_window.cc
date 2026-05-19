@@ -15,6 +15,8 @@
 #include <QUrl>
 #include <QSettings>
 #include <QDesktopServices>
+#include <QProcess>
+#include <QStandardPaths>
 #include <vector>
 
 #include "main_window.h"
@@ -447,8 +449,42 @@ void main_window::on_open_recent_path(const QString& path)
 void main_window::on_reveal_path(const QString& path)
 {
     QFileInfo file_info(path);
-    QString reveal_target = file_info.isDir() ? file_info.absoluteFilePath() : file_info.absolutePath();
-    QDesktopServices::openUrl(QUrl::fromLocalFile(reveal_target));
+    if (!file_info.exists())
+    {
+        return;
+    }
+
+    bool handled = false;
+
+#if defined(Q_OS_WIN)
+    handled = QProcess::startDetached("explorer.exe", {"/select,", QDir::toNativeSeparators(file_info.absoluteFilePath())});
+#elif defined(Q_OS_MACOS)
+    handled = QProcess::startDetached("open", {"-R", file_info.absoluteFilePath()});
+#else
+    if (file_info.isFile())
+    {
+        const QString dbus_send = QStandardPaths::findExecutable("dbus-send");
+        if (!dbus_send.isEmpty())
+        {
+            const QString uri = QUrl::fromLocalFile(file_info.absoluteFilePath()).toString();
+            handled = QProcess::startDetached(
+                dbus_send,
+                {"--session",
+                 "--dest=org.freedesktop.FileManager1",
+                 "--type=method_call",
+                 "/org/freedesktop/FileManager1",
+                 "org.freedesktop.FileManager1.ShowItems",
+                 QString("array:string:%1").arg(uri),
+                 "string:"});
+        }
+    }
+#endif
+
+    if (!handled)
+    {
+        const QString reveal_target = file_info.isDir() ? file_info.absoluteFilePath() : file_info.absolutePath();
+        QDesktopServices::openUrl(QUrl::fromLocalFile(reveal_target));
+    }
 }
 
 void main_window::on_move_path_to_trash(const QString& path)
