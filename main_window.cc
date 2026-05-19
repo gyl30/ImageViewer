@@ -12,6 +12,7 @@
 #include <QFile>
 #include <QMenu>
 #include <QMimeData>
+#include <QMessageBox>
 #include <QUrl>
 #include <QSettings>
 #include <QDesktopServices>
@@ -489,8 +490,21 @@ void main_window::on_reveal_path(const QString& path)
 
 void main_window::on_move_path_to_trash(const QString& path)
 {
+    QFileInfo file_info(path);
+    const QMessageBox::StandardButton reply = QMessageBox::question(
+        this,
+        "移到回收站",
+        QString("确认将 \"%1\" 移到回收站吗？").arg(file_info.fileName()),
+        QMessageBox::Yes | QMessageBox::No,
+        QMessageBox::No);
+    if (reply != QMessageBox::Yes)
+    {
+        return;
+    }
+
     if (!QFile::moveToTrash(path))
     {
+        QMessageBox::warning(this, "移到回收站失败", QString("无法将 \"%1\" 移到回收站。").arg(file_info.fileName()));
         return;
     }
 
