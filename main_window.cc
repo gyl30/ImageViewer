@@ -9,6 +9,8 @@
 #include <QCoreApplication>
 #include <QResizeEvent>
 #include <QFileInfo>
+#include <QMimeData>
+#include <QUrl>
 #include <QSettings>
 #include <vector>
 
@@ -65,11 +67,31 @@ void main_window::setup_ui()
     addAction(act_open);
     connect(act_open, &QAction::triggered, this, &main_window::on_add_folder);
 
+    auto* act_open_file = new QAction("Open Image", this);
+    act_open_file->setShortcut(QKeySequence("Ctrl+Shift+O"));
+    addAction(act_open_file);
+    connect(act_open_file,
+            &QAction::triggered,
+            this,
+            [this]()
+            {
+                QString path = QFileDialog::getOpenFileName(
+                    this,
+                    "Select Image",
+                    last_open_dir_,
+                    "Images (*.jpg *.jpeg *.png *.bmp *.gif *.webp)");
+                if (!path.isEmpty())
+                {
+                    open_path(path, true);
+                }
+            });
+
     scene_ = new waterfall_scene(this);
     view_ = new waterfall_view(this);
     view_->setScene(scene_);
 
     setCentralWidget(view_);
+    setAcceptDrops(true);
 
     status_label_ = new QLabel("Press Ctrl+O to load folder", this);
     statusBar()->addWidget(status_label_);
@@ -366,4 +388,41 @@ void main_window::closeEvent(QCloseEvent* event)
 {
     save_settings();
     QMainWindow::closeEvent(event);
+}
+
+void main_window::dragEnterEvent(QDragEnterEvent* event)
+{
+    if (event->mimeData()->hasUrls())
+    {
+        const QList<QUrl> urls = event->mimeData()->urls();
+        if (!urls.isEmpty() && urls.first().isLocalFile())
+        {
+            event->acceptProposedAction();
+            return;
+        }
+    }
+
+    QMainWindow::dragEnterEvent(event);
+}
+
+void main_window::dropEvent(QDropEvent* event)
+{
+    const QList<QUrl> urls = event->mimeData()->urls();
+    for (const QUrl& url : urls)
+    {
+        if (!url.isLocalFile())
+        {
+            continue;
+        }
+
+        QString local_path = url.toLocalFile();
+        if (QFileInfo::exists(local_path))
+        {
+            open_path(local_path, true);
+            event->acceptProposedAction();
+            return;
+        }
+    }
+
+    QMainWindow::dropEvent(event);
 }

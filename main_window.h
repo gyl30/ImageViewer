@@ -2,6 +2,8 @@
 #define MAIN_WINDOW_H
 
 #include <QMainWindow>
+#include <QDragEnterEvent>
+#include <QDropEvent>
 #include <QThread>
 #include <QLabel>
 #include <QElapsedTimer>
@@ -49,6 +51,8 @@ class main_window : public QMainWindow
 
    protected:
     void closeEvent(QCloseEvent* event) override;
+    void dragEnterEvent(QDragEnterEvent* event) override;
+    void dropEvent(QDropEvent* event) override;
 
    signals:
     void request_start_scan(const QString& path, int session_id);
