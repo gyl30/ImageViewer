@@ -457,6 +457,10 @@ void waterfall_scene::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     {
         QAction* copyPathAction = menu.addAction("复制图片路径");
         connect(copyPathAction, &QAction::triggered, [wf_item]() { QGuiApplication::clipboard()->setText(wf_item->get_path()); });
+        QAction* revealPathAction = menu.addAction("在文件管理器中显示");
+        connect(revealPathAction, &QAction::triggered, this, [this, wf_item]() { emit request_reveal_path(wf_item->get_path()); });
+        QAction* trashPathAction = menu.addAction("移到回收站");
+        connect(trashPathAction, &QAction::triggered, this, [this, wf_item]() { emit request_move_to_trash(wf_item->get_path()); });
         menu.addSeparator();
     }
 

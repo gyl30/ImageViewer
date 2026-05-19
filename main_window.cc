@@ -9,9 +9,11 @@
 #include <QCoreApplication>
 #include <QResizeEvent>
 #include <QFileInfo>
+#include <QFile>
 #include <QMimeData>
 #include <QUrl>
 #include <QSettings>
+#include <QDesktopServices>
 #include <vector>
 
 #include "main_window.h"
@@ -139,6 +141,8 @@ void main_window::setup_connections()
     connect(scene_, &waterfall_scene::image_double_clicked, this, &main_window::on_image_double_clicked);
     connect(scene_, &waterfall_scene::request_open_folder, this, &main_window::on_add_folder);
     connect(scene_, &waterfall_scene::request_open_recent, this, &main_window::on_open_recent_path);
+    connect(scene_, &waterfall_scene::request_reveal_path, this, &main_window::on_reveal_path);
+    connect(scene_, &waterfall_scene::request_move_to_trash, this, &main_window::on_move_path_to_trash);
     connect(scene_, &QGraphicsScene::selectionChanged, this, &main_window::on_selection_changed);
     connect(image_loader_, &image_loader::thumbnail_loaded, this, &main_window::on_image_loaded_stat);
 }
@@ -220,6 +224,7 @@ void main_window::open_path(const QString& path, bool add_to_recent)
     }
 
     last_open_dir_ = path;
+    current_root_path_ = path;
 
     if (file_scanner_ != nullptr)
     {
@@ -382,6 +387,34 @@ void main_window::on_image_double_clicked(const QString& path)
 void main_window::on_open_recent_path(const QString& path)
 {
     open_path(path, true);
+}
+
+void main_window::on_reveal_path(const QString& path)
+{
+    QFileInfo file_info(path);
+    QString reveal_target = file_info.isDir() ? file_info.absoluteFilePath() : file_info.absolutePath();
+    QDesktopServices::openUrl(QUrl::fromLocalFile(reveal_target));
+}
+
+void main_window::on_move_path_to_trash(const QString& path)
+{
+    if (!QFile::moveToTrash(path))
+    {
+        return;
+    }
+
+    recent_paths_.removeAll(path);
+    scene_->set_recent_paths(recent_paths_);
+
+    if (viewer_window_ != nullptr && viewer_window_->current_image_path() == path)
+    {
+        viewer_window_->close();
+    }
+
+    if (!current_root_path_.isEmpty() && QFileInfo::exists(current_root_path_))
+    {
+        open_path(current_root_path_, false);
+    }
 }
 
 void main_window::closeEvent(QCloseEvent* event)

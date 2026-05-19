@@ -45,6 +45,8 @@ class main_window : public QMainWindow
     void on_selection_changed();
     void on_image_double_clicked(const QString& path);
     void on_open_recent_path(const QString& path);
+    void on_reveal_path(const QString& path);
+    void on_move_path_to_trash(const QString& path);
 
     void on_scan_batch_received(const QList<image_meta>& batch, int session_id);
     void on_scan_all_finished(int total, qint64 duration, int session_id);
@@ -72,6 +74,7 @@ class main_window : public QMainWindow
     QSet<QString> loaded_paths_;
     QStringList recent_paths_;
     QString last_open_dir_;
+    QString current_root_path_;
     int current_scan_session_id_ = 0;
     image_viewer_window* viewer_window_ = nullptr;
 };

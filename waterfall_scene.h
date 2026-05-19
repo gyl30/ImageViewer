@@ -37,6 +37,8 @@ class waterfall_scene : public QGraphicsScene
     void image_double_clicked(QString path);
     void request_open_folder();
     void request_open_recent(QString path);
+    void request_reveal_path(QString path);
+    void request_move_to_trash(QString path);
 
    public slots:
     void on_image_loaded(quint64 id, const QString& path, const QImage& image, int session_id);
