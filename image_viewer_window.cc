@@ -11,6 +11,7 @@
 #include <QGraphicsTextItem>
 #include <QToolBar>
 #include <QAction>
+#include <QActionGroup>
 #include <QResizeEvent>
 #include <QEvent>
 #include <QWheelEvent>
@@ -62,6 +63,41 @@ void image_viewer_window::setup_ui()
     view_->installEventFilter(this);
 
     setCentralWidget(view_);
+
+    auto* toolbar = addToolBar("View");
+    toolbar->setMovable(false);
+
+    view_mode_group_ = new QActionGroup(this);
+    view_mode_group_->setExclusive(true);
+
+    fit_window_action_ = toolbar->addAction("适应窗口");
+    fit_window_action_->setCheckable(true);
+    fit_window_action_->setShortcut(QKeySequence("Ctrl+0"));
+    view_mode_group_->addAction(fit_window_action_);
+    connect(fit_window_action_, &QAction::triggered, this, &image_viewer_window::set_fit_window_mode);
+
+    actual_size_action_ = toolbar->addAction("1:1");
+    actual_size_action_->setCheckable(true);
+    actual_size_action_->setShortcut(QKeySequence("Ctrl+1"));
+    view_mode_group_->addAction(actual_size_action_);
+    connect(actual_size_action_, &QAction::triggered, this, &image_viewer_window::set_actual_size_mode);
+
+    fit_width_action_ = toolbar->addAction("适应宽度");
+    fit_width_action_->setCheckable(true);
+    fit_width_action_->setShortcut(QKeySequence("Ctrl+2"));
+    view_mode_group_->addAction(fit_width_action_);
+    connect(fit_width_action_, &QAction::triggered, this, &image_viewer_window::set_fit_width_mode);
+
+    full_screen_action_ = toolbar->addAction("全屏");
+    full_screen_action_->setCheckable(true);
+    full_screen_action_->setShortcut(QKeySequence(Qt::Key_F11));
+    connect(full_screen_action_, &QAction::triggered, this, &image_viewer_window::toggle_full_screen);
+
+    addAction(fit_window_action_);
+    addAction(actual_size_action_);
+    addAction(fit_width_action_);
+    addAction(full_screen_action_);
+    update_view_mode_actions();
 
     const QString btn_style = R"(
         QPushButton {
@@ -225,6 +261,14 @@ void image_viewer_window::save_settings() const
     settings.setValue("viewer_window/geometry", saveGeometry());
 }
 
+void image_viewer_window::update_view_mode_actions()
+{
+    fit_window_action_->setChecked(current_view_mode_ == view_mode::fit_window);
+    actual_size_action_->setChecked(current_view_mode_ == view_mode::actual_size);
+    fit_width_action_->setChecked(current_view_mode_ == view_mode::fit_width);
+    full_screen_action_->setChecked(isFullScreen());
+}
+
 void image_viewer_window::resize_window_to_image(const QSize& image_size)
 {
     if (!image_size.isValid() || isMaximized() || isFullScreen())
@@ -270,6 +314,23 @@ void image_viewer_window::apply_auto_view()
 
     const QSize viewport_size = view_->viewport()->size();
     const QRectF image_rect = image_item_->boundingRect();
+
+    if (current_view_mode_ == view_mode::actual_size)
+    {
+        view_->centerOn(image_item_);
+        return;
+    }
+
+    if (current_view_mode_ == view_mode::fit_width)
+    {
+        if (image_rect.width() > viewport_size.width() && image_rect.width() > 0.0)
+        {
+            qreal scale = static_cast<qreal>(viewport_size.width()) / image_rect.width();
+            view_->scale(scale, scale);
+        }
+        view_->centerOn(image_item_);
+        return;
+    }
 
     if (image_rect.width() > viewport_size.width() || image_rect.height() > viewport_size.height())
     {
@@ -375,6 +436,43 @@ void image_viewer_window::load_prev_image() { navigate_image(-1); }
 
 void image_viewer_window::load_next_image() { navigate_image(1); }
 
+void image_viewer_window::set_fit_window_mode()
+{
+    current_view_mode_ = view_mode::fit_window;
+    has_manual_zoom_ = false;
+    update_view_mode_actions();
+    apply_auto_view();
+}
+
+void image_viewer_window::set_actual_size_mode()
+{
+    current_view_mode_ = view_mode::actual_size;
+    has_manual_zoom_ = false;
+    update_view_mode_actions();
+    apply_auto_view();
+}
+
+void image_viewer_window::set_fit_width_mode()
+{
+    current_view_mode_ = view_mode::fit_width;
+    has_manual_zoom_ = false;
+    update_view_mode_actions();
+    apply_auto_view();
+}
+
+void image_viewer_window::toggle_full_screen()
+{
+    if (isFullScreen())
+    {
+        showNormal();
+    }
+    else
+    {
+        showFullScreen();
+    }
+    update_view_mode_actions();
+}
+
 void image_viewer_window::navigate_image(int delta)
 {
     if (image_list_.empty())
@@ -455,5 +553,6 @@ void image_viewer_window::closeEvent(QCloseEvent* event)
     current_path_.clear();
     has_manual_zoom_ = false;
     update_navigation_buttons();
+    update_view_mode_actions();
     QMainWindow::closeEvent(event);
 }
