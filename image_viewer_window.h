@@ -14,6 +14,7 @@ class QGraphicsView;
 class QGraphicsScene;
 class QGraphicsPixmapItem;
 class QPushButton;
+class QLabel;
 class QAction;
 class QActionGroup;
 
@@ -63,6 +64,8 @@ class image_viewer_window : public QMainWindow
     void display_image(const QImage& image, const QString& path);
     void queue_adjacent_preloads();
     void start_next_preload();
+    void update_image_status(const QString& path, const QSize& image_size);
+    void update_zoom_status();
     void update_view_mode_actions();
     void update_index_from_path();
     void update_navigation_buttons();
@@ -73,6 +76,9 @@ class image_viewer_window : public QMainWindow
     ptrdiff_t current_index_;
     bool has_manual_zoom_ = false;
     view_mode current_view_mode_ = view_mode::fit_window;
+    QSize current_image_size_;
+    QString current_image_format_;
+    qint64 current_file_size_ = 0;
 
     QGraphicsView* view_;
     QGraphicsScene* scene_;
@@ -87,6 +93,8 @@ class image_viewer_window : public QMainWindow
     QAction* full_screen_action_ = nullptr;
     QCache<QString, QImage> image_cache_;
     QStringList pending_preload_paths_;
+    QLabel* image_info_label_ = nullptr;
+    QLabel* zoom_label_ = nullptr;
 
     QFutureWatcher<std::pair<QImage, QString>>* image_watcher_ = nullptr;
     QFutureWatcher<std::pair<QString, QImage>>* preload_watcher_ = nullptr;

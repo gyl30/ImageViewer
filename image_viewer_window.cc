@@ -19,9 +19,11 @@
 #include <QPushButton>
 #include <QFileInfo>
 #include <QFont>
+#include <QLabel>
 #include <QGuiApplication>
 #include <QScreen>
 #include <QSettings>
+#include <QStatusBar>
 #include <QWindow>
 #include "common_types.h"
 #include "image_viewer_window.h"
@@ -121,6 +123,12 @@ void image_viewer_window::setup_ui()
     view_->installEventFilter(this);
 
     setCentralWidget(view_);
+
+    image_info_label_ = new QLabel(this);
+    statusBar()->addWidget(image_info_label_);
+
+    zoom_label_ = new QLabel(this);
+    statusBar()->addPermanentWidget(zoom_label_);
 
     auto* toolbar = addToolBar("View");
     toolbar->setMovable(false);
@@ -274,6 +282,7 @@ void image_viewer_window::display_image(const QImage& image, const QString& path
     QPixmap pixmap = QPixmap::fromImage(image);
     image_item_ = scene_->addPixmap(pixmap);
     scene_->setSceneRect(pixmap.rect());
+    update_image_status(path, pixmap.size());
 
     if (image_item_ != nullptr)
     {
@@ -290,6 +299,47 @@ void image_viewer_window::display_image(const QImage& image, const QString& path
                        .arg(image_list_.size()));
 
     queue_adjacent_preloads();
+}
+
+void image_viewer_window::update_image_status(const QString& path, const QSize& image_size)
+{
+    QFileInfo file_info(path);
+    current_image_size_ = image_size;
+    current_file_size_ = file_info.size();
+
+    QImageReader reader(path);
+    current_image_format_ = QString::fromLatin1(reader.format()).toUpper();
+    if (current_image_format_.isEmpty())
+    {
+        current_image_format_ = file_info.suffix().toUpper();
+    }
+
+    QString size_str;
+    if (current_file_size_ < 1024)
+    {
+        size_str = QString("%1 B").arg(current_file_size_);
+    }
+    else if (current_file_size_ < static_cast<qint64>(1024 * 1024))
+    {
+        size_str = QString("%1 KB").arg(static_cast<double>(current_file_size_) / 1024.0, 0, 'f', 1);
+    }
+    else
+    {
+        size_str = QString("%1 MB").arg(static_cast<double>(current_file_size_) / (1024.0 * 1024.0), 0, 'f', 2);
+    }
+
+    image_info_label_->setText(QString("%1 | %2 | %3x%4 | %5")
+                                   .arg(file_info.fileName())
+                                   .arg(current_image_format_)
+                                   .arg(current_image_size_.width())
+                                   .arg(current_image_size_.height())
+                                   .arg(size_str));
+}
+
+void image_viewer_window::update_zoom_status()
+{
+    const qreal scale = view_->transform().m11();
+    zoom_label_->setText(QString("%1%").arg(scale * 100.0, 0, 'f', 0));
 }
 
 void image_viewer_window::queue_adjacent_preloads()
@@ -420,6 +470,7 @@ void image_viewer_window::apply_auto_view()
     if (current_view_mode_ == view_mode::actual_size)
     {
         view_->centerOn(image_item_);
+        update_zoom_status();
         return;
     }
 
@@ -431,16 +482,19 @@ void image_viewer_window::apply_auto_view()
             view_->scale(scale, scale);
         }
         view_->centerOn(image_item_);
+        update_zoom_status();
         return;
     }
 
     if (image_rect.width() > viewport_size.width() || image_rect.height() > viewport_size.height())
     {
         view_->fitInView(image_item_, Qt::KeepAspectRatio);
+        update_zoom_status();
         return;
     }
 
     view_->centerOn(image_item_);
+    update_zoom_status();
 }
 
 void image_viewer_window::update_index_from_path()
@@ -526,12 +580,14 @@ void image_viewer_window::zoom_in()
 {
     has_manual_zoom_ = true;
     view_->scale(1.2, 1.2);
+    update_zoom_status();
 }
 
 void image_viewer_window::zoom_out()
 {
     has_manual_zoom_ = true;
     view_->scale(1.0 / 1.2, 1.0 / 1.2);
+    update_zoom_status();
 }
 
 void image_viewer_window::load_prev_image() { navigate_image(-1); }
@@ -662,6 +718,8 @@ void image_viewer_window::closeEvent(QCloseEvent* event)
     scene_->clear();
     image_item_ = nullptr;
     current_path_.clear();
+    image_info_label_->clear();
+    zoom_label_->clear();
     has_manual_zoom_ = false;
     update_navigation_buttons();
     update_view_mode_actions();
