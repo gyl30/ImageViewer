@@ -19,9 +19,7 @@ void file_scanner::start_scan(const QString& dir_path, int session_id)
     filters << "*.jpg" << "*.jpeg" << "*.png" << "*.bmp" << "*.gif" << "*.webp";
 
     QDirIterator it(dir_path, filters, QDir::Files, QDirIterator::Subdirectories);
-
-    QList<image_meta> batch;
-    batch.reserve(100);
+    QList<image_meta> scanned_images;
     int total_count = 0;
 
     while (it.hasNext())
@@ -44,19 +42,20 @@ void file_scanner::start_scan(const QString& dir_path, int session_id)
         meta.path = file_path;
         meta.original_size = size;
 
-        batch.append(meta);
+        scanned_images.append(meta);
         total_count++;
-
-        if (batch.size() >= 100)
-        {
-            emit images_scanned_batch(batch, session_id);
-            batch.clear();
-            batch.reserve(100);
-        }
     }
 
-    if (!batch.isEmpty())
+    const qsizetype batch_size = 100;
+    for (qsizetype i = 0; i < scanned_images.size(); i += batch_size)
     {
+        QList<image_meta> batch;
+        batch.reserve(static_cast<int>(batch_size));
+        qsizetype end = std::min(i + batch_size, scanned_images.size());
+        for (qsizetype j = i; j < end; ++j)
+        {
+            batch.append(scanned_images[j]);
+        }
         emit images_scanned_batch(batch, session_id);
     }
 
