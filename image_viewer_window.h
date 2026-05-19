@@ -48,6 +48,10 @@ class image_viewer_window : public QMainWindow
     void set_actual_size_mode();
     void set_fit_width_mode();
     void toggle_full_screen();
+    void rotate_left();
+    void rotate_right();
+    void flip_horizontal();
+    void flip_vertical();
     void zoom_in();
     void zoom_out();
     void load_prev_image();
@@ -64,6 +68,7 @@ class image_viewer_window : public QMainWindow
     void display_image(const QImage& image, const QString& path);
     void queue_adjacent_preloads();
     void start_next_preload();
+    void apply_image_transform();
     void update_image_status(const QString& path, const QSize& image_size);
     void update_zoom_status();
     void update_view_mode_actions();
@@ -76,6 +81,9 @@ class image_viewer_window : public QMainWindow
     ptrdiff_t current_index_;
     bool has_manual_zoom_ = false;
     view_mode current_view_mode_ = view_mode::fit_window;
+    int rotation_degrees_ = 0;
+    bool flip_horizontal_ = false;
+    bool flip_vertical_ = false;
     QSize current_image_size_;
     QString current_image_format_;
     qint64 current_file_size_ = 0;
@@ -91,6 +99,10 @@ class image_viewer_window : public QMainWindow
     QAction* actual_size_action_ = nullptr;
     QAction* fit_width_action_ = nullptr;
     QAction* full_screen_action_ = nullptr;
+    QAction* rotate_left_action_ = nullptr;
+    QAction* rotate_right_action_ = nullptr;
+    QAction* flip_horizontal_action_ = nullptr;
+    QAction* flip_vertical_action_ = nullptr;
     QCache<QString, QImage> image_cache_;
     QStringList pending_preload_paths_;
     QLabel* image_info_label_ = nullptr;

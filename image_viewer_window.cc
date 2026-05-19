@@ -159,10 +159,32 @@ void image_viewer_window::setup_ui()
     full_screen_action_->setShortcut(QKeySequence(Qt::Key_F11));
     connect(full_screen_action_, &QAction::triggered, this, &image_viewer_window::toggle_full_screen);
 
+    toolbar->addSeparator();
+
+    rotate_left_action_ = toolbar->addAction("左转");
+    rotate_left_action_->setShortcut(QKeySequence("Ctrl+L"));
+    connect(rotate_left_action_, &QAction::triggered, this, &image_viewer_window::rotate_left);
+
+    rotate_right_action_ = toolbar->addAction("右转");
+    rotate_right_action_->setShortcut(QKeySequence("Ctrl+R"));
+    connect(rotate_right_action_, &QAction::triggered, this, &image_viewer_window::rotate_right);
+
+    flip_horizontal_action_ = toolbar->addAction("水平翻转");
+    flip_horizontal_action_->setShortcut(QKeySequence("Ctrl+H"));
+    connect(flip_horizontal_action_, &QAction::triggered, this, &image_viewer_window::flip_horizontal);
+
+    flip_vertical_action_ = toolbar->addAction("垂直翻转");
+    flip_vertical_action_->setShortcut(QKeySequence("Ctrl+Shift+H"));
+    connect(flip_vertical_action_, &QAction::triggered, this, &image_viewer_window::flip_vertical);
+
     addAction(fit_window_action_);
     addAction(actual_size_action_);
     addAction(fit_width_action_);
     addAction(full_screen_action_);
+    addAction(rotate_left_action_);
+    addAction(rotate_right_action_);
+    addAction(flip_horizontal_action_);
+    addAction(flip_vertical_action_);
     update_view_mode_actions();
 
     const QString btn_style = R"(
@@ -282,6 +304,10 @@ void image_viewer_window::display_image(const QImage& image, const QString& path
     QPixmap pixmap = QPixmap::fromImage(image);
     image_item_ = scene_->addPixmap(pixmap);
     scene_->setSceneRect(pixmap.rect());
+    rotation_degrees_ = 0;
+    flip_horizontal_ = false;
+    flip_vertical_ = false;
+    apply_image_transform();
     update_image_status(path, pixmap.size());
 
     if (image_item_ != nullptr)
@@ -413,6 +439,31 @@ void image_viewer_window::start_next_preload()
     }
 }
 
+void image_viewer_window::apply_image_transform()
+{
+    if (image_item_ == nullptr)
+    {
+        return;
+    }
+
+    image_item_->setTransformOriginPoint(image_item_->boundingRect().center());
+
+    QTransform transform;
+    transform.scale(flip_horizontal_ ? -1.0 : 1.0, flip_vertical_ ? -1.0 : 1.0);
+    transform.rotate(rotation_degrees_);
+    image_item_->setTransform(transform);
+    scene_->setSceneRect(image_item_->sceneBoundingRect());
+
+    if (has_manual_zoom_)
+    {
+        view_->centerOn(image_item_);
+        update_zoom_status();
+        return;
+    }
+
+    apply_auto_view();
+}
+
 void image_viewer_window::update_view_mode_actions()
 {
     fit_window_action_->setChecked(current_view_mode_ == view_mode::fit_window);
@@ -465,7 +516,7 @@ void image_viewer_window::apply_auto_view()
     view_->resetTransform();
 
     const QSize viewport_size = view_->viewport()->size();
-    const QRectF image_rect = image_item_->boundingRect();
+    const QRectF image_rect = image_item_->sceneBoundingRect();
 
     if (current_view_mode_ == view_mode::actual_size)
     {
@@ -631,6 +682,30 @@ void image_viewer_window::toggle_full_screen()
     update_view_mode_actions();
 }
 
+void image_viewer_window::rotate_left()
+{
+    rotation_degrees_ = (rotation_degrees_ + 270) % 360;
+    apply_image_transform();
+}
+
+void image_viewer_window::rotate_right()
+{
+    rotation_degrees_ = (rotation_degrees_ + 90) % 360;
+    apply_image_transform();
+}
+
+void image_viewer_window::flip_horizontal()
+{
+    flip_horizontal_ = !flip_horizontal_;
+    apply_image_transform();
+}
+
+void image_viewer_window::flip_vertical()
+{
+    flip_vertical_ = !flip_vertical_;
+    apply_image_transform();
+}
+
 void image_viewer_window::navigate_image(int delta)
 {
     if (image_list_.empty())
@@ -718,6 +793,9 @@ void image_viewer_window::closeEvent(QCloseEvent* event)
     scene_->clear();
     image_item_ = nullptr;
     current_path_.clear();
+    rotation_degrees_ = 0;
+    flip_horizontal_ = false;
+    flip_vertical_ = false;
     image_info_label_->clear();
     zoom_label_->clear();
     has_manual_zoom_ = false;
