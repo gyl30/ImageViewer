@@ -27,7 +27,7 @@ class waterfall_scene : public QGraphicsScene
     void add_images(const QList<image_meta>& batch);
     void layout_models(int view_width);
     void update_viewport(const QRectF& visible_rect);
-    void set_recent_paths(const QStringList& recent_paths);
+    void set_recent_paths(const QStringList& recent_folder_paths, const QStringList& recent_image_paths);
     [[nodiscard]] std::vector<QString> get_all_paths() const;
 
    signals:
@@ -71,7 +71,8 @@ class waterfall_scene : public QGraphicsScene
     QFutureWatcher<layout_result> layout_watcher_;
     bool is_laying_out_ = false;
     int pending_view_width_ = 0;
-    QStringList recent_paths_;
+    QStringList recent_folder_paths_;
+    QStringList recent_image_paths_;
 };
 
 #endif

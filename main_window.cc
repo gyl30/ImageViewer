@@ -10,6 +10,7 @@
 #include <QResizeEvent>
 #include <QFileInfo>
 #include <QFile>
+#include <QMenu>
 #include <QMimeData>
 #include <QUrl>
 #include <QSettings>
@@ -88,6 +89,18 @@ void main_window::setup_ui()
                 }
             });
 
+    auto* act_open_recent = new QAction("Open Recent", this);
+    act_open_recent->setShortcut(QKeySequence("Ctrl+Alt+O"));
+    addAction(act_open_recent);
+    connect(act_open_recent,
+            &QAction::triggered,
+            this,
+            [this]()
+            {
+                QRect rect = geometry();
+                show_recent_menu(mapToGlobal(QPoint(rect.width() / 2, rect.height() / 2)));
+            });
+
     scene_ = new waterfall_scene(this);
     view_ = new waterfall_view(this);
     view_->setScene(scene_);
@@ -153,12 +166,19 @@ void main_window::load_settings()
 
     restoreGeometry(settings.value("main_window/geometry").toByteArray());
 
-    recent_paths_ = settings.value("main_window/recent_paths").toStringList();
-    recent_paths_.erase(std::remove_if(recent_paths_.begin(),
-                                       recent_paths_.end(),
-                                       [](const QString& path) { return !QFileInfo::exists(path); }),
-                        recent_paths_.end());
-    scene_->set_recent_paths(recent_paths_);
+    recent_folder_paths_ = settings.value("main_window/recent_folder_paths").toStringList();
+    recent_folder_paths_.erase(std::remove_if(recent_folder_paths_.begin(),
+                                              recent_folder_paths_.end(),
+                                              [](const QString& path) { return !QFileInfo(path).isDir(); }),
+                               recent_folder_paths_.end());
+
+    recent_image_paths_ = settings.value("main_window/recent_image_paths").toStringList();
+    recent_image_paths_.erase(std::remove_if(recent_image_paths_.begin(),
+                                             recent_image_paths_.end(),
+                                             [](const QString& path) { return !QFileInfo(path).isFile(); }),
+                              recent_image_paths_.end());
+
+    scene_->set_recent_paths(recent_folder_paths_, recent_image_paths_);
 
     QString saved_dir = settings.value("main_window/last_open_dir", QDir::homePath()).toString();
     if (QFileInfo::exists(saved_dir))
@@ -176,7 +196,8 @@ void main_window::save_settings() const
 {
     QSettings settings("gyl30", "ImageViewer");
     settings.setValue("main_window/geometry", saveGeometry());
-    settings.setValue("main_window/recent_paths", recent_paths_);
+    settings.setValue("main_window/recent_folder_paths", recent_folder_paths_);
+    settings.setValue("main_window/recent_image_paths", recent_image_paths_);
     settings.setValue("main_window/last_open_dir", last_open_dir_);
 }
 
@@ -254,15 +275,49 @@ void main_window::add_recent_path(const QString& path)
 {
     static constexpr qsizetype kMaxRecentPaths = 10;
 
-    recent_paths_.removeAll(path);
-    recent_paths_.prepend(path);
+    QStringList* recent_paths = QFileInfo(path).isDir() ? &recent_folder_paths_ : &recent_image_paths_;
 
-    while (recent_paths_.size() > kMaxRecentPaths)
+    recent_paths->removeAll(path);
+    recent_paths->prepend(path);
+
+    while (recent_paths->size() > kMaxRecentPaths)
     {
-        recent_paths_.removeLast();
+        recent_paths->removeLast();
     }
 
-    scene_->set_recent_paths(recent_paths_);
+    scene_->set_recent_paths(recent_folder_paths_, recent_image_paths_);
+}
+
+void main_window::show_recent_menu(const QPoint& global_pos)
+{
+    QMenu menu(this);
+
+    auto add_recent_actions =
+        [this, &menu](const QString& title, const QStringList& paths)
+        {
+            if (paths.isEmpty())
+            {
+                return;
+            }
+
+            QMenu* sub_menu = menu.addMenu(title);
+            for (const QString& path : paths)
+            {
+                QAction* action = sub_menu->addAction(path);
+                connect(action, &QAction::triggered, this, [this, path]() { open_path(path, true); });
+            }
+        };
+
+    add_recent_actions("最近文件夹", recent_folder_paths_);
+    add_recent_actions("最近图片", recent_image_paths_);
+
+    if (menu.isEmpty())
+    {
+        QAction* empty_action = menu.addAction("暂无最近记录");
+        empty_action->setEnabled(false);
+    }
+
+    menu.exec(global_pos);
 }
 
 void main_window::show_image_viewer(const QString& path, const std::vector<QString>& image_list)
@@ -403,8 +458,8 @@ void main_window::on_move_path_to_trash(const QString& path)
         return;
     }
 
-    recent_paths_.removeAll(path);
-    scene_->set_recent_paths(recent_paths_);
+    recent_image_paths_.removeAll(path);
+    scene_->set_recent_paths(recent_folder_paths_, recent_image_paths_);
 
     if (viewer_window_ != nullptr && viewer_window_->current_image_path() == path)
     {

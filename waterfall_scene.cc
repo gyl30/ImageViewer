@@ -120,7 +120,11 @@ void waterfall_scene::add_images(const QList<image_meta>& batch)
     }
 }
 
-void waterfall_scene::set_recent_paths(const QStringList& recent_paths) { recent_paths_ = recent_paths; }
+void waterfall_scene::set_recent_paths(const QStringList& recent_folder_paths, const QStringList& recent_image_paths)
+{
+    recent_folder_paths_ = recent_folder_paths;
+    recent_image_paths_ = recent_image_paths;
+}
 
 void waterfall_scene::layout_models(int view_width)
 {
@@ -464,13 +468,26 @@ void waterfall_scene::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
         menu.addSeparator();
     }
 
-    if (!recent_paths_.isEmpty())
+    if (!recent_folder_paths_.isEmpty() || !recent_image_paths_.isEmpty())
     {
         QMenu* recent_menu = menu.addMenu("最近打开");
-        for (const QString& path : recent_paths_)
+        if (!recent_folder_paths_.isEmpty())
         {
-            QAction* recent_action = recent_menu->addAction(path);
-            connect(recent_action, &QAction::triggered, this, [this, path]() { emit request_open_recent(path); });
+            QMenu* folder_menu = recent_menu->addMenu("最近文件夹");
+            for (const QString& path : recent_folder_paths_)
+            {
+                QAction* recent_action = folder_menu->addAction(path);
+                connect(recent_action, &QAction::triggered, this, [this, path]() { emit request_open_recent(path); });
+            }
+        }
+        if (!recent_image_paths_.isEmpty())
+        {
+            QMenu* image_menu = recent_menu->addMenu("最近图片");
+            for (const QString& path : recent_image_paths_)
+            {
+                QAction* recent_action = image_menu->addAction(path);
+                connect(recent_action, &QAction::triggered, this, [this, path]() { emit request_open_recent(path); });
+            }
         }
         menu.addSeparator();
     }

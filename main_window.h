@@ -38,6 +38,7 @@ class main_window : public QMainWindow
     void save_settings() const;
     void open_path(const QString& path, bool add_to_recent);
     void add_recent_path(const QString& path);
+    void show_recent_menu(const QPoint& global_pos);
     void show_image_viewer(const QString& path, const std::vector<QString>& image_list);
 
     void on_add_folder();
@@ -72,7 +73,8 @@ class main_window : public QMainWindow
     int total_count_ = 0;
     int loaded_count_ = 0;
     QSet<QString> loaded_paths_;
-    QStringList recent_paths_;
+    QStringList recent_folder_paths_;
+    QStringList recent_image_paths_;
     QString last_open_dir_;
     QString current_root_path_;
     int current_scan_session_id_ = 0;
