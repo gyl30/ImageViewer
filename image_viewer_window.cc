@@ -459,12 +459,52 @@ void image_viewer_window::update_image_status(const QString& path, const QSize& 
         size_str = QString("%1 MB").arg(static_cast<double>(current_file_size_) / (1024.0 * 1024.0), 0, 'f', 2);
     }
 
-    image_info_label_->setText(QString("%1 | %2 | %3x%4 | %5")
-                                   .arg(file_info.fileName())
-                                   .arg(current_image_format_)
-                                   .arg(current_image_size_.width())
-                                   .arg(current_image_size_.height())
-                                   .arg(size_str));
+    const auto read_text =
+        [&reader](std::initializer_list<const char*> keys)
+    {
+        for (const char* key : keys)
+        {
+            const QString value = reader.text(QString::fromLatin1(key)).trimmed();
+            if (!value.isEmpty())
+            {
+                return value;
+            }
+        }
+        return QString();
+    };
+
+    const QString capture_time = read_text({"DateTimeOriginal", "DateTimeDigitized", "DateTime"});
+    const QString camera_make = read_text({"Make"});
+    const QString camera_model = read_text({"Model", "CameraModelName"});
+
+    QStringList info_parts = {
+        file_info.fileName(),
+        current_image_format_,
+        QString("%1x%2").arg(current_image_size_.width()).arg(current_image_size_.height()),
+        size_str};
+
+    if (!capture_time.isEmpty())
+    {
+        info_parts.append(capture_time);
+    }
+
+    if (!camera_model.isEmpty())
+    {
+        if (!camera_make.isEmpty() && !camera_model.startsWith(camera_make, Qt::CaseInsensitive))
+        {
+            info_parts.append(QString("%1 %2").arg(camera_make, camera_model));
+        }
+        else
+        {
+            info_parts.append(camera_model);
+        }
+    }
+    else if (!camera_make.isEmpty())
+    {
+        info_parts.append(camera_make);
+    }
+
+    image_info_label_->setText(info_parts.join(" | "));
 }
 
 void image_viewer_window::update_zoom_status()
