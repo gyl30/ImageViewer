@@ -21,6 +21,7 @@
 #include <QFont>
 #include <QLabel>
 #include <QGuiApplication>
+#include <QInputDialog>
 #include <QMovie>
 #include <QScreen>
 #include <QSettings>
@@ -194,6 +195,13 @@ void image_viewer_window::setup_ui()
     slideshow_action_->setShortcut(QKeySequence(Qt::Key_F5));
     connect(slideshow_action_, &QAction::triggered, this, &image_viewer_window::toggle_slideshow);
 
+    slideshow_loop_action_ = toolbar->addAction("循环播放");
+    slideshow_loop_action_->setCheckable(true);
+    connect(slideshow_loop_action_, &QAction::triggered, this, &image_viewer_window::toggle_slideshow_loop);
+
+    slideshow_interval_action_ = toolbar->addAction("播放间隔");
+    connect(slideshow_interval_action_, &QAction::triggered, this, &image_viewer_window::configure_slideshow_interval);
+
     addAction(fit_window_action_);
     addAction(actual_size_action_);
     addAction(fit_width_action_);
@@ -206,7 +214,7 @@ void image_viewer_window::setup_ui()
     update_view_mode_actions();
 
     slideshow_timer_ = new QTimer(this);
-    slideshow_timer_->setInterval(3000);
+    slideshow_timer_->setInterval(slideshow_interval_ms_);
     connect(slideshow_timer_, &QTimer::timeout, this, &image_viewer_window::advance_slideshow);
 
     const QString btn_style = R"(
@@ -320,12 +328,24 @@ void image_viewer_window::load_settings()
     {
         resize(1200, 800);
     }
+    slideshow_interval_ms_ = settings.value("viewer_window/slideshow_interval_ms", 3000).toInt();
+    slideshow_loop_enabled_ = settings.value("viewer_window/slideshow_loop_enabled", false).toBool();
+    if (slideshow_loop_action_ != nullptr)
+    {
+        slideshow_loop_action_->setChecked(slideshow_loop_enabled_);
+    }
+    if (slideshow_timer_ != nullptr)
+    {
+        slideshow_timer_->setInterval(slideshow_interval_ms_);
+    }
 }
 
 void image_viewer_window::save_settings() const
 {
     QSettings settings("gyl30", "ImageViewer");
     settings.setValue("viewer_window/geometry", saveGeometry());
+    settings.setValue("viewer_window/slideshow_interval_ms", slideshow_interval_ms_);
+    settings.setValue("viewer_window/slideshow_loop_enabled", slideshow_loop_enabled_);
 }
 
 void image_viewer_window::display_image(const QImage& image, const QString& path)
@@ -833,10 +853,52 @@ void image_viewer_window::toggle_slideshow()
     }
 }
 
+void image_viewer_window::toggle_slideshow_loop()
+{
+    slideshow_loop_enabled_ = slideshow_loop_action_ != nullptr && slideshow_loop_action_->isChecked();
+}
+
+void image_viewer_window::configure_slideshow_interval()
+{
+    bool ok = false;
+    const int seconds = QInputDialog::getInt(
+        this,
+        "播放间隔",
+        "每张图片停留秒数：",
+        slideshow_interval_ms_ / 1000,
+        1,
+        60,
+        1,
+        &ok);
+
+    if (!ok)
+    {
+        return;
+    }
+
+    slideshow_interval_ms_ = seconds * 1000;
+    if (slideshow_timer_ != nullptr)
+    {
+        slideshow_timer_->setInterval(slideshow_interval_ms_);
+    }
+}
+
 void image_viewer_window::advance_slideshow()
 {
-    if (current_index_ < 0 || current_index_ >= static_cast<ptrdiff_t>(image_list_.size()) - 1)
+    if (current_index_ < 0 || image_list_.empty())
     {
+        slideshow_timer_->stop();
+        slideshow_action_->setChecked(false);
+        return;
+    }
+
+    if (current_index_ >= static_cast<ptrdiff_t>(image_list_.size()) - 1)
+    {
+        if (slideshow_loop_enabled_)
+        {
+            set_image_path(image_list_.front());
+            return;
+        }
         slideshow_timer_->stop();
         slideshow_action_->setChecked(false);
         return;

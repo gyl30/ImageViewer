@@ -55,6 +55,8 @@ class image_viewer_window : public QMainWindow
     void flip_horizontal();
     void flip_vertical();
     void toggle_slideshow();
+    void toggle_slideshow_loop();
+    void configure_slideshow_interval();
     void advance_slideshow();
     void zoom_in();
     void zoom_out();
@@ -110,6 +112,8 @@ class image_viewer_window : public QMainWindow
     QAction* flip_horizontal_action_ = nullptr;
     QAction* flip_vertical_action_ = nullptr;
     QAction* slideshow_action_ = nullptr;
+    QAction* slideshow_loop_action_ = nullptr;
+    QAction* slideshow_interval_action_ = nullptr;
     QCache<QString, QImage> image_cache_;
     QStringList pending_preload_paths_;
     QLabel* image_info_label_ = nullptr;
@@ -117,6 +121,8 @@ class image_viewer_window : public QMainWindow
     QTimer* slideshow_timer_ = nullptr;
     QMovie* movie_ = nullptr;
     bool movie_initialized_ = false;
+    bool slideshow_loop_enabled_ = false;
+    int slideshow_interval_ms_ = 3000;
 
     QFutureWatcher<std::pair<QImage, QString>>* image_watcher_ = nullptr;
     QFutureWatcher<std::pair<QString, QImage>>* preload_watcher_ = nullptr;
