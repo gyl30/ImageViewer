@@ -13,7 +13,7 @@ constexpr qsizetype kEmitBatchSize = 500;
 
 struct scanned_image
 {
-    image_meta meta;
+    QString path;
     QString file_name;
 };
 }
@@ -33,7 +33,6 @@ void file_scanner::start_scan(const QString& dir_path, int session_id)
 
     QDirIterator it(dir_path, filters, QDir::Files, QDirIterator::Subdirectories);
     QList<scanned_image> scanned_images;
-    int total_count = 0;
 
     while (it.hasNext())
     {
@@ -43,16 +42,7 @@ void file_scanner::start_scan(const QString& dir_path, int session_id)
         }
 
         QString file_path = it.next();
-
-        QImageReader reader(file_path);
-        QSize size = reader.size();
-        if (!size.isValid())
-        {
-            continue;
-        }
-
-        scanned_images.append({{file_path, size}, QFileInfo(file_path).fileName()});
-        total_count++;
+        scanned_images.append({file_path, QFileInfo(file_path).fileName()});
     }
 
     if (stop_flag_)
@@ -73,8 +63,12 @@ void file_scanner::start_scan(const QString& dir_path, int session_id)
                   {
                       return cmp < 0;
                   }
-                  return left.meta.path < right.meta.path;
+                  return left.path < right.path;
               });
+
+    int total_count = 0;
+    QList<image_meta> batch;
+    batch.reserve(static_cast<int>(kEmitBatchSize));
 
     for (qsizetype i = 0; i < scanned_images.size(); i += kEmitBatchSize)
     {
@@ -83,14 +77,25 @@ void file_scanner::start_scan(const QString& dir_path, int session_id)
             return;
         }
 
-        QList<image_meta> batch;
-        batch.reserve(static_cast<int>(kEmitBatchSize));
         qsizetype end = std::min(i + kEmitBatchSize, scanned_images.size());
         for (qsizetype j = i; j < end; ++j)
         {
-            batch.append(scanned_images[j].meta);
+            QImageReader reader(scanned_images[j].path);
+            QSize size = reader.size();
+            if (!size.isValid())
+            {
+                continue;
+            }
+
+            batch.append({scanned_images[j].path, size});
+            total_count++;
         }
-        emit images_scanned_batch(batch, session_id);
+
+        if (!batch.isEmpty())
+        {
+            emit images_scanned_batch(batch, session_id);
+            batch.clear();
+        }
     }
 
     if (!stop_flag_)
