@@ -60,6 +60,7 @@ class waterfall_scene : public QGraphicsScene
     std::vector<int> col_heights_;
     size_t last_layout_index_ = 0;
     int current_session_id_ = 0;
+    int layout_generation_ = 0;
     quint64 request_counter_ = 0;
 
     QFutureWatcher<layout_result> layout_watcher_;

@@ -12,10 +12,11 @@
 #include "waterfall_scene.h"
 #include "waterfall_item.h"
 
-static layout_result calculate_layout_job(const std::vector<QSize>& sizes, int view_width, int kItemMargin, int kColumnMargin, int kMinColWidth)
+static layout_result calculate_layout_job(const std::vector<QSize>& sizes, int view_width, int generation, int kItemMargin, int kColumnMargin, int kMinColWidth)
 {
     layout_result result;
     result.view_width = view_width;
+    result.generation = generation;
     result.count = sizes.size();
 
     if (sizes.empty() || view_width <= 0)
@@ -81,15 +82,9 @@ waterfall_scene::~waterfall_scene()
 
 void waterfall_scene::clear_items()
 {
-    if (layout_watcher_.isRunning())
-    {
-        layout_watcher_.disconnect();
-
-        connect(&layout_watcher_, &QFutureWatcher<layout_result>::finished, this, &waterfall_scene::on_layout_finished);
-    }
-
     emit request_cancel_all();
     current_session_id_++;
+    layout_generation_++;
 
     auto keys = active_items_.keys();
     for (int idx : keys)
@@ -197,7 +192,8 @@ void waterfall_scene::layout_models(int view_width)
         sizes.push_back(m.original_size);
     }
 
-    QFuture<layout_result> future = QtConcurrent::run(calculate_layout_job, sizes, view_width, kItemMargin, kColumnMargin, kMinColWidth);
+    QFuture<layout_result> future =
+        QtConcurrent::run(calculate_layout_job, sizes, view_width, layout_generation_, kItemMargin, kColumnMargin, kMinColWidth);
 
     layout_watcher_.setFuture(future);
 }
@@ -205,6 +201,17 @@ void waterfall_scene::layout_models(int view_width)
 void waterfall_scene::on_layout_finished()
 {
     layout_result result = layout_watcher_.result();
+
+    if (result.generation != layout_generation_)
+    {
+        if (pending_view_width_ > 0 && !all_models_.empty())
+        {
+            int next_width = pending_view_width_;
+            pending_view_width_ = 0;
+            layout_models(next_width);
+        }
+        return;
+    }
 
     if (pending_view_width_ > 0 && pending_view_width_ != result.view_width)
     {

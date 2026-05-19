@@ -36,6 +36,7 @@ struct layout_result
     std::vector<int> item_y_index;
     int max_height = 0;
     int view_width = 0;
+    int generation = 0;
     size_t count = 0;
 };
 
