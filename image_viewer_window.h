@@ -4,8 +4,10 @@
 #include <QMainWindow>
 #include <QFutureWatcher>
 #include <QCloseEvent>
+#include <QCache>
 #include <vector>
 #include <QString>
+#include <QStringList>
 #include <utility>
 
 class QGraphicsView;
@@ -58,6 +60,9 @@ class image_viewer_window : public QMainWindow
     void apply_auto_view();
     void load_settings();
     void save_settings() const;
+    void display_image(const QImage& image, const QString& path);
+    void queue_adjacent_preloads();
+    void start_next_preload();
     void update_view_mode_actions();
     void update_index_from_path();
     void update_navigation_buttons();
@@ -80,8 +85,11 @@ class image_viewer_window : public QMainWindow
     QAction* actual_size_action_ = nullptr;
     QAction* fit_width_action_ = nullptr;
     QAction* full_screen_action_ = nullptr;
+    QCache<QString, QImage> image_cache_;
+    QStringList pending_preload_paths_;
 
     QFutureWatcher<std::pair<QImage, QString>>* image_watcher_ = nullptr;
+    QFutureWatcher<std::pair<QString, QImage>>* preload_watcher_ = nullptr;
 };
 
 #endif
