@@ -140,6 +140,7 @@ void main_window::on_add_folder()
     scene_->clear_items();
     total_count_ = 0;
     loaded_count_ = 0;
+    loaded_paths_.clear();
     scan_duration_ = 0;
     info_label_->clear();
 
@@ -178,9 +179,15 @@ void main_window::on_scan_all_finished(int total, qint64 duration, int session_i
     update_status_bar();
 }
 
-void main_window::on_image_loaded_stat()
+void main_window::on_image_loaded_stat(quint64 /*id*/, const QString& path, const QImage& /*image*/, int session_id)
 {
-    loaded_count_++;
+    if (session_id != current_scan_session_id_ || loaded_paths_.contains(path))
+    {
+        return;
+    }
+
+    loaded_paths_.insert(path);
+    loaded_count_ = loaded_paths_.size();
     update_status_bar();
 }
 

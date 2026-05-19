@@ -6,9 +6,11 @@
 #include <QLabel>
 #include <QElapsedTimer>
 #include <QList>
+#include <QSet>
 #include "common_types.h"
 #include "file_scanner.h"
 
+class QImage;
 class waterfall_view;
 class waterfall_scene;
 class image_loader;
@@ -30,7 +32,7 @@ class main_window : public QMainWindow
     void update_status_bar();
 
     void on_add_folder();
-    void on_image_loaded_stat();
+    void on_image_loaded_stat(quint64 id, const QString& path, const QImage& image, int session_id);
     void on_selection_changed();
     void on_image_double_clicked(const QString& path);
 
@@ -52,6 +54,7 @@ class main_window : public QMainWindow
     qint64 scan_duration_ = 0;
     int total_count_ = 0;
     int loaded_count_ = 0;
+    QSet<QString> loaded_paths_;
     int current_scan_session_id_ = 0;
     image_viewer_window* viewer_window_ = nullptr;
 };
