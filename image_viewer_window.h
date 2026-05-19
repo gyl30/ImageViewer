@@ -18,6 +18,7 @@ class QLabel;
 class QAction;
 class QActionGroup;
 class QTimer;
+class QMovie;
 
 class image_viewer_window : public QMainWindow
 {
@@ -72,6 +73,8 @@ class image_viewer_window : public QMainWindow
     void queue_adjacent_preloads();
     void start_next_preload();
     void apply_image_transform();
+    void clear_movie();
+    void start_movie(const QString& path);
     void update_image_status(const QString& path, const QSize& image_size);
     void update_zoom_status();
     void update_view_mode_actions();
@@ -112,6 +115,8 @@ class image_viewer_window : public QMainWindow
     QLabel* image_info_label_ = nullptr;
     QLabel* zoom_label_ = nullptr;
     QTimer* slideshow_timer_ = nullptr;
+    QMovie* movie_ = nullptr;
+    bool movie_initialized_ = false;
 
     QFutureWatcher<std::pair<QImage, QString>>* image_watcher_ = nullptr;
     QFutureWatcher<std::pair<QString, QImage>>* preload_watcher_ = nullptr;

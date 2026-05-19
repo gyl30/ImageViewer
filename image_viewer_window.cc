@@ -21,6 +21,7 @@
 #include <QFont>
 #include <QLabel>
 #include <QGuiApplication>
+#include <QMovie>
 #include <QScreen>
 #include <QSettings>
 #include <QStatusBar>
@@ -31,6 +32,12 @@
 
 namespace
 {
+bool is_animated_image(const QString& path)
+{
+    QImageReader reader(path);
+    return reader.supportsAnimation() && reader.imageCount() != 1;
+}
+
 std::pair<QImage, QString> load_image_file(const QString& path)
 {
     QImageReader reader(path);
@@ -84,6 +91,8 @@ image_viewer_window::image_viewer_window(QWidget* parent)
 
 image_viewer_window::~image_viewer_window()
 {
+    clear_movie();
+
     if (image_watcher_ != nullptr)
     {
         image_watcher_->disconnect();
@@ -231,6 +240,7 @@ void image_viewer_window::set_image_path(const QString& path)
     current_path_ = path;
     update_index_from_path();
     update_navigation_buttons();
+    clear_movie();
 
     if (image_watcher_ == nullptr)
     {
@@ -242,6 +252,12 @@ void image_viewer_window::set_image_path(const QString& path)
     setWindowTitle(QString("Loading %1...").arg(QFileInfo(path).fileName()));
 
     pending_preload_paths_.clear();
+
+    if (is_animated_image(path))
+    {
+        start_movie(path);
+        return;
+    }
 
     if (image_cache_.contains(path))
     {
@@ -475,6 +491,87 @@ void image_viewer_window::apply_image_transform()
     }
 
     apply_auto_view();
+}
+
+void image_viewer_window::clear_movie()
+{
+    if (movie_ == nullptr)
+    {
+        return;
+    }
+
+    movie_->stop();
+    movie_->deleteLater();
+    movie_ = nullptr;
+    movie_initialized_ = false;
+}
+
+void image_viewer_window::start_movie(const QString& path)
+{
+    movie_ = new QMovie(path, QByteArray(), this);
+    movie_->setCacheMode(QMovie::CacheAll);
+    movie_initialized_ = false;
+
+    if (!movie_->isValid())
+    {
+        clear_movie();
+        setWindowTitle("Error loading image");
+        scene_->clear();
+        image_item_ = nullptr;
+        image_info_label_->setText("Failed to load animated image");
+        zoom_label_->clear();
+        return;
+    }
+
+    connect(movie_,
+            &QMovie::frameChanged,
+            this,
+            [this, path](int)
+            {
+                if (movie_ == nullptr || current_path_ != path)
+                {
+                    return;
+                }
+
+                QPixmap pixmap = movie_->currentPixmap();
+                if (pixmap.isNull())
+                {
+                    return;
+                }
+
+                if (image_item_ == nullptr)
+                {
+                    image_item_ = scene_->addPixmap(pixmap);
+                    rotation_degrees_ = 0;
+                    flip_horizontal_ = false;
+                    flip_vertical_ = false;
+                    movie_initialized_ = true;
+                    update_image_status(path, pixmap.size());
+                    resize_window_to_image(pixmap.size());
+                    apply_image_transform();
+                    setWindowTitle(QString("Viewer - %1 (%2x%3) [%4/%5]")
+                                       .arg(QFileInfo(path).fileName())
+                                       .arg(pixmap.width())
+                                       .arg(pixmap.height())
+                                       .arg(current_index_ + 1)
+                                       .arg(image_list_.size()));
+                    queue_adjacent_preloads();
+                    return;
+                }
+
+                image_item_->setPixmap(pixmap);
+                scene_->setSceneRect(image_item_->sceneBoundingRect());
+
+                if (!movie_initialized_)
+                {
+                    movie_initialized_ = true;
+                    update_image_status(path, pixmap.size());
+                    resize_window_to_image(pixmap.size());
+                    apply_image_transform();
+                }
+            });
+
+    movie_->start();
 }
 
 void image_viewer_window::update_view_mode_actions()
