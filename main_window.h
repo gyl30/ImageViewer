@@ -15,6 +15,7 @@
 #include "file_scanner.h"
 
 class QImage;
+class QAction;
 class QActionGroup;
 class waterfall_view;
 class waterfall_scene;
@@ -89,6 +90,10 @@ class main_window : public QMainWindow
     scan_sort_mode current_sort_mode_ = scan_sort_mode::file_name;
     bool sort_descending_ = false;
     QActionGroup* sort_group_ = nullptr;
+    QAction* sort_name_action_ = nullptr;
+    QAction* sort_time_action_ = nullptr;
+    QAction* sort_size_action_ = nullptr;
+    QAction* sort_desc_action_ = nullptr;
     image_viewer_window* viewer_window_ = nullptr;
 };
 

@@ -148,11 +148,11 @@ void main_window::setup_ui()
     sort_group_ = new QActionGroup(this);
     sort_group_->setExclusive(true);
 
-    auto* act_sort_name = sort_toolbar->addAction("文件名");
-    act_sort_name->setCheckable(true);
-    act_sort_name->setChecked(true);
-    sort_group_->addAction(act_sort_name);
-    connect(act_sort_name,
+    sort_name_action_ = sort_toolbar->addAction("文件名");
+    sort_name_action_->setCheckable(true);
+    sort_name_action_->setChecked(true);
+    sort_group_->addAction(sort_name_action_);
+    connect(sort_name_action_,
             &QAction::triggered,
             this,
             [this, rescan_current_folder]()
@@ -165,10 +165,10 @@ void main_window::setup_ui()
                 rescan_current_folder();
             });
 
-    auto* act_sort_time = sort_toolbar->addAction("修改时间");
-    act_sort_time->setCheckable(true);
-    sort_group_->addAction(act_sort_time);
-    connect(act_sort_time,
+    sort_time_action_ = sort_toolbar->addAction("修改时间");
+    sort_time_action_->setCheckable(true);
+    sort_group_->addAction(sort_time_action_);
+    connect(sort_time_action_,
             &QAction::triggered,
             this,
             [this, rescan_current_folder]()
@@ -181,10 +181,10 @@ void main_window::setup_ui()
                 rescan_current_folder();
             });
 
-    auto* act_sort_size = sort_toolbar->addAction("文件大小");
-    act_sort_size->setCheckable(true);
-    sort_group_->addAction(act_sort_size);
-    connect(act_sort_size,
+    sort_size_action_ = sort_toolbar->addAction("文件大小");
+    sort_size_action_->setCheckable(true);
+    sort_group_->addAction(sort_size_action_);
+    connect(sort_size_action_,
             &QAction::triggered,
             this,
             [this, rescan_current_folder]()
@@ -199,14 +199,14 @@ void main_window::setup_ui()
 
     sort_toolbar->addSeparator();
 
-    auto* act_sort_desc = sort_toolbar->addAction("倒序");
-    act_sort_desc->setCheckable(true);
-    connect(act_sort_desc,
+    sort_desc_action_ = sort_toolbar->addAction("倒序");
+    sort_desc_action_->setCheckable(true);
+    connect(sort_desc_action_,
             &QAction::triggered,
             this,
-            [this, act_sort_desc, rescan_current_folder]()
+            [this, rescan_current_folder]()
             {
-                const bool descending = act_sort_desc->isChecked();
+                const bool descending = sort_desc_action_ != nullptr && sort_desc_action_->isChecked();
                 if (sort_descending_ == descending)
                 {
                     return;
@@ -294,6 +294,38 @@ void main_window::load_settings()
 
     scene_->set_recent_paths(recent_folder_paths_, recent_image_paths_);
 
+    const int sort_mode = settings.value("main_window/sort_mode", static_cast<int>(scan_sort_mode::file_name)).toInt();
+    if (sort_mode == static_cast<int>(scan_sort_mode::modified_time))
+    {
+        current_sort_mode_ = scan_sort_mode::modified_time;
+    }
+    else if (sort_mode == static_cast<int>(scan_sort_mode::file_size))
+    {
+        current_sort_mode_ = scan_sort_mode::file_size;
+    }
+    else
+    {
+        current_sort_mode_ = scan_sort_mode::file_name;
+    }
+
+    sort_descending_ = settings.value("main_window/sort_descending", false).toBool();
+    if (sort_name_action_ != nullptr)
+    {
+        sort_name_action_->setChecked(current_sort_mode_ == scan_sort_mode::file_name);
+    }
+    if (sort_time_action_ != nullptr)
+    {
+        sort_time_action_->setChecked(current_sort_mode_ == scan_sort_mode::modified_time);
+    }
+    if (sort_size_action_ != nullptr)
+    {
+        sort_size_action_->setChecked(current_sort_mode_ == scan_sort_mode::file_size);
+    }
+    if (sort_desc_action_ != nullptr)
+    {
+        sort_desc_action_->setChecked(sort_descending_);
+    }
+
     QString saved_dir = settings.value("main_window/last_open_dir", QDir::homePath()).toString();
     if (QFileInfo::exists(saved_dir))
     {
@@ -313,6 +345,8 @@ void main_window::save_settings() const
     settings.setValue("main_window/recent_folder_paths", recent_folder_paths_);
     settings.setValue("main_window/recent_image_paths", recent_image_paths_);
     settings.setValue("main_window/last_open_dir", last_open_dir_);
+    settings.setValue("main_window/sort_mode", static_cast<int>(current_sort_mode_));
+    settings.setValue("main_window/sort_descending", sort_descending_);
 }
 
 void main_window::on_add_folder()
