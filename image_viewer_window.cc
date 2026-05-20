@@ -34,6 +34,8 @@
 
 namespace
 {
+constexpr qint64 kAnimatedCacheAllMaxBytes = 20LL * 1024 * 1024;
+
 bool is_animated_image(const QString& path)
 {
     QImageReader reader(path);
@@ -625,7 +627,8 @@ void image_viewer_window::clear_movie()
 void image_viewer_window::start_movie(const QString& path)
 {
     movie_ = new QMovie(path, QByteArray(), this);
-    movie_->setCacheMode(QMovie::CacheAll);
+    const qint64 file_size = QFileInfo(path).size();
+    movie_->setCacheMode(file_size > kAnimatedCacheAllMaxBytes ? QMovie::CacheNone : QMovie::CacheAll);
     movie_initialized_ = false;
 
     if (!movie_->isValid())
