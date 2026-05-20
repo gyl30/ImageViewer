@@ -514,6 +514,7 @@ void main_window::show_image_viewer(const QString& path, const std::vector<QStri
                         scene_->focus_path(path);
                     }
                 });
+        connect(viewer_window_, &image_viewer_window::request_move_to_trash, this, &main_window::on_move_path_to_trash);
     }
 
     viewer_window_->set_image_list(image_list);

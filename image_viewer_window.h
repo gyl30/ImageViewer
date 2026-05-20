@@ -42,6 +42,7 @@ class image_viewer_window : public QMainWindow
 
    signals:
     void current_image_changed(QString path);
+    void request_move_to_trash(QString path);
 
    protected:
     void showEvent(QShowEvent* event) override;

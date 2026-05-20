@@ -220,6 +220,7 @@ void image_viewer_window::setup_ui()
                     "Ctrl+0 适应窗口\n"
                     "Ctrl+1 1:1\n"
                     "Ctrl+2 适应宽度\n"
+                    "Delete 移到回收站\n"
                     "Ctrl+L 左转\n"
                     "Ctrl+R 右转\n"
                     "Ctrl+H 水平翻转\n"
@@ -1084,6 +1085,13 @@ void image_viewer_window::keyPressEvent(QKeyEvent* event)
         else
         {
             close();
+        }
+    }
+    else if (event->key() == Qt::Key_Delete)
+    {
+        if (!current_path_.isEmpty())
+        {
+            emit request_move_to_trash(current_path_);
         }
     }
     else
