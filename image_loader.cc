@@ -1,3 +1,4 @@
+#include <cmath>
 #include <QCryptographicHash>
 #include <QDebug>
 #include <QDir>
@@ -229,9 +230,31 @@ void image_loader::load_image_internal(const load_task& current_task)
 
     QImageReader reader(current_task.path);
     reader.setAutoTransform(true);
-    if (reader.supportsOption(QImageIOHandler::ScaledSize) && !current_task.target_size.isEmpty())
+
+    const QSize source_size = reader.size();
+    const bool supports_scaled_size = reader.supportsOption(QImageIOHandler::ScaledSize);
+
+    if (source_size.isValid())
     {
-        reader.setScaledSize(current_task.target_size);
+        const double estimated_mb =
+            (static_cast<double>(source_size.width()) * source_size.height() * 4.0) / (1024.0 * 1024.0);
+        const bool exceeds_allocation_limit = estimated_mb > kMaxImageAllocMB;
+
+        if (supports_scaled_size && !current_task.target_size.isEmpty())
+        {
+            QSize scaled_size = current_task.target_size;
+            if (exceeds_allocation_limit)
+            {
+                const double scale_factor = std::sqrt(kMaxImageAllocMB / estimated_mb);
+                const QSize safe_size = (source_size * scale_factor).expandedTo(QSize(1, 1));
+                scaled_size = scaled_size.boundedTo(safe_size).expandedTo(QSize(1, 1));
+            }
+            reader.setScaledSize(scaled_size);
+        }
+        else if (exceeds_allocation_limit)
+        {
+            return;
+        }
     }
 
     image = reader.read();
