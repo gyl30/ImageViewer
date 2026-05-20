@@ -290,18 +290,8 @@ void main_window::load_settings()
     restoreGeometry(settings.value("main_window/geometry").toByteArray());
 
     recent_folder_paths_ = settings.value("main_window/recent_folder_paths").toStringList();
-    recent_folder_paths_.erase(std::remove_if(recent_folder_paths_.begin(),
-                                              recent_folder_paths_.end(),
-                                              [](const QString& path) { return !QFileInfo(path).isDir(); }),
-                               recent_folder_paths_.end());
-
     recent_image_paths_ = settings.value("main_window/recent_image_paths").toStringList();
-    recent_image_paths_.erase(std::remove_if(recent_image_paths_.begin(),
-                                             recent_image_paths_.end(),
-                                             [](const QString& path) { return !QFileInfo(path).isFile(); }),
-                              recent_image_paths_.end());
-
-    scene_->set_recent_paths(recent_folder_paths_, recent_image_paths_);
+    prune_recent_paths();
 
     const int sort_mode = settings.value("main_window/sort_mode", static_cast<int>(scan_sort_mode::file_name)).toInt();
     if (sort_mode == static_cast<int>(scan_sort_mode::modified_time))
@@ -356,6 +346,24 @@ void main_window::save_settings() const
     settings.setValue("main_window/last_open_dir", last_open_dir_);
     settings.setValue("main_window/sort_mode", static_cast<int>(current_sort_mode_));
     settings.setValue("main_window/sort_descending", sort_descending_);
+}
+
+void main_window::prune_recent_paths()
+{
+    recent_folder_paths_.erase(std::remove_if(recent_folder_paths_.begin(),
+                                              recent_folder_paths_.end(),
+                                              [](const QString& path) { return !QFileInfo(path).isDir(); }),
+                               recent_folder_paths_.end());
+
+    recent_image_paths_.erase(std::remove_if(recent_image_paths_.begin(),
+                                             recent_image_paths_.end(),
+                                             [](const QString& path) { return !QFileInfo(path).isFile(); }),
+                              recent_image_paths_.end());
+
+    if (scene_ != nullptr)
+    {
+        scene_->set_recent_paths(recent_folder_paths_, recent_image_paths_);
+    }
 }
 
 void main_window::on_add_folder()
@@ -447,6 +455,8 @@ void main_window::add_recent_path(const QString& path)
 
 void main_window::show_recent_menu(const QPoint& global_pos)
 {
+    prune_recent_paths();
+
     QMenu menu(this);
 
     auto add_recent_actions =

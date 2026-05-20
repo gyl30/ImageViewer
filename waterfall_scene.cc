@@ -4,6 +4,7 @@
 #include <QMenu>
 #include <QClipboard>
 #include <QApplication>
+#include <QFileInfo>
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsView>
 #include <QDebug>
@@ -502,12 +503,18 @@ void waterfall_scene::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     if (!recent_folder_paths_.isEmpty() || !recent_image_paths_.isEmpty())
     {
         QMenu* recent_menu = menu.addMenu("最近打开");
+        bool has_recent_entries = false;
         if (!recent_folder_paths_.isEmpty())
         {
             QMenu* folder_menu = recent_menu->addMenu("最近文件夹");
+            bool has_folder_entries = false;
             for (qsizetype i = 0; i < recent_folder_paths_.size(); ++i)
             {
                 const QString& path = recent_folder_paths_[i];
+                if (!QFileInfo(path).isDir())
+                {
+                    continue;
+                }
                 QString label = path;
                 if (i < 9)
                 {
@@ -520,14 +527,26 @@ void waterfall_scene::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
                     recent_action->setShortcut(QKeySequence(QString("Alt+%1").arg(i + 1)));
                 }
                 connect(recent_action, &QAction::triggered, this, [this, path]() { emit request_open_recent(path); });
+                has_folder_entries = true;
+                has_recent_entries = true;
+            }
+            if (!has_folder_entries)
+            {
+                recent_menu->removeAction(folder_menu->menuAction());
+                delete folder_menu;
             }
         }
         if (!recent_image_paths_.isEmpty())
         {
             QMenu* image_menu = recent_menu->addMenu("最近图片");
+            bool has_image_entries = false;
             for (qsizetype i = 0; i < recent_image_paths_.size(); ++i)
             {
                 const QString& path = recent_image_paths_[i];
+                if (!QFileInfo(path).isFile())
+                {
+                    continue;
+                }
                 QString label = path;
                 if (i < 9)
                 {
@@ -540,9 +559,24 @@ void waterfall_scene::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
                     recent_action->setShortcut(QKeySequence(QString("Alt+%1").arg(i + 1)));
                 }
                 connect(recent_action, &QAction::triggered, this, [this, path]() { emit request_open_recent(path); });
+                has_image_entries = true;
+                has_recent_entries = true;
+            }
+            if (!has_image_entries)
+            {
+                recent_menu->removeAction(image_menu->menuAction());
+                delete image_menu;
             }
         }
-        menu.addSeparator();
+        if (!has_recent_entries)
+        {
+            menu.removeAction(recent_menu->menuAction());
+            delete recent_menu;
+        }
+        else
+        {
+            menu.addSeparator();
+        }
     }
 
     QAction* clearCacheAction = menu.addAction("清理缩略图缓存");

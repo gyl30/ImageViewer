@@ -45,6 +45,7 @@ class main_window : public QMainWindow
     void update_status_bar();
     void load_settings();
     void save_settings() const;
+    void prune_recent_paths();
     void open_path(const QString& path, bool add_to_recent);
     void add_recent_path(const QString& path);
     void show_recent_menu(const QPoint& global_pos);
