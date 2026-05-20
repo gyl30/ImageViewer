@@ -71,7 +71,7 @@ std::pair<QImage, QString> load_image_file(const QString& path)
         else if (estimated_mb > kQtImageReaderAllocMB && !supports_scaled_size)
         {
             return {QImage(),
-                    QString("Image is too large to decode safely (%1 MB > %2 MB) and this format does not support scaled loading.")
+                    QString("图片过大，无法安全解码（约 %1 MB，超过 %2 MB），且当前格式不支持缩小读取。")
                         .arg(estimated_mb, 0, 'f', 1)
                         .arg(kQtImageReaderAllocMB)};
         }
@@ -84,9 +84,9 @@ std::pair<QImage, QString> load_image_file(const QString& path)
         QString err = reader.errorString();
         if (err.isEmpty())
         {
-            err = "Unknown error (Format not supported or file corrupted)";
+            err = "文件格式不受支持或文件已损坏";
         }
-        return {QImage(), err};
+        return {QImage(), QString("无法读取图片数据：%1").arg(err)};
     }
 
     return {image, QString()};
@@ -328,10 +328,10 @@ void image_viewer_window::set_image_path(const QString& path)
 
                 if (image.isNull())
                 {
-                    setWindowTitle("Error loading image");
+                    setWindowTitle("加载图片失败");
 
                     scene_->clear();
-                    QGraphicsTextItem* text_item = scene_->addText(QString("Failed to load image:\n%1").arg(error_msg));
+                    QGraphicsTextItem* text_item = scene_->addText(QString("加载图片失败：\n%1").arg(error_msg));
 
                     text_item->setDefaultTextColor(Qt::red);
                     QFont font = text_item->font();
@@ -466,6 +466,7 @@ void image_viewer_window::update_image_status(const QString& path, const QSize& 
     current_file_size_ = file_info.size();
 
     QImageReader reader(path);
+    const QSize source_size = reader.size();
     current_image_format_ = QString::fromLatin1(reader.format()).toUpper();
     if (current_image_format_.isEmpty())
     {
@@ -529,6 +530,19 @@ void image_viewer_window::update_image_status(const QString& path, const QSize& 
     else if (!camera_make.isEmpty())
     {
         info_parts.append(camera_make);
+    }
+
+    if (source_size.isValid() && source_size != current_image_size_)
+    {
+        const double estimated_mb =
+            (static_cast<double>(source_size.width()) * source_size.height() * 4.0) / (1024.0 * 1024.0);
+        if (estimated_mb > kMaxImageAllocMB)
+        {
+            info_parts.append(
+                QString("原图 %1x%2，已按内存限制缩小加载")
+                    .arg(source_size.width())
+                    .arg(source_size.height()));
+        }
     }
 
     image_info_label_->setText(info_parts.join(" | "));
