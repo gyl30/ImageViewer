@@ -5,7 +5,7 @@
 
 int main(int argc, char *argv[])
 {
-    QImageReader::setAllocationLimit(kMaxImageAllocMB);
+    QImageReader::setAllocationLimit(kQtImageReaderAllocMB);
 
     QApplication app(argc, argv);
 

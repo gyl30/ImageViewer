@@ -47,7 +47,8 @@ std::pair<QImage, QString> load_image_file(const QString& path)
     QImageReader reader(path);
     reader.setAutoTransform(true);
 
-    QSize img_size = reader.size();
+    const QSize img_size = reader.size();
+    const bool supports_scaled_size = reader.supportsOption(QImageIOHandler::ScaledSize);
 
     if (!img_size.isValid())
     {
@@ -59,13 +60,20 @@ std::pair<QImage, QString> load_image_file(const QString& path)
 
     if (img_size.isValid())
     {
-        double estimated_mb = (static_cast<double>(img_size.width()) * img_size.height() * 4) / (1024.0 * 1024.0);
+        const double estimated_mb = (static_cast<double>(img_size.width()) * img_size.height() * 4) / (1024.0 * 1024.0);
 
-        if (estimated_mb > kMaxImageAllocMB)
+        if (estimated_mb > kMaxImageAllocMB && supports_scaled_size)
         {
-            double scale_factor = std::sqrt(kMaxImageAllocMB / estimated_mb);
-            QSize safe_size = img_size * scale_factor;
+            const double scale_factor = std::sqrt(kMaxImageAllocMB / estimated_mb);
+            const QSize safe_size = (img_size * scale_factor).expandedTo(QSize(1, 1));
             reader.setScaledSize(safe_size);
+        }
+        else if (estimated_mb > kQtImageReaderAllocMB && !supports_scaled_size)
+        {
+            return {QImage(),
+                    QString("Image is too large to decode safely (%1 MB > %2 MB) and this format does not support scaled loading.")
+                        .arg(estimated_mb, 0, 'f', 1)
+                        .arg(kQtImageReaderAllocMB)};
         }
     }
 

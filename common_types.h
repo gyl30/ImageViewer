@@ -48,5 +48,6 @@ const int kColumnMargin = 10;
 const int kItemMargin = 10;
 const int kMinColWidth = 200;
 const int kMaxImageAllocMB = 256;
+const int kQtImageReaderAllocMB = 1024;
 
 #endif
