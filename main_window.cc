@@ -131,6 +131,7 @@ void main_window::setup_ui()
                     "Ctrl+O 打开文件夹\n"
                     "Ctrl+Shift+O 打开图片\n"
                     "Ctrl+Alt+O 打开最近项\n"
+                    "Alt+1..9 打开最近菜单中的对应项目\n"
                     "F1 查看快捷键\n\n"
                     "预览窗口:\n"
                     "Left/Right 上一张/下一张\n"
@@ -449,9 +450,20 @@ void main_window::show_recent_menu(const QPoint& global_pos)
             }
 
             QMenu* sub_menu = menu.addMenu(title);
-            for (const QString& path : paths)
+            for (qsizetype i = 0; i < paths.size(); ++i)
             {
-                QAction* action = sub_menu->addAction(path);
+                const QString& path = paths[i];
+                QString label = path;
+                if (i < 9)
+                {
+                    label = QString("&%1 %2").arg(i + 1).arg(path);
+                }
+
+                QAction* action = sub_menu->addAction(label);
+                if (i < 9)
+                {
+                    action->setShortcut(QKeySequence(QString("Alt+%1").arg(i + 1)));
+                }
                 connect(action, &QAction::triggered, this, [this, path]() { open_path(path, true); });
             }
         };

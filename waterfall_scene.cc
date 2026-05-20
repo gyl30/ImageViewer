@@ -474,18 +474,40 @@ void waterfall_scene::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
         if (!recent_folder_paths_.isEmpty())
         {
             QMenu* folder_menu = recent_menu->addMenu("最近文件夹");
-            for (const QString& path : recent_folder_paths_)
+            for (qsizetype i = 0; i < recent_folder_paths_.size(); ++i)
             {
-                QAction* recent_action = folder_menu->addAction(path);
+                const QString& path = recent_folder_paths_[i];
+                QString label = path;
+                if (i < 9)
+                {
+                    label = QString("&%1 %2").arg(i + 1).arg(path);
+                }
+
+                QAction* recent_action = folder_menu->addAction(label);
+                if (i < 9)
+                {
+                    recent_action->setShortcut(QKeySequence(QString("Alt+%1").arg(i + 1)));
+                }
                 connect(recent_action, &QAction::triggered, this, [this, path]() { emit request_open_recent(path); });
             }
         }
         if (!recent_image_paths_.isEmpty())
         {
             QMenu* image_menu = recent_menu->addMenu("最近图片");
-            for (const QString& path : recent_image_paths_)
+            for (qsizetype i = 0; i < recent_image_paths_.size(); ++i)
             {
-                QAction* recent_action = image_menu->addAction(path);
+                const QString& path = recent_image_paths_[i];
+                QString label = path;
+                if (i < 9)
+                {
+                    label = QString("&%1 %2").arg(i + 1).arg(path);
+                }
+
+                QAction* recent_action = image_menu->addAction(label);
+                if (i < 9)
+                {
+                    recent_action->setShortcut(QKeySequence(QString("Alt+%1").arg(i + 1)));
+                }
                 connect(recent_action, &QAction::triggered, this, [this, path]() { emit request_open_recent(path); });
             }
         }
