@@ -224,6 +224,8 @@ void image_viewer_window::setup_ui()
                     this,
                     "快捷键",
                     "Left/Right 上一张/下一张\n"
+                    "Space/Backspace 上一张/下一张\n"
+                    "Home/End 跳到首张/末张\n"
                     "Ctrl+滚轮 缩放\n"
                     "Ctrl+0 适应窗口\n"
                     "Ctrl+1 1:1\n"
@@ -1096,6 +1098,28 @@ void image_viewer_window::keyPressEvent(QKeyEvent* event)
     else if (event->key() == Qt::Key_Right)
     {
         load_next_image();
+    }
+    else if (event->key() == Qt::Key_Space)
+    {
+        load_next_image();
+    }
+    else if (event->key() == Qt::Key_Backspace)
+    {
+        load_prev_image();
+    }
+    else if (event->key() == Qt::Key_Home)
+    {
+        if (!image_list_.empty())
+        {
+            set_image_path(image_list_.front());
+        }
+    }
+    else if (event->key() == Qt::Key_End)
+    {
+        if (!image_list_.empty())
+        {
+            set_image_path(image_list_.back());
+        }
     }
     else if (event->key() == Qt::Key_Escape)
     {
