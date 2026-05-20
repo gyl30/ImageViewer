@@ -387,8 +387,22 @@ void image_viewer_window::load_settings()
     {
         resize(1200, 800);
     }
+    const int saved_view_mode = settings.value("viewer_window/view_mode", static_cast<int>(view_mode::fit_window)).toInt();
+    if (saved_view_mode == static_cast<int>(view_mode::actual_size))
+    {
+        current_view_mode_ = view_mode::actual_size;
+    }
+    else if (saved_view_mode == static_cast<int>(view_mode::fit_width))
+    {
+        current_view_mode_ = view_mode::fit_width;
+    }
+    else
+    {
+        current_view_mode_ = view_mode::fit_window;
+    }
     slideshow_interval_ms_ = settings.value("viewer_window/slideshow_interval_ms", 3000).toInt();
     slideshow_loop_enabled_ = settings.value("viewer_window/slideshow_loop_enabled", false).toBool();
+    update_view_mode_actions();
     if (slideshow_loop_action_ != nullptr)
     {
         slideshow_loop_action_->setChecked(slideshow_loop_enabled_);
@@ -403,6 +417,7 @@ void image_viewer_window::save_settings() const
 {
     QSettings settings("gyl30", "ImageViewer");
     settings.setValue("viewer_window/geometry", saveGeometry());
+    settings.setValue("viewer_window/view_mode", static_cast<int>(current_view_mode_));
     settings.setValue("viewer_window/slideshow_interval_ms", slideshow_interval_ms_);
     settings.setValue("viewer_window/slideshow_loop_enabled", slideshow_loop_enabled_);
 }
