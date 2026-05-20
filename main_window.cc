@@ -11,6 +11,7 @@
 #include <QResizeEvent>
 #include <QFileInfo>
 #include <QFile>
+#include <QFontMetrics>
 #include <QMenu>
 #include <QMimeData>
 #include <QMessageBox>
@@ -471,10 +472,12 @@ void main_window::show_recent_menu(const QPoint& global_pos)
             for (qsizetype i = 0; i < paths.size(); ++i)
             {
                 const QString& path = paths[i];
-                QString label = path;
+                const QString display_path =
+                    sub_menu->fontMetrics().elidedText(path, Qt::ElideMiddle, 520);
+                QString label = display_path;
                 if (i < 9)
                 {
-                    label = QString("&%1 %2").arg(i + 1).arg(path);
+                    label = QString("&%1 %2").arg(i + 1).arg(display_path);
                 }
 
                 QAction* action = sub_menu->addAction(label);

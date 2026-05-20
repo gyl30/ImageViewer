@@ -5,6 +5,7 @@
 #include <QClipboard>
 #include <QApplication>
 #include <QFileInfo>
+#include <QFontMetrics>
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsView>
 #include <QDebug>
@@ -515,10 +516,12 @@ void waterfall_scene::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
                 {
                     continue;
                 }
-                QString label = path;
+                const QString display_path =
+                    folder_menu->fontMetrics().elidedText(path, Qt::ElideMiddle, 520);
+                QString label = display_path;
                 if (i < 9)
                 {
-                    label = QString("&%1 %2").arg(i + 1).arg(path);
+                    label = QString("&%1 %2").arg(i + 1).arg(display_path);
                 }
 
                 QAction* recent_action = folder_menu->addAction(label);
@@ -547,10 +550,12 @@ void waterfall_scene::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
                 {
                     continue;
                 }
-                QString label = path;
+                const QString display_path =
+                    image_menu->fontMetrics().elidedText(path, Qt::ElideMiddle, 520);
+                QString label = display_path;
                 if (i < 9)
                 {
-                    label = QString("&%1 %2").arg(i + 1).arg(path);
+                    label = QString("&%1 %2").arg(i + 1).arg(display_path);
                 }
 
                 QAction* recent_action = image_menu->addAction(label);
