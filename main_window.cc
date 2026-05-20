@@ -486,6 +486,16 @@ void main_window::show_image_viewer(const QString& path, const std::vector<QStri
     {
         viewer_window_ = new image_viewer_window(this);
         viewer_window_->setWindowFlags(Qt::Window);
+        connect(viewer_window_,
+                &image_viewer_window::current_image_changed,
+                this,
+                [this](const QString& path)
+                {
+                    if (scene_ != nullptr)
+                    {
+                        scene_->focus_path(path);
+                    }
+                });
     }
 
     viewer_window_->set_image_list(image_list);

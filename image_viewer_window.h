@@ -40,6 +40,9 @@ class image_viewer_window : public QMainWindow
     void remove_image_path(const QString& path);
     [[nodiscard]] QString current_image_path() const { return current_path_; }
 
+   signals:
+    void current_image_changed(QString path);
+
    protected:
     void showEvent(QShowEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;

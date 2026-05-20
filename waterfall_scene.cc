@@ -126,6 +126,37 @@ void waterfall_scene::set_recent_paths(const QStringList& recent_folder_paths, c
     recent_image_paths_ = recent_image_paths;
 }
 
+bool waterfall_scene::focus_path(const QString& path)
+{
+    auto it = std::find_if(
+        all_models_.begin(),
+        all_models_.end(),
+        [&path](const layout_model& model) { return model.path == path; });
+    if (it == all_models_.end() || views().isEmpty())
+    {
+        return false;
+    }
+
+    const int index = static_cast<int>(std::distance(all_models_.begin(), it));
+    const QRectF target_rect = it->layout_rect;
+    if (!target_rect.isValid())
+    {
+        return false;
+    }
+
+    QGraphicsView* view = views().first();
+    clearSelection();
+    view->centerOn(target_rect.center());
+    update_viewport(view->mapToScene(view->viewport()->rect()).boundingRect());
+
+    if (active_items_.contains(index))
+    {
+        active_items_[index]->setSelected(true);
+    }
+
+    return true;
+}
+
 void waterfall_scene::layout_models(int view_width)
 {
     if (all_models_.empty() || view_width <= 0)

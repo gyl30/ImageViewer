@@ -27,6 +27,7 @@ class waterfall_scene : public QGraphicsScene
     void add_images(const QList<image_meta>& batch);
     void layout_models(int view_width);
     void update_viewport(const QRectF& visible_rect);
+    bool focus_path(const QString& path);
     void set_recent_paths(const QStringList& recent_folder_paths, const QStringList& recent_image_paths);
     [[nodiscard]] std::vector<QString> get_all_paths() const;
 

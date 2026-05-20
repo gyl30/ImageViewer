@@ -275,6 +275,7 @@ void image_viewer_window::set_image_path(const QString& path)
     current_path_ = path;
     update_index_from_path();
     update_navigation_buttons();
+    emit current_image_changed(path);
     clear_movie();
 
     if (image_watcher_ == nullptr)
