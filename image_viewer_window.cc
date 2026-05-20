@@ -1076,7 +1076,15 @@ void image_viewer_window::keyPressEvent(QKeyEvent* event)
     }
     else if (event->key() == Qt::Key_Escape)
     {
-        close();
+        if (isFullScreen())
+        {
+            showNormal();
+            update_view_mode_actions();
+        }
+        else
+        {
+            close();
+        }
     }
     else
     {
