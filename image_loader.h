@@ -27,6 +27,7 @@ class image_loader : public QObject
     void request_thumbnails(const QList<load_task>& tasks);
     void cancel_thumbnails(const QList<QString>& paths);
     void clear_all();
+    void clear_cache();
 
    signals:
     void thumbnail_loaded(quint64 id, QString path, QImage image, int session_id);

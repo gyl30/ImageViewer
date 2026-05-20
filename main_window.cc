@@ -271,6 +271,14 @@ void main_window::setup_connections()
     connect(scene_, &waterfall_scene::request_open_recent, this, &main_window::on_open_recent_path);
     connect(scene_, &waterfall_scene::request_reveal_path, this, &main_window::on_reveal_path);
     connect(scene_, &waterfall_scene::request_move_to_trash, this, &main_window::on_move_path_to_trash);
+    connect(scene_, &waterfall_scene::request_clear_thumbnail_cache, image_loader_, &image_loader::clear_cache);
+    connect(scene_,
+            &waterfall_scene::request_clear_thumbnail_cache,
+            this,
+            [this]()
+            {
+                statusBar()->showMessage("已清理缩略图缓存", 3000);
+            });
     connect(scene_, &QGraphicsScene::selectionChanged, this, &main_window::on_selection_changed);
     connect(image_loader_, &image_loader::thumbnail_loaded, this, &main_window::on_image_loaded_stat);
 }

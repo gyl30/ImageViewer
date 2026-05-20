@@ -545,6 +545,10 @@ void waterfall_scene::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
         menu.addSeparator();
     }
 
+    QAction* clearCacheAction = menu.addAction("清理缩略图缓存");
+    connect(clearCacheAction, &QAction::triggered, this, &waterfall_scene::request_clear_thumbnail_cache);
+    menu.addSeparator();
+
     QAction* openAction = menu.addAction("打开新文件夹");
     connect(openAction, &QAction::triggered, this, &waterfall_scene::request_open_folder);
 

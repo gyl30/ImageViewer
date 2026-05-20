@@ -40,6 +40,7 @@ class waterfall_scene : public QGraphicsScene
     void request_open_recent(QString path);
     void request_reveal_path(QString path);
     void request_move_to_trash(QString path);
+    void request_clear_thumbnail_cache();
 
    public slots:
     void on_image_loaded(quint64 id, const QString& path, const QImage& image, int session_id);

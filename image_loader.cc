@@ -142,6 +142,21 @@ void image_loader::clear_all()
     pending_cancels_.clear();
 }
 
+void image_loader::clear_cache()
+{
+    {
+        QMutexLocker locker(&mutex_);
+        cache_.clear();
+    }
+
+    QDir cache_dir(disk_cache_dir_);
+    const QFileInfoList files = cache_dir.entryInfoList(QStringList() << "*.png", QDir::Files);
+    for (const QFileInfo& file_info : files)
+    {
+        QFile::remove(file_info.absoluteFilePath());
+    }
+}
+
 void image_loader::start_loop()
 {
     while (!abort_)
