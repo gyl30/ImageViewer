@@ -4,6 +4,7 @@
 #include <QImageReader>
 #include <QFile>
 #include <QFileInfo>
+#include <QDateTime>
 #include <QStandardPaths>
 #include <QSemaphore>
 #include <QSignalSpy>
@@ -97,6 +98,7 @@ class correctness_test : public QObject
     void stale_queued_scans();
     void exif_orientation_data();
     void exif_orientation();
+    void thumbnail_file_replaced();
 };
 
 void correctness_test::large_visible_batch()
@@ -395,6 +397,40 @@ void correctness_test::exif_orientation()
         QVERIFY(std::abs(actual.green() - reference.green()) < 10);
         QVERIFY(std::abs(actual.blue() - reference.blue()) < 10);
     }
+}
+
+void correctness_test::thumbnail_file_replaced()
+{
+    QTemporaryDir dir;
+    const QString path = dir.filePath("image.png");
+    QImage image(100, 50, QImage::Format_RGB32);
+    image.fill(Qt::red);
+    QVERIFY(image.save(path));
+    const QDateTime modified = QFileInfo(path).lastModified();
+    {
+        loader_worker worker;
+        QSignalSpy loaded(worker.loader, &image_loader::thumbnail_loaded);
+        worker.thread.start();
+        worker.loader->request_thumbnails({{1, path, QSize(50, 25), 1}});
+        QTRY_COMPARE(loaded.size(), 1);
+        QCOMPARE(qvariant_cast<QImage>(loaded.first()[2]).pixelColor(0, 0), QColor(Qt::red));
+
+        image.fill(Qt::blue);
+        QVERIFY(image.save(path));
+        QFile file(path);
+        QVERIFY(file.open(QIODevice::ReadWrite));
+        QVERIFY(file.setFileTime(modified.addSecs(2), QFileDevice::FileModificationTime));
+        file.close();
+        worker.loader->request_thumbnails({{2, path, QSize(50, 25), 1}});
+        QTRY_COMPARE(loaded.size(), 2);
+        QCOMPARE(qvariant_cast<QImage>(loaded.last()[2]).pixelColor(0, 0), QColor(Qt::blue));
+    }
+    loader_worker worker;
+    QSignalSpy loaded(worker.loader, &image_loader::thumbnail_loaded);
+    worker.thread.start();
+    worker.loader->request_thumbnails({{3, path, QSize(50, 25), 1}});
+    QTRY_COMPARE(loaded.size(), 1);
+    QCOMPARE(qvariant_cast<QImage>(loaded.first()[2]).pixelColor(0, 0), QColor(Qt::blue));
 }
 
 int main(int argc, char** argv)

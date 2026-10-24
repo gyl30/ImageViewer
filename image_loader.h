@@ -31,10 +31,7 @@ class image_loader : public QObject
 
    private:
     void load_next();
-    [[nodiscard]] QString memory_cache_key(const load_task& task) const;
     [[nodiscard]] QString disk_cache_path(const load_task& task) const;
-    [[nodiscard]] QImage load_disk_cached_image(const load_task& task) const;
-    void save_disk_cached_image(const load_task& task, const QImage& image);
     void cleanup_disk_cache();
     void load_image_internal(const load_task& task);
 

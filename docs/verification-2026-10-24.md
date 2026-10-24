@@ -11,3 +11,4 @@
 | C5 | `preloads_after_reopen`：重开后无法完成左右两个邻居的预加载 | 换一组未缓存图片重开后，两个邻居依次完成；累计 CTest 通过 |
 | C6 | `stale_queued_scans`：连续三个 queued 请求产生三个 finished，预期仅一个 | 仅最新请求发出 batch/finished；扫描会话直接取自 scanner 原子代次，累计 CTest 通过 |
 | C7 | `exif_orientation`：5–8 方向元数据为 120×60 而非 60×120；先修元数据后再次观察到缩略图 40×20 而非 40×80 | 1–8 方向的元数据、目标尺寸和四象限颜色全部通过；磁盘缓存版本更新，避免复用旧错误缩略图；累计 CTest 通过 |
+| C8a | `thumbnail_file_replaced`：覆盖为蓝图后仍返回红像素 | 同进程重新请求及新 loader 的磁盘缓存读取均为蓝色；解码与存盘固定使用开始时的版本 key，累计 CTest 通过 |

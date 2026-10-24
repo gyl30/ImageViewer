@@ -29,11 +29,6 @@ void image_loader::stop()
     abort_ = true;
 }
 
-QString image_loader::memory_cache_key(const load_task& task) const
-{
-    return QString("%1|%2x%3").arg(task.path).arg(task.target_size.width()).arg(task.target_size.height());
-}
-
 QString image_loader::disk_cache_path(const load_task& task) const
 {
     QFileInfo file_info(task.path);
@@ -47,24 +42,6 @@ QString image_loader::disk_cache_path(const load_task& task) const
             .arg(task.target_size.height());
     const QByteArray hash = QCryptographicHash::hash(cache_seed.toUtf8(), QCryptographicHash::Sha1).toHex();
     return disk_cache_dir_ + "/" + QString::fromLatin1(hash) + ".png";
-}
-
-QImage image_loader::load_disk_cached_image(const load_task& task) const
-{
-    QImageReader reader(disk_cache_path(task));
-    reader.setAutoTransform(true);
-    return reader.read();
-}
-
-void image_loader::save_disk_cached_image(const load_task& task, const QImage& image)
-{
-    if (image.isNull())
-    {
-        return;
-    }
-
-    image.save(disk_cache_path(task), "PNG");
-    cleanup_disk_cache();
 }
 
 void image_loader::cleanup_disk_cache()
@@ -95,7 +72,7 @@ void image_loader::request_thumbnails(const QList<load_task>& tasks)
     QMutexLocker locker(&mutex_);
     for (const auto& task : tasks)
     {
-        const QString cache_key = memory_cache_key(task);
+        const QString cache_key = disk_cache_path(task);
         if (cache_.contains(cache_key))
         {
             emit thumbnail_loaded(task.id, task.path, *cache_.object(cache_key), task.session_id);
@@ -158,7 +135,7 @@ void image_loader::load_next()
 
 void image_loader::load_image_internal(const load_task& current_task)
 {
-    const QString cache_key = memory_cache_key(current_task);
+    const QString cache_key = disk_cache_path(current_task);
 
     {
         QMutexLocker locker(&mutex_);
@@ -169,7 +146,7 @@ void image_loader::load_image_internal(const load_task& current_task)
         }
     }
 
-    QImage image = load_disk_cached_image(current_task);
+    QImage image(cache_key);
     if (!image.isNull())
     {
         if (image.format() != QImage::Format_ARGB32_Premultiplied)
@@ -236,7 +213,8 @@ void image_loader::load_image_internal(const load_task& current_task)
             cache_.insert(cache_key, new QImage(image), cost);
         }
 
-        save_disk_cached_image(current_task, image);
+        image.save(cache_key, "PNG");
+        cleanup_disk_cache();
 
         emit thumbnail_loaded(current_task.id, current_task.path, image, current_task.session_id);
     }
