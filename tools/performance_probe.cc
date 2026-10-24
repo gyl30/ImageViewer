@@ -10,6 +10,7 @@
 #include <QLocale>
 #include <QMimeData>
 #include <QPainter>
+#include <QMovie>
 #include <QScrollBar>
 #include <QStandardPaths>
 #include <QtTest>
@@ -284,6 +285,68 @@ class performance_probe
     qsizetype max_active_ = 0;
 };
 
+static int viewer_benchmark(const QString& directory, const QString& output)
+{
+    QJsonArray samples;
+    const auto sample = [&samples](const QString& phase)
+    {
+        samples.append(QJsonObject{{"phase", phase}, {"cpu_ms", process_cpu_ms()},
+            {"rss_kib", proc_value("/proc/self/status", "VmRSS")},
+            {"pss_kib", proc_value("/proc/self/smaps_rollup", "Pss")},
+            {"peak_rss_kib", proc_value("/proc/self/status", "VmHWM")}});
+    };
+    auto* viewer = new image_viewer_window();
+    viewer->show();
+    sample("empty");
+    QStringList paths;
+    for (int index = 0; index < 3; ++index)
+    {
+        paths.append(directory + QString("/large-%1.jpg").arg(index));
+    }
+    viewer->set_image_list(paths);
+    QElapsedTimer elapsed;
+    elapsed.start();
+    viewer->set_image_path(paths[1]);
+    while (!viewer->windowTitle().startsWith("Viewer -") && elapsed.elapsed() < 30000)
+    {
+        QTest::qWait(10);
+    }
+    const qint64 first_display_ms = elapsed.elapsed();
+    QThreadPool::globalInstance()->waitForDone();
+    QTest::qWait(500);
+    QThreadPool::globalInstance()->waitForDone();
+    QTest::qWait(500);
+    sample("large_and_neighbors");
+    viewer->set_image_path(directory + "/large-extra.jpg");
+    elapsed.restart();
+    viewer->close();
+    const qint64 close_ms = elapsed.elapsed();
+    QTest::qWait(500);
+    sample("closed");
+    delete viewer;
+    sample("destroyed");
+    viewer = new image_viewer_window();
+    viewer->show();
+    viewer->set_image_path(directory + "/animation.gif");
+    QTest::qWait(3000);
+    auto* movie = viewer->findChild<QMovie*>();
+    const int frames = movie == nullptr ? 0 : movie->frameCount();
+    const bool cache_all = movie != nullptr && movie->cacheMode() == QMovie::CacheAll;
+    sample("gif_3_seconds");
+    viewer->close();
+    QTest::qWait(50);
+    delete viewer;
+    sample("gif_destroyed");
+    QFile file(output);
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        return 6;
+    }
+    file.write(QJsonDocument(QJsonObject{{"first_display_ms", first_display_ms}, {"close_ms", close_ms},
+        {"gif_frames", frames}, {"gif_cache_all", cache_all}, {"samples", samples}}).toJson());
+    return 0;
+}
+
 int main(int argc, char** argv)
 {
     QApplication app(argc, argv);
@@ -293,6 +356,10 @@ int main(int argc, char** argv)
     }
     QLocale::setDefault(QLocale(QLocale::English, QLocale::UnitedStates));
     QImageReader::setAllocationLimit(kQtImageReaderAllocMB);
+    if (QString::fromLocal8Bit(argv[1]) == "--viewer")
+    {
+        return viewer_benchmark(QString::fromLocal8Bit(argv[2]), QString::fromLocal8Bit(argv[3]));
+    }
     main_window window;
     window.resize(1280, 800);
     window.show();
