@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """生成重复数据并逐进程运行冷/暖应用缓存基准。"""
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -13,6 +14,12 @@ def generate(args):
     from PIL import Image, ImageEnhance
 
     root = args.root.resolve()
+    source_hash = hashlib.sha256(args.source.read_bytes()).hexdigest()
+    manifest = root / "dataset.json"
+    if manifest.exists():
+        previous = json.loads(manifest.read_text())
+        if previous.get("storage") != args.storage or previous.get("source_sha256") != source_hash:
+            raise SystemExit("目标目录已有不同的数据集定义，请使用新目录")
     samples = root / "samples"
     samples.mkdir(parents=True, exist_ok=True)
     with Image.open(args.source) as photo:
@@ -41,6 +48,7 @@ def generate(args):
         print(f"generated {count}: {folder}", flush=True)
     (root / "dataset.json").write_text(json.dumps({
         "source": str(args.source.resolve()), "sizes": args.sizes,
+        "source_sha256": source_hash,
         "samples": 64, "storage": args.storage,
         "description": "真实壁纸派生的混合尺寸 JPEG；independent 模式每个图库具有 N 个独立 inode 和不同 JPEG 注释，各规模间共享文件",
     }, ensure_ascii=False, indent=2))

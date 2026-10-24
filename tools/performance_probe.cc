@@ -67,7 +67,7 @@ static qint64 proc_value(const QString& path, const QByteArray& key)
 class performance_probe
 {
    public:
-    enum class run_mode { cold, warm, capture, trim };
+    enum class run_mode { cold, warm, capture, trim, soak };
     explicit performance_probe(main_window& window) : window_(window)
     {
         timer_.start();
@@ -190,7 +190,7 @@ class performance_probe
 
     int run(const QString& directory, const QString& output, run_mode mode)
     {
-        const bool clear_disk = mode == run_mode::warm;
+        const bool clear_disk = mode == run_mode::warm || mode == run_mode::soak;
         sample("empty");
         const double idle_start = process_cpu_ms();
         QTest::qWait(500);
@@ -238,7 +238,8 @@ class performance_probe
         QImage surface(window_.view_->size(), QImage::Format_RGB32);
         double render_ms = 0;
         auto* scroll = window_.view_->verticalScrollBar();
-        for (int lap = 0; lap < 3; ++lap)
+        const int laps = mode == run_mode::soak ? 30 : 3;
+        for (int lap = 0; lap < laps; ++lap)
         {
             for (int step = 0; step < 120; ++step)
             {
@@ -302,7 +303,7 @@ class performance_probe
                            {"scan_ms", scan_ms_}, {"idle_cpu_ms_500ms", idle_cpu_ms_},
                            {"max_queue_sampled", max_queue_}, {"max_active_items", max_active_},
                            {"clear_disk_at_end", clear_disk},
-                           {"explicit_render_ms_360_frames", render_ms}, {"samples", samples_}};
+                           {QString("explicit_render_ms_%1_frames").arg(laps * 120), render_ms}, {"samples", samples_}};
         QFile file(output);
         if (!file.open(QIODevice::WriteOnly))
         {
@@ -527,6 +528,10 @@ int main(int argc, char** argv)
     else if (QString::fromLocal8Bit(argv[3]) == "trim")
     {
         mode = performance_probe::run_mode::trim;
+    }
+    else if (QString::fromLocal8Bit(argv[3]) == "soak")
+    {
+        mode = performance_probe::run_mode::soak;
     }
     return probe.run(QString::fromLocal8Bit(argv[1]), QString::fromLocal8Bit(argv[2]), mode);
 }
