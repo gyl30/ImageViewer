@@ -306,7 +306,7 @@ void waterfall_scene::on_layout_finished()
     for (auto it = active_items_.begin(); it != active_items_.end(); ++it)
     {
         waterfall_item* item = it.value();
-        item->bind_model(all_models_[it.key()], it.key(), image_paths_[it.key()], current_col_width_, item->get_request_id());
+        item->bind_model(all_models_[it.key()], it.key(), image_paths_.at(it.key()), current_col_width_, item->get_request_id());
     }
 
     if (count < all_models_.size())
@@ -372,7 +372,7 @@ void waterfall_scene::update_viewport(const QRectF& visible_rect)
         }
 
         waterfall_item* item = obtain_item();
-        item->bind_model(model, i, image_paths_[i], current_col_width_, 0);
+        item->bind_model(model, i, image_paths_.at(i), current_col_width_, 0);
         active_items_.insert(i, item);
     }
 
@@ -448,10 +448,10 @@ void waterfall_scene::request_visible_images(const QRectF& visible_rect, request
         --available;
         const auto& model = all_models_[index];
         const quint64 id = ++request_counter_;
-        item->bind_model(model, index, image_paths_[index], current_col_width_, id);
+        item->bind_model(model, index, image_paths_.at(index), current_col_width_, id);
         const QSize size(std::max(1, qRound(model.layout_rect.width() * dpr)),
                          std::max(1, qRound(model.layout_rect.height() * dpr)));
-        tasks.append({id, image_paths_[index], size, current_session_id_});
+        tasks.append({id, image_paths_.at(index), size, current_session_id_});
         priority.append(id);
     }
     if (!tasks.isEmpty())
@@ -588,7 +588,7 @@ void waterfall_scene::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
             bool has_image_entries = false;
             for (qsizetype i = 0; i < recent_image_paths_.size(); ++i)
             {
-                const QString& path = recent_image_paths_[i];
+                const QString& path = recent_image_paths_.at(i);
                 if (!QFileInfo(path).isFile())
                 {
                     continue;

@@ -452,7 +452,7 @@ void main_window::open_path(const QString& path, bool add_to_recent)
     {
         last_open_dir_ = file_info.absolutePath();
         QStringList image_list = scene_->get_all_paths();
-        if (std::find(image_list.begin(), image_list.end(), path) == image_list.end())
+        if (!image_list.contains(path))
         {
             image_list = {path};
         }

@@ -151,6 +151,7 @@ class correctness_test : public QObject
     void same_path_replaced_inflight();
     void layout_result_is_consumed();
     void natural_sort_in_c_locale();
+    void viewer_snapshot_is_shared();
 };
 
 void correctness_test::large_visible_batch()
@@ -934,6 +935,11 @@ void correctness_test::catalog_snapshot_is_shared()
     const auto first = scene.get_all_paths();
     const auto second = scene.get_all_paths();
     QVERIFY(first.data() == second.data());
+    scene.layout_models(440);
+    QTRY_VERIFY(!scene.is_laying_out_);
+    scene.update_viewport(QRectF(0, 0, 440, 400));
+    const auto after_layout = scene.get_all_paths();
+    QVERIFY(first.data() == after_layout.data());
     scene.clear_items();
     scene.add_images({{"second.png", QSize(50, 100)}});
     QCOMPARE(first.front(), QString("first.png"));
@@ -1225,6 +1231,19 @@ void correctness_test::natural_sort_in_c_locale()
     QCOMPARE(batches.size(), 1);
     const auto images = qvariant_cast<QList<image_meta>>(batches.first().first());
     QCOMPARE(QFileInfo(images.first().path).fileName(), QString("image2.png"));
+}
+
+void correctness_test::viewer_snapshot_is_shared()
+{
+    QStringList paths = {"/missing/first.png", "/missing/second.png"};
+    QVERIFY(paths.isDetached());
+    image_viewer_window viewer;
+    viewer.set_image_list(paths);
+    QVERIFY(!paths.isDetached());
+    viewer.set_image_path(paths.at(0));
+    QVERIFY(!paths.isDetached());
+    QMetaObject::invokeMethod(&viewer, "load_next_image");
+    QVERIFY(!paths.isDetached());
 }
 
 int main(int argc, char** argv)

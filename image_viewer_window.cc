@@ -756,10 +756,10 @@ void image_viewer_window::update_index_from_path()
         return;
     }
 
-    auto it = std::find(image_list_.begin(), image_list_.end(), current_path_);
-    if (it != image_list_.end())
+    auto it = std::find(image_list_.cbegin(), image_list_.cend(), current_path_);
+    if (it != image_list_.cend())
     {
-        current_index_ = std::distance(image_list_.begin(), it);
+        current_index_ = std::distance(image_list_.cbegin(), it);
     }
     else
     {
@@ -958,7 +958,7 @@ void image_viewer_window::advance_slideshow()
     {
         if (slideshow_loop_enabled_)
         {
-            set_image_path(image_list_.front());
+            set_image_path(image_list_.constFirst());
             return;
         }
         slideshow_timer_->stop();
@@ -997,7 +997,7 @@ void image_viewer_window::navigate_image(int delta)
         return;
     }
 
-    set_image_path(image_list_[new_idx]);
+    set_image_path(image_list_.at(new_idx));
 }
 
 void image_viewer_window::update_navigation_buttons()
@@ -1031,14 +1031,14 @@ void image_viewer_window::keyPressEvent(QKeyEvent* event)
     {
         if (!image_list_.empty())
         {
-            set_image_path(image_list_.front());
+            set_image_path(image_list_.constFirst());
         }
     }
     else if (event->key() == Qt::Key_End)
     {
         if (!image_list_.empty())
         {
-            set_image_path(image_list_.back());
+            set_image_path(image_list_.constLast());
         }
     }
     else if (event->key() == Qt::Key_Escape)
