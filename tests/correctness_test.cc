@@ -152,6 +152,8 @@ class correctness_test : public QObject
     void layout_result_is_consumed();
     void natural_sort_in_c_locale();
     void viewer_snapshot_is_shared();
+    void scanner_formats_data();
+    void scanner_formats();
 };
 
 void correctness_test::large_visible_batch()
@@ -1042,11 +1044,13 @@ void correctness_test::scanner_reports_root_error()
     QSignalSpy failed(&scanner, &file_scanner::scan_failed);
     scanner.start_scan("/missing/imageviewer-directory", scanner.stop_scan(), 0, false);
     QCOMPARE(failed.size(), 1);
+#ifdef Q_OS_UNIX
     QTemporaryDir dir;
     QVERIFY(QFile::setPermissions(dir.path(), {}));
     scanner.start_scan(dir.path(), scanner.stop_scan(), 0, false);
     QVERIFY(QFile::setPermissions(dir.path(), QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner));
     QCOMPARE(failed.size(), 2);
+#endif
 }
 
 void correctness_test::theme_keeps_scene_items()
@@ -1244,6 +1248,46 @@ void correctness_test::viewer_snapshot_is_shared()
     QVERIFY(!paths.isDetached());
     QMetaObject::invokeMethod(&viewer, "load_next_image");
     QVERIFY(!paths.isDetached());
+}
+
+void correctness_test::scanner_formats_data()
+{
+    QTest::addColumn<QByteArray>("format");
+    for (const auto* format : {"jpg", "png", "bmp", "gif", "webp"})
+    {
+        QTest::newRow(format) << QByteArray(format);
+    }
+}
+
+void correctness_test::scanner_formats()
+{
+    QFETCH(QByteArray, format);
+    if (!QImageReader::supportedImageFormats().contains(format))
+    {
+        QSKIP("当前 Qt 未安装此图片格式插件");
+    }
+    QTemporaryDir dir;
+    const QString path = dir.filePath("image." + QString::fromLatin1(format));
+    QSize expected(12, 6);
+    if (format == "gif")
+    {
+        QFile file(path);
+        QVERIFY(file.open(QIODevice::WriteOnly));
+        QVERIFY(file.write(QByteArray::fromBase64(kAnimatedGif)) > 0);
+        expected = QSize(2, 2);
+    }
+    else
+    {
+        QImage image(expected, QImage::Format_RGB32);
+        image.fill(Qt::blue);
+        QVERIFY(image.save(path));
+    }
+    file_scanner scanner;
+    QSignalSpy batches(&scanner, &file_scanner::images_scanned_batch);
+    scanner.start_scan(dir.path(), scanner.stop_scan(), 0, false);
+    QCOMPARE(batches.size(), 1);
+    const auto images = qvariant_cast<QList<image_meta>>(batches.first().first());
+    QCOMPARE(images.first().original_size, expected);
 }
 
 int main(int argc, char** argv)

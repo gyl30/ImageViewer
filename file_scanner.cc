@@ -5,9 +5,13 @@
 #include <QImageReader>
 #include <QElapsedTimer>
 #include <QFileInfo>
+#include <QFile>
 #include <QDateTime>
 #include <QDebug>
 #include <QLocale>
+#ifdef Q_OS_LINUX
+#include <fcntl.h>
+#endif
 
 namespace
 {
@@ -136,7 +140,20 @@ void file_scanner::start_scan(const QString& dir_path, int session_id, int sort_
                 return;
             }
 
-            QImageReader reader(scanned_images[j].path);
+            QFile file(scanned_images[j].path);
+            QIODevice::OpenMode flags = QIODevice::ReadOnly;
+#ifndef Q_OS_WIN
+            flags |= QIODevice::Unbuffered;
+#endif
+            if (!file.open(flags))
+            {
+                continue;
+            }
+#ifdef Q_OS_LINUX
+            // 这里只读元数据，避免为每个文件预读后续像素数据。
+            posix_fadvise(file.handle(), 0, 0, POSIX_FADV_RANDOM);
+#endif
+            QImageReader reader(&file);
             QSize size = reader.size();
             if (!size.isValid())
             {
