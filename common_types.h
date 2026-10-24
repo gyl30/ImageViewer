@@ -47,5 +47,7 @@ const int kItemMargin = 10;
 const int kMinColWidth = 200;
 const int kMaxImageAllocMB = 256;
 const int kQtImageReaderAllocMB = 1024;
+inline constexpr int kThumbnailCacheMiB = 64;
+inline constexpr int kMaxThumbnailTasks = 64;
 
 #endif

@@ -16,7 +16,7 @@ constexpr int kThumbnailCacheVersion = 2;
 
 image_loader::image_loader(QObject* parent) : QObject(parent), abort_(false)
 {
-    cache_.setMaxCost(200L * 1024 * 1024);
+    cache_.setMaxCost(kThumbnailCacheMiB * 1024 * 1024);
     disk_cache_dir_ = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + "/thumbnails";
     QDir().mkpath(disk_cache_dir_);
     cleanup_disk_cache();
@@ -72,6 +72,10 @@ void image_loader::request_thumbnails(const QList<load_task>& tasks)
     QMutexLocker locker(&mutex_);
     for (const auto& task : tasks)
     {
+        if (task_queue_.size() >= kMaxThumbnailTasks)
+        {
+            break;
+        }
         const QString cache_key = disk_cache_path(task);
         if (cache_.contains(cache_key))
         {
@@ -79,7 +83,7 @@ void image_loader::request_thumbnails(const QList<load_task>& tasks)
             continue;
         }
 
-        task_queue_.prepend(task);
+        task_queue_.append(task);
     }
 
     if (!task_queue_.isEmpty() && !is_loading_ && !abort_)

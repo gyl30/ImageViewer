@@ -57,6 +57,7 @@ class waterfall_scene : public QGraphicsScene
    private:
     waterfall_item* obtain_item();
     void recycle_item(waterfall_item* item);
+    void request_visible_images(const QRectF& visible_rect);
 
    private:
     std::vector<layout_model> all_models_;

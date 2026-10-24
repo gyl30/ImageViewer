@@ -28,6 +28,7 @@ void waterfall_item::bind_model(const layout_model& model, int index, const QStr
     if (current_request_id_ != request_id || path_ != path)
     {
         setPixmap(get_placeholder());
+        state_ = request_id == 0 ? load_state::empty : load_state::loading;
     }
 
     index_ = index;
@@ -54,6 +55,7 @@ void waterfall_item::reset()
     is_hovered_ = false;
 
     setPixmap(get_placeholder());
+    state_ = load_state::empty;
     setGraphicsEffect(nullptr);
     setZValue(0);
     setVisible(false);
@@ -61,6 +63,12 @@ void waterfall_item::reset()
 
 void waterfall_item::set_pixmap_safe(const QPixmap& pixmap)
 {
+    state_ = pixmap.isNull() ? load_state::failed : load_state::ready;
+    if (pixmap.isNull())
+    {
+        update();
+        return;
+    }
     if (this->pixmap().cacheKey() == pixmap.cacheKey())
     {
         return;

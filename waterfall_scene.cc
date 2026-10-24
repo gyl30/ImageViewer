@@ -305,7 +305,8 @@ void waterfall_scene::update_viewport(const QRectF& visible_rect)
         return;
     }
 
-    QRectF load_rect = visible_rect.adjusted(0, -1000, 0, 1500);
+    const qreal preload_height = visible_rect.height() / 2;
+    QRectF load_rect = visible_rect.adjusted(0, -preload_height, 0, preload_height);
     int top_y = static_cast<int>(load_rect.top());
     int bottom_y = static_cast<int>(load_rect.bottom());
 
@@ -324,14 +325,7 @@ void waterfall_scene::update_viewport(const QRectF& visible_rect)
     }
 
     QSet<int> needed_indices;
-    QList<load_task> tasks_to_load;
     QList<QString> paths_to_cancel;
-
-    qreal dpr = 1.0;
-    if (!views().isEmpty())
-    {
-        dpr = views().first()->devicePixelRatio();
-    }
 
     for (int i = start_idx; i < end_idx; ++i)
     {
@@ -349,14 +343,8 @@ void waterfall_scene::update_viewport(const QRectF& visible_rect)
         }
 
         waterfall_item* item = obtain_item();
-        quint64 req_id = ++request_counter_;
-
-        item->bind_model(model, i, image_paths_[i], current_col_width_, req_id);
+        item->bind_model(model, i, image_paths_[i], current_col_width_, 0);
         active_items_.insert(i, item);
-
-        int req_w = static_cast<int>(model.layout_rect.width() * dpr);
-        int req_h = static_cast<int>(model.layout_rect.height() * dpr);
-        tasks_to_load.append({req_id, image_paths_[i], QSize(req_w, req_h), current_session_id_});
     }
 
     auto current_keys = active_items_.keys();
@@ -370,14 +358,62 @@ void waterfall_scene::update_viewport(const QRectF& visible_rect)
         }
     }
 
-    if (!tasks_to_load.isEmpty())
-    {
-        emit request_load_batch(tasks_to_load);
-    }
     if (!paths_to_cancel.isEmpty())
     {
         emit request_cancel_batch(paths_to_cancel);
     }
+    request_visible_images(visible_rect);
+}
+
+void waterfall_scene::request_visible_images(const QRectF& visible_rect)
+{
+    int available = kMaxThumbnailTasks;
+    std::vector<int> pending;
+    for (auto it = active_items_.begin(); it != active_items_.end(); ++it)
+    {
+        if (it.value()->state() == waterfall_item::load_state::loading)
+        {
+            --available;
+        }
+        else if (it.value()->state() == waterfall_item::load_state::empty)
+        {
+            pending.push_back(it.key());
+        }
+    }
+    if (available <= 0 || pending.empty())
+    {
+        return;
+    }
+    std::sort(pending.begin(), pending.end(), [&](int left, int right)
+    {
+        const auto& a = all_models_[left].layout_rect;
+        const auto& b = all_models_[right].layout_rect;
+        const bool a_visible = a.intersects(visible_rect);
+        const bool b_visible = b.intersects(visible_rect);
+        if (a_visible != b_visible)
+        {
+            return a_visible;
+        }
+        return std::abs(a.center().y() - visible_rect.center().y()) <
+               std::abs(b.center().y() - visible_rect.center().y());
+    });
+    const qreal dpr = views().isEmpty() ? 1.0 : views().first()->devicePixelRatioF();
+    QList<load_task> tasks;
+    for (int index : pending)
+    {
+        if (available-- <= 0)
+        {
+            break;
+        }
+        auto* item = active_items_[index];
+        const auto& model = all_models_[index];
+        const quint64 id = ++request_counter_;
+        item->bind_model(model, index, image_paths_[index], current_col_width_, id);
+        const QSize size(std::max(1, qRound(model.layout_rect.width() * dpr)),
+                         std::max(1, qRound(model.layout_rect.height() * dpr)));
+        tasks.append({id, image_paths_[index], size, current_session_id_});
+    }
+    emit request_load_batch(tasks);
 }
 
 waterfall_item* waterfall_scene::obtain_item()
@@ -416,6 +452,11 @@ void waterfall_scene::on_image_loaded(quint64 id, const QString& /*path*/, const
         if (item->get_request_id() == id)
         {
             item->set_pixmap_safe(QPixmap::fromImage(image));
+            if (!views().isEmpty())
+            {
+                auto* view = views().first();
+                request_visible_images(view->mapToScene(view->viewport()->rect()).boundingRect());
+            }
             return;
         }
     }

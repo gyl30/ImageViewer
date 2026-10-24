@@ -131,6 +131,8 @@ class correctness_test : public QObject
     void navigation_focus_data();
     void navigation_focus();
     void catalog_snapshot_is_shared();
+    void thumbnail_budget_and_bound();
+    void visible_requests_first();
 };
 
 void correctness_test::large_visible_batch()
@@ -151,7 +153,7 @@ void correctness_test::large_visible_batch()
     loader_worker worker;
     waterfall_scene scene;
     QGraphicsView view(&scene);
-    view.resize(440, 600);
+    view.resize(440, 2000);
     QSignalSpy loaded(worker.loader, &image_loader::thumbnail_loaded);
     connect(worker.loader, &image_loader::thumbnail_loaded, &scene, &waterfall_scene::on_image_loaded);
 
@@ -164,6 +166,7 @@ void correctness_test::large_visible_batch()
     scene.add_images(models);
     scene.layout_models(440);
     QTRY_VERIFY(submissions > 0);
+    scene.update_viewport(QRectF(0, 0, 440, 2000));
     QCOMPARE(submissions, 1);
 
     worker.thread.start();
@@ -940,6 +943,39 @@ void correctness_test::catalog_snapshot_is_shared()
     scene.add_images({{"second.png", QSize(50, 100)}});
     QCOMPARE(first.front(), QString("first.png"));
     QCOMPARE(scene.get_all_paths().front(), QString("second.png"));
+}
+
+void correctness_test::thumbnail_budget_and_bound()
+{
+    loader_worker worker;
+    QList<load_task> tasks;
+    for (int i = 0; i < 1000; ++i)
+    {
+        tasks.append({static_cast<quint64>(i + 1), QString("/missing/%1.png").arg(i), QSize(100, 100), 1});
+    }
+    worker.loader->request_thumbnails(tasks);
+    QCOMPARE(worker.loader->cache_.maxCost(), 64LL * 1024 * 1024);
+    QVERIFY(worker.loader->task_queue_.size() <= 64);
+}
+
+void correctness_test::visible_requests_first()
+{
+    waterfall_scene scene;
+    QSignalSpy requests(&scene, &waterfall_scene::request_load_batch);
+    QList<image_meta> images;
+    for (int i = 0; i < 100; ++i)
+    {
+        images.append({QString::number(i), QSize(100, 100)});
+    }
+    scene.add_images(images);
+    scene.layout_models(440);
+    QTRY_COMPARE(scene.sceneRect().width(), 440);
+    scene.update_viewport(QRectF(0, 1000, 440, 300));
+    QVERIFY(!requests.isEmpty());
+    const auto tasks = qvariant_cast<QList<load_task>>(requests.last().first());
+    const int first = tasks.first().path.toInt();
+    QVERIFY(first >= 8 && first <= 13);
+    QVERIFY(tasks.size() <= 64);
 }
 
 int main(int argc, char** argv)
