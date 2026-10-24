@@ -8,6 +8,10 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QDateTime>
+#include <QDropEvent>
+#include <QMimeData>
+#include <QDir>
+#include <QLocale>
 #include <QStandardPaths>
 #include <QSemaphore>
 #include <QSignalSpy>
@@ -19,8 +23,15 @@
 #include "file_scanner.h"
 #include "image_loader.h"
 #include "image_viewer_window.h"
+#include "main_window.h"
 #include "waterfall_item.h"
 #include "waterfall_scene.h"
+
+namespace
+{
+constexpr char kAnimatedGif[] =
+    "R0lGODlhAgACAIEAAP8AAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQACgAAACwAAAAAAgACAAAIBgABCAQQEAAh+QQBCgABACwAAAAAAgACAIEAAP8AAAAAAAAAAAAIBgABCAQQEAA7";
+}
 
 class loader_worker
 {
@@ -108,6 +119,11 @@ class correctness_test : public QObject
     void tall_image_stays_visible();
     void item_geometry_data();
     void item_geometry();
+    void main_window_switches_folders();
+    void fast_navigation();
+    void large_image_and_close();
+    void loader_cancel_and_clear();
+    void scanner_cancel_during_batch();
 };
 
 void correctness_test::large_visible_batch()
@@ -510,8 +526,7 @@ void correctness_test::movie_stops_on_close()
     const QString path = dir.filePath("animated.gif");
     QFile file(path);
     QVERIFY(file.open(QIODevice::WriteOnly));
-    const QByteArray gif = QByteArray::fromBase64(
-        "R0lGODlhAgACAIEAAP8AAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQACgAAACwAAAAAAgACAAAIBgABCAQQEAAh+QQBCgABACwAAAAAAgACAIEAAP8AAAAAAAAAAAAIBgABCAQQEAA7");
+    const QByteArray gif = QByteArray::fromBase64(kAnimatedGif);
     QCOMPARE(file.write(gif), gif.size());
     file.close();
 
@@ -601,12 +616,201 @@ void correctness_test::item_geometry()
     QCOMPARE(item.mapRectToScene(pixels), expected);
 }
 
+void correctness_test::main_window_switches_folders()
+{
+    QTemporaryDir dir;
+    std::vector<QString> folders;
+    for (int i = 0; i < 3; ++i)
+    {
+        const QString folder = dir.filePath(QString::number(i));
+        QVERIFY(QDir().mkpath(folder));
+        QImage image(100, 50, QImage::Format_RGB32);
+        image.fill(Qt::blue);
+        QVERIFY(image.save(folder + "/image10.png"));
+        QVERIFY(image.save(folder + "/image2.png"));
+        folders.push_back(folder);
+    }
+    main_window window;
+    window.show();
+    auto* scene = window.findChild<waterfall_scene*>();
+    QVERIFY(scene != nullptr);
+    for (const QString& folder : folders)
+    {
+        QMimeData mime;
+        mime.setUrls({QUrl::fromLocalFile(folder)});
+        QDragEnterEvent enter(QPoint(1, 1), Qt::CopyAction, &mime, Qt::LeftButton, Qt::NoModifier);
+        QApplication::sendEvent(&window, &enter);
+        QVERIFY(enter.isAccepted());
+        QDropEvent drop(QPointF(1, 1), Qt::CopyAction, &mime, Qt::LeftButton, Qt::NoModifier);
+        QApplication::sendEvent(&window, &drop);
+        QVERIFY(drop.isAccepted());
+    }
+    const std::vector<QString> expected = {folders.back() + "/image2.png", folders.back() + "/image10.png"};
+    QTRY_COMPARE(scene->get_all_paths().size(), expected.size());
+    QCOMPARE(scene->get_all_paths()[0], expected[0]);
+    QCOMPARE(scene->get_all_paths()[1], expected[1]);
+    const auto loaded_latest = [scene]()
+    {
+        int loaded = 0;
+        for (auto* candidate : scene->items())
+        {
+            auto* item = dynamic_cast<waterfall_item*>(candidate);
+            if (item != nullptr && item->isVisible() && item->pixmap().toImage().pixelColor(0, 0) == QColor(Qt::blue))
+            {
+                ++loaded;
+            }
+        }
+        return loaded == 2;
+    };
+    QTRY_VERIFY(loaded_latest());
+    QVERIFY(window.close());
+}
+
+void correctness_test::fast_navigation()
+{
+    QTemporaryDir dir;
+    std::vector<QString> paths;
+    for (int i = 0; i < 3; ++i)
+    {
+        QImage image(100 + i, 50, QImage::Format_RGB32);
+        image.fill(i == 2 ? Qt::blue : Qt::red);
+        paths.push_back(dir.filePath(QString::number(i) + ".png"));
+        QVERIFY(image.save(paths.back()));
+    }
+    image_viewer_window viewer;
+    viewer.set_image_list(paths);
+    pool_blocker blocker;
+    for (int i = 0; i < 30; ++i)
+    {
+        viewer.set_image_path(paths[i % paths.size()]);
+    }
+    blocker.unblock();
+    QTRY_VERIFY(viewer.windowTitle().contains("2.png (102x50)"));
+    QVERIFY(QThreadPool::globalInstance()->waitForDone(5000));
+    QCoreApplication::sendPostedEvents();
+    auto* scene = viewer.findChild<QGraphicsView*>()->scene();
+    QCOMPARE(scene->items().size(), 1);
+    auto* item = dynamic_cast<QGraphicsPixmapItem*>(scene->items().first());
+    QVERIFY(item != nullptr);
+    QCOMPARE(item->pixmap().toImage().pixelColor(0, 0), QColor(Qt::blue));
+
+    const QString gif_path = dir.filePath("animated.gif");
+    QFile gif(gif_path);
+    QVERIFY(gif.open(QIODevice::WriteOnly));
+    QVERIFY(gif.write(QByteArray::fromBase64(kAnimatedGif)) > 0);
+    gif.close();
+    {
+        pool_blocker pending_load;
+        viewer.set_image_path(paths[0]);
+        viewer.set_image_path(gif_path);
+        pending_load.unblock();
+        QVERIFY(QThreadPool::globalInstance()->waitForDone(5000));
+        QCoreApplication::sendPostedEvents();
+        QCOMPARE(viewer.current_image_path(), gif_path);
+        QVERIFY(viewer.windowTitle().contains("animated.gif (2x2)"));
+        QCOMPARE(scene->items().size(), 1);
+    }
+
+    viewer.show();
+    viewer.set_image_path(paths[0]);
+    QVERIFY(viewer.close());
+    QCOMPARE(viewer.current_image_path(), QString());
+    QVERIFY(scene->items().isEmpty());
+    viewer.show();
+    viewer.set_image_path(paths[2]);
+    QTRY_VERIFY(viewer.windowTitle().contains("2.png (102x50)"));
+    QCOMPARE(scene->items().size(), 1);
+}
+
+void correctness_test::large_image_and_close()
+{
+    QTemporaryDir dir;
+    const QString path = dir.filePath("large.jpg");
+    {
+        QImage source(9000, 8000, QImage::Format_RGB32);
+        QVERIFY(!source.isNull());
+        source.fill(Qt::red);
+        QVERIFY(source.save(path, "JPEG", 80));
+    }
+    auto* viewer = new image_viewer_window();
+    viewer->set_image_path(path);
+    QTRY_VERIFY_WITH_TIMEOUT(viewer->windowTitle().startsWith("Viewer -"), 15000);
+    auto* scene = viewer->findChild<QGraphicsView*>()->scene();
+    QCOMPARE(scene->items().size(), 1);
+    auto* item = dynamic_cast<QGraphicsPixmapItem*>(scene->items().first());
+    QVERIFY(item != nullptr);
+    QVERIFY(item->pixmap().width() < 9000);
+    QVERIFY(item->pixmap().height() < 8000);
+    {
+        const QImage decoded = item->pixmap().toImage();
+        QVERIFY(decoded.sizeInBytes() <= (kMaxImageAllocMB + 1LL) * 1024 * 1024);
+        QVERIFY(decoded.pixelColor(0, 0).red() > 240);
+    }
+    QPointer<image_viewer_window> lifetime = viewer;
+    delete viewer;
+    QVERIFY(lifetime.isNull());
+
+    viewer = new image_viewer_window();
+    viewer->show();
+    viewer->set_image_path(path);
+    QVERIFY(viewer->close());
+    QCOMPARE(viewer->current_image_path(), QString());
+    QVERIFY(viewer->findChild<QGraphicsView*>()->scene()->items().isEmpty());
+    delete viewer;
+}
+
+void correctness_test::loader_cancel_and_clear()
+{
+    QTemporaryDir dir;
+    QImage image(100, 50, QImage::Format_RGB32);
+    image.fill(Qt::red);
+    const QString first = dir.filePath("first.png");
+    const QString second = dir.filePath("second.png");
+    QVERIFY(image.save(first));
+    QVERIFY(image.save(second));
+    loader_worker worker;
+    QSignalSpy loaded(worker.loader, &image_loader::thumbnail_loaded);
+    worker.loader->request_thumbnails({{1, first, QSize(50, 25), 1}, {2, second, QSize(50, 25), 1}});
+    worker.loader->cancel_thumbnails({first});
+    worker.thread.start();
+    QTRY_COMPARE(loaded.size(), 1);
+    QCOMPARE(loaded.first().first().toULongLong(), 2);
+    worker.loader->request_thumbnails({{3, first, QSize(50, 25), 1}});
+    QTRY_COMPARE(loaded.size(), 2);
+    QCOMPARE(loaded.last().first().toULongLong(), 3);
+    QVERIFY(QMetaObject::invokeMethod(worker.loader, &image_loader::clear_cache, Qt::QueuedConnection));
+    worker.loader->clear_all();
+    worker.loader->request_thumbnails({{4, second, QSize(50, 25), 2}});
+    QTRY_COMPARE(loaded.size(), 3);
+    QCOMPARE(loaded.last().first().toULongLong(), 4);
+}
+
+void correctness_test::scanner_cancel_during_batch()
+{
+    QTemporaryDir dir;
+    QImage image(2, 2, QImage::Format_RGB32);
+    image.fill(Qt::blue);
+    for (int i = 0; i < 501; ++i)
+    {
+        QVERIFY(image.save(dir.filePath(QString::number(i) + ".png")));
+    }
+    file_scanner scanner;
+    QSignalSpy batches(&scanner, &file_scanner::images_scanned_batch);
+    QSignalSpy finished(&scanner, &file_scanner::scan_finished);
+    connect(&scanner, &file_scanner::images_scanned_batch, &scanner, &file_scanner::stop_scan);
+    scanner.start_scan(dir.path(), scanner.stop_scan(), 0, false);
+    QCOMPARE(batches.size(), 1);
+    QCOMPARE(qvariant_cast<QList<image_meta>>(batches.first().first()).size(), 500);
+    QVERIFY(finished.isEmpty());
+}
+
 int main(int argc, char** argv)
 {
     QTemporaryDir settings_dir;
     qputenv("XDG_CONFIG_HOME", settings_dir.path().toUtf8());
     qputenv("XDG_CACHE_HOME", settings_dir.path().toUtf8());
     QImageReader::setAllocationLimit(kQtImageReaderAllocMB);
+    QLocale::setDefault(QLocale(QLocale::English, QLocale::UnitedStates));
     QApplication app(argc, argv);
     app.setQuitOnLastWindowClosed(false);
     correctness_test test;

@@ -39,6 +39,8 @@ if(BUILD_TESTING)
         waterfall_scene.cc
         image_viewer_window.cc
         file_scanner.cc
+        main_window.cc
+        waterfall_view.cc
     )
     target_include_directories(imageviewer_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
     target_link_libraries(imageviewer_tests PRIVATE Qt6::Widgets Qt6::Concurrent Qt6::Test)
