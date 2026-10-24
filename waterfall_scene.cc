@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cmath>
+#include <utility>
 #include <QPixmap>
 #include <QMenu>
 #include <QClipboard>
@@ -166,6 +167,12 @@ void waterfall_scene::layout_models(int view_width)
         return;
     }
 
+    if (is_laying_out_)
+    {
+        pending_view_width_ = view_width;
+        return;
+    }
+
     int available_width = view_width - (2 * kItemMargin);
     int col_count = std::max(1, available_width / (kMinColWidth + kColumnMargin));
     int total_spacing = (col_count - 1) * kColumnMargin;
@@ -218,12 +225,6 @@ void waterfall_scene::layout_models(int view_width)
         return;
     }
 
-    if (layout_watcher_.isRunning())
-    {
-        pending_view_width_ = view_width;
-        return;
-    }
-
     std::vector<QSize> sizes;
     sizes.reserve(all_models_.size());
     for (const auto& m : all_models_)
@@ -234,29 +235,27 @@ void waterfall_scene::layout_models(int view_width)
     QFuture<layout_result> future =
         QtConcurrent::run(calculate_layout_job, sizes, view_width, layout_generation_, kItemMargin, kColumnMargin, kMinColWidth);
 
+    is_laying_out_ = true;
     layout_watcher_.setFuture(future);
 }
 
 void waterfall_scene::on_layout_finished()
 {
     layout_result result = layout_watcher_.result();
+    is_laying_out_ = false;
+    const int next_width = std::exchange(pending_view_width_, 0);
 
     if (result.generation != layout_generation_)
     {
-        if (pending_view_width_ > 0 && !all_models_.empty())
+        if (next_width > 0 && !all_models_.empty())
         {
-            int next_width = pending_view_width_;
-            pending_view_width_ = 0;
             layout_models(next_width);
         }
         return;
     }
 
-    if (pending_view_width_ > 0 && pending_view_width_ != result.view_width)
+    if (next_width > 0 && next_width != result.view_width)
     {
-        int next_width = pending_view_width_;
-        pending_view_width_ = 0;
-
         layout_models(next_width);
         return;
     }

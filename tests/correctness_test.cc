@@ -88,6 +88,8 @@ class correctness_test : public QObject
     void relayout_preserves_image_data();
     void relayout_preserves_image();
     void item_reuse_resets_image();
+    void latest_layout_width_data();
+    void latest_layout_width();
 };
 
 void correctness_test::large_visible_batch()
@@ -198,6 +200,61 @@ void correctness_test::item_reuse_resets_image()
     model.path = "second.png";
     item.bind_model(model, 200, 2);
     QCOMPARE(item.pixmap().toImage().pixelColor(0, 0), QColor(Qt::lightGray));
+}
+
+void correctness_test::latest_layout_width_data()
+{
+    QTest::addColumn<QString>("sequence");
+    QTest::newRow("repeat-then-new-width") << QString("repeat");
+    QTest::newRow("return-to-applied-width") << QString("return");
+    QTest::newRow("finished-before-notification") << QString("notification");
+    QTest::newRow("clear-during-layout") << QString("clear");
+}
+
+void correctness_test::latest_layout_width()
+{
+    QFETCH(QString, sequence);
+    waterfall_scene scene;
+    scene.add_images({{"first.png", QSize(100, 50)}});
+    scene.layout_models(440);
+    QTRY_COMPARE(scene.sceneRect().width(), 440);
+
+    pool_blocker blocker;
+    scene.layout_models(640);
+    if (sequence == "return")
+    {
+        scene.layout_models(440);
+    }
+    else if (sequence == "clear")
+    {
+        scene.clear_items();
+        scene.add_images({{"second.png", QSize(50, 100)}});
+        scene.layout_models(840);
+    }
+    else if (sequence == "repeat")
+    {
+        scene.layout_models(640);
+    }
+    blocker.unblock();
+    QVERIFY(QThreadPool::globalInstance()->waitForDone(5000));
+    if (sequence == "notification")
+    {
+        scene.layout_models(840);
+    }
+    QCoreApplication::sendPostedEvents();
+    QCoreApplication::processEvents();
+
+    if (sequence == "return")
+    {
+        QCOMPARE(scene.sceneRect().width(), 440);
+        return;
+    }
+    if (sequence == "repeat")
+    {
+        QTRY_COMPARE(scene.sceneRect().width(), 640);
+        scene.layout_models(840);
+    }
+    QTRY_COMPARE_WITH_TIMEOUT(scene.sceneRect().width(), 840, 500);
 }
 
 int main(int argc, char** argv)
