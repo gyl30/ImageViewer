@@ -58,7 +58,7 @@ class waterfall_scene : public QGraphicsScene
 
    private:
     std::vector<layout_model> all_models_;
-    std::vector<int> item_y_index_;
+    std::vector<int> item_bottom_index_;
     QStack<waterfall_item*> pool_;
     QHash<int, waterfall_item*> active_items_;
 

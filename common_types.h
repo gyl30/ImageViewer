@@ -33,7 +33,7 @@ struct layout_result
 {
     std::vector<QRectF> rects;
     std::vector<int> col_heights;
-    std::vector<int> item_y_index;
+    std::vector<int> item_bottom_index;
     int max_height = 0;
     int view_width = 0;
     int generation = 0;

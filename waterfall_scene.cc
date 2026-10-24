@@ -34,7 +34,7 @@ static layout_result calculate_layout_job(const std::vector<QSize>& sizes, int v
 
     result.col_heights.assign(col_count, kItemMargin);
     result.rects.reserve(sizes.size());
-    result.item_y_index.reserve(sizes.size());
+    result.item_bottom_index.reserve(sizes.size());
 
     for (const auto& original_size : sizes)
     {
@@ -52,7 +52,8 @@ static layout_result calculate_layout_job(const std::vector<QSize>& sizes, int v
         int h = static_cast<int>(real_col_width * ratio);
 
         result.rects.emplace_back(x, y, real_col_width, h);
-        result.item_y_index.push_back(y);
+        const int previous_bottom = result.item_bottom_index.empty() ? 0 : result.item_bottom_index.back();
+        result.item_bottom_index.push_back(std::max(previous_bottom, y + h));
 
         result.col_heights[min_col_idx] += (h + kItemMargin);
     }
@@ -96,7 +97,7 @@ void waterfall_scene::clear_items()
     }
 
     all_models_.clear();
-    item_y_index_.clear();
+    item_bottom_index_.clear();
     col_heights_.clear();
     last_layout_index_ = 0;
     request_counter_ = 0;
@@ -109,7 +110,7 @@ void waterfall_scene::add_images(const QList<image_meta>& batch)
 {
     int start_index = static_cast<int>(all_models_.size());
     all_models_.reserve(all_models_.size() + batch.size());
-    item_y_index_.reserve(all_models_.size() + batch.size());
+    item_bottom_index_.reserve(all_models_.size() + batch.size());
 
     for (int i = 0; i < batch.size(); ++i)
     {
@@ -119,7 +120,7 @@ void waterfall_scene::add_images(const QList<image_meta>& batch)
         model.original_size = batch[i].original_size;
 
         all_models_.push_back(model);
-        item_y_index_.push_back(0);
+        item_bottom_index_.push_back(0);
     }
 }
 
@@ -207,7 +208,8 @@ void waterfall_scene::layout_models(int view_width)
                 int h = static_cast<int>(real_col_width * ratio);
 
                 model.layout_rect = QRectF(x, y, real_col_width, h);
-                item_y_index_[i] = y;
+                const int previous_bottom = i == 0 ? 0 : item_bottom_index_[i - 1];
+                item_bottom_index_[i] = std::max(previous_bottom, y + h);
 
                 col_heights_[min_col_idx] += (h + kItemMargin);
             }
@@ -265,7 +267,7 @@ void waterfall_scene::on_layout_finished()
     for (size_t i = 0; i < count; ++i)
     {
         all_models_[i].layout_rect = result.rects[i];
-        item_y_index_[i] = result.item_y_index[i];
+        item_bottom_index_[i] = result.item_bottom_index[i];
     }
 
     col_heights_ = result.col_heights;
@@ -308,22 +310,18 @@ void waterfall_scene::update_viewport(const QRectF& visible_rect)
     int top_y = static_cast<int>(load_rect.top());
     int bottom_y = static_cast<int>(load_rect.bottom());
 
-    auto it_start = std::lower_bound(item_y_index_.begin(), item_y_index_.end(), top_y);
-    int start_idx = static_cast<int>(std::distance(item_y_index_.begin(), it_start));
-    start_idx = std::max(0, start_idx - 20);
+    // 前缀最大底边保证二分有序，也能找到跨越多行的长图。
+    const auto laid_out_end = item_bottom_index_.begin() + last_layout_index_;
+    auto it_start = std::upper_bound(item_bottom_index_.begin(), laid_out_end, top_y);
+    int start_idx = static_cast<int>(std::distance(item_bottom_index_.begin(), it_start));
 
     int end_idx = start_idx;
-    for (; end_idx < static_cast<int>(all_models_.size()); ++end_idx)
+    for (; end_idx < static_cast<int>(last_layout_index_); ++end_idx)
     {
-        if (item_y_index_[end_idx] > bottom_y)
+        if (all_models_[end_idx].layout_rect.top() > bottom_y)
         {
-            end_idx = std::min(static_cast<int>(all_models_.size()) - 1, end_idx + 20);
             break;
         }
-    }
-    if (end_idx >= static_cast<int>(all_models_.size()))
-    {
-        end_idx = static_cast<int>(all_models_.size()) - 1;
     }
 
     QSet<int> needed_indices;
@@ -336,7 +334,7 @@ void waterfall_scene::update_viewport(const QRectF& visible_rect)
         dpr = views().first()->devicePixelRatio();
     }
 
-    for (int i = start_idx; i <= end_idx; ++i)
+    for (int i = start_idx; i < end_idx; ++i)
     {
         const auto& model = all_models_[i];
         if (!load_rect.intersects(model.layout_rect))

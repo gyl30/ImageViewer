@@ -105,6 +105,7 @@ class correctness_test : public QObject
     void viewer_file_replaced_data();
     void viewer_file_replaced();
     void movie_stops_on_close();
+    void tall_image_stays_visible();
 };
 
 void correctness_test::large_visible_batch()
@@ -535,6 +536,36 @@ void correctness_test::movie_stops_on_close()
     viewer.set_image_path(still_path);
     QTRY_VERIFY(movie.isNull());
     QTRY_VERIFY(viewer.windowTitle().contains("still.png (100x50)"));
+}
+
+void correctness_test::tall_image_stays_visible()
+{
+    waterfall_scene scene;
+    QList<image_meta> models = {{"tall.png", QSize(100, 10000)}};
+    for (int i = 0; i < 80; ++i)
+    {
+        models.append({QString::number(i) + ".png", QSize(100, 100)});
+    }
+    scene.add_images(models);
+    scene.layout_models(440);
+    QTRY_COMPARE(scene.sceneRect().width(), 440);
+    scene.update_viewport(QRectF(0, 0, 440, 400));
+    scene.update_viewport(QRectF(0, 9000, 440, 400));
+
+    bool tall_visible = false;
+    bool first_short_visible = false;
+    for (auto* candidate : scene.items())
+    {
+        auto* item = dynamic_cast<waterfall_item*>(candidate);
+        if (item == nullptr || !item->isVisible())
+        {
+            continue;
+        }
+        tall_visible |= item->get_path() == "tall.png";
+        first_short_visible |= item->get_index() == 1;
+    }
+    QVERIFY(tall_visible);
+    QVERIFY(!first_short_visible);
 }
 
 int main(int argc, char** argv)

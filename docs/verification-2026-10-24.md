@@ -14,3 +14,4 @@
 | C8a | `thumbnail_file_replaced`：覆盖为蓝图后仍返回红像素 | 同进程重新请求及新 loader 的磁盘缓存读取均为蓝色；解码与存盘固定使用开始时的版本 key，累计 CTest 通过 |
 | C8b | `viewer_file_replaced`：主加载缓存和预加载缓存两条路径覆盖后均仍显示旧图 | 两条路径重新打开均显示新像素，关闭重开预加载回归仍通过；累计 CTest 通过 |
 | C9 | `movie_stops_on_close`：close 后 QMovie 仍为 Running | 关闭后停止并销毁，重开恢复播放，切换静态图后旧 movie 销毁；累计 CTest 通过 |
+| C10 | `tall_image_stays_visible`：长图覆盖当前视口却不可见 | 使用既有索引空间保存前缀最大底边，二分只查询已布局部分；滚动后长图保留、离屏短图回收，累计 CTest 通过 |
