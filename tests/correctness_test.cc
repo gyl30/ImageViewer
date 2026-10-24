@@ -427,23 +427,26 @@ void correctness_test::exif_orientation()
     const auto metadata = qvariant_cast<QList<image_meta>>(batches.first().first());
     QCOMPARE(metadata.first().original_size, display_size);
 
-    loader_worker worker;
-    QSignalSpy loaded(worker.loader, &image_loader::thumbnail_loaded);
-    const QSize target_size = display_size * (2.0 / 3.0);
-    worker.loader->request_thumbnails({{1, path, target_size, 1}});
-    worker.thread.start();
-    QTRY_COMPARE(loaded.size(), 1);
-    const QImage thumbnail = qvariant_cast<QImage>(loaded.first()[2]);
-    QCOMPARE(thumbnail.size(), target_size);
-    for (const QPoint& corner : {QPoint(0, 0), QPoint(1, 0), QPoint(0, 1), QPoint(1, 1)})
+    for (int pass = 0; pass < 2; ++pass)
     {
-        const QColor actual = thumbnail.pixelColor(thumbnail.width() * (1 + 2 * corner.x()) / 4,
-                                                   thumbnail.height() * (1 + 2 * corner.y()) / 4);
-        const QColor reference = expected.pixelColor(expected.width() * (1 + 2 * corner.x()) / 4,
-                                                     expected.height() * (1 + 2 * corner.y()) / 4);
-        QVERIFY(std::abs(actual.red() - reference.red()) < 10);
-        QVERIFY(std::abs(actual.green() - reference.green()) < 10);
-        QVERIFY(std::abs(actual.blue() - reference.blue()) < 10);
+        loader_worker worker;
+        QSignalSpy loaded(worker.loader, &image_loader::thumbnail_loaded);
+        const QSize target_size = display_size * (2.0 / 3.0);
+        worker.loader->request_thumbnails({{1, path, target_size, 1}});
+        worker.thread.start();
+        QTRY_COMPARE(loaded.size(), 1);
+        const QImage thumbnail = qvariant_cast<QImage>(loaded.first()[2]);
+        QCOMPARE(thumbnail.size(), target_size);
+        for (const QPoint& corner : {QPoint(0, 0), QPoint(1, 0), QPoint(0, 1), QPoint(1, 1)})
+        {
+            const QColor actual = thumbnail.pixelColor(thumbnail.width() * (1 + 2 * corner.x()) / 4,
+                                                       thumbnail.height() * (1 + 2 * corner.y()) / 4);
+            const QColor reference = expected.pixelColor(expected.width() * (1 + 2 * corner.x()) / 4,
+                                                         expected.height() * (1 + 2 * corner.y()) / 4);
+            QVERIFY(std::abs(actual.red() - reference.red()) < 10);
+            QVERIFY(std::abs(actual.green() - reference.green()) < 10);
+            QVERIFY(std::abs(actual.blue() - reference.blue()) < 10);
+        }
     }
 }
 

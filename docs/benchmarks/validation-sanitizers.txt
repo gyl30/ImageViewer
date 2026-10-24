@@ -1,10 +1,10 @@
-Start testing: Oct 25 06:20 CST
+Start testing: Oct 25 06:50 CST
 ----------------------------------------------------------
 1/1 Testing: correctness
 1/1 Test: correctness
 Command: "/tmp/imageviewer-sanitize/imageviewer_tests"
 Directory: /tmp/imageviewer-sanitize
-"correctness" start time: Oct 25 06:20 CST
+"correctness" start time: Oct 25 06:50 CST
 Output:
 ----------------------------------------------------------
 ********* Start testing of correctness_test *********
@@ -93,15 +93,16 @@ PASS   : correctness_test::scanner_formats(webp)
 PASS   : correctness_test::jpeg_cache_roundtrip()
 PASS   : correctness_test::only_visible_requests()
 PASS   : correctness_test::scrolled_result_skips_old()
+PASS   : correctness_test::viewer_status_tracks_loading()
 PASS   : correctness_test::cleanupTestCase()
-Totals: 71 passed, 0 failed, 0 skipped, 0 blacklisted, 4258ms
+Totals: 72 passed, 0 failed, 0 skipped, 0 blacklisted, 4755ms
 ********* Finished testing of correctness_test *********
 <end of output>
-Test time =   4.31 sec
+Test time =   4.82 sec
 ----------------------------------------------------------
 Test Passed.
-"correctness" end time: Oct 25 06:20 CST
+"correctness" end time: Oct 25 06:50 CST
 "correctness" time elapsed: 00:00:04
 ----------------------------------------------------------
 
-End testing: Oct 25 06:20 CST
+End testing: Oct 25 06:50 CST
