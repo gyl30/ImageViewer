@@ -1161,6 +1161,7 @@ void image_viewer_window::closeEvent(QCloseEvent* event)
 {
     save_settings();
     pending_preload_paths_.clear();
+    clear_movie();
 
     if (image_watcher_ != nullptr)
     {

@@ -13,3 +13,4 @@
 | C7 | `exif_orientation`：5–8 方向元数据为 120×60 而非 60×120；先修元数据后再次观察到缩略图 40×20 而非 40×80 | 1–8 方向的元数据、目标尺寸和四象限颜色全部通过；磁盘缓存版本更新，避免复用旧错误缩略图；累计 CTest 通过 |
 | C8a | `thumbnail_file_replaced`：覆盖为蓝图后仍返回红像素 | 同进程重新请求及新 loader 的磁盘缓存读取均为蓝色；解码与存盘固定使用开始时的版本 key，累计 CTest 通过 |
 | C8b | `viewer_file_replaced`：主加载缓存和预加载缓存两条路径覆盖后均仍显示旧图 | 两条路径重新打开均显示新像素，关闭重开预加载回归仍通过；累计 CTest 通过 |
+| C9 | `movie_stops_on_close`：close 后 QMovie 仍为 Running | 关闭后停止并销毁，重开恢复播放，切换静态图后旧 movie 销毁；累计 CTest 通过 |

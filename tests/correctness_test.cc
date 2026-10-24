@@ -2,6 +2,8 @@
 #include <QBuffer>
 #include <QGraphicsView>
 #include <QGraphicsPixmapItem>
+#include <QMovie>
+#include <QPointer>
 #include <QImageReader>
 #include <QFile>
 #include <QFileInfo>
@@ -102,6 +104,7 @@ class correctness_test : public QObject
     void thumbnail_file_replaced();
     void viewer_file_replaced_data();
     void viewer_file_replaced();
+    void movie_stops_on_close();
 };
 
 void correctness_test::large_visible_batch()
@@ -496,6 +499,42 @@ void correctness_test::viewer_file_replaced()
         return item != nullptr && item->pixmap().toImage().pixelColor(0, 0) == QColor(Qt::blue);
     };
     QTRY_VERIFY_WITH_TIMEOUT(shows_new_image(), 500);
+}
+
+void correctness_test::movie_stops_on_close()
+{
+    QTemporaryDir dir;
+    const QString path = dir.filePath("animated.gif");
+    QFile file(path);
+    QVERIFY(file.open(QIODevice::WriteOnly));
+    const QByteArray gif = QByteArray::fromBase64(
+        "R0lGODlhAgACAIEAAP8AAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQACgAAACwAAAAAAgACAAAIBgABCAQQEAAh+QQBCgABACwAAAAAAgACAIEAAP8AAAAAAAAAAAAIBgABCAQQEAA7");
+    QCOMPARE(file.write(gif), gif.size());
+    file.close();
+
+    image_viewer_window viewer;
+    viewer.show();
+    viewer.set_image_path(path);
+    QPointer<QMovie> movie = viewer.findChild<QMovie*>();
+    QVERIFY(!movie.isNull());
+    QCOMPARE(movie->frameCount(), 2);
+    QCOMPARE(movie->state(), QMovie::Running);
+    QVERIFY(viewer.close());
+    QVERIFY(movie.isNull() || movie->state() == QMovie::NotRunning);
+    QTRY_VERIFY(movie.isNull());
+
+    viewer.show();
+    viewer.set_image_path(path);
+    movie = viewer.findChild<QMovie*>();
+    QVERIFY(!movie.isNull());
+    QCOMPARE(movie->state(), QMovie::Running);
+    const QString still_path = dir.filePath("still.png");
+    QImage image(100, 50, QImage::Format_RGB32);
+    image.fill(Qt::green);
+    QVERIFY(image.save(still_path));
+    viewer.set_image_path(still_path);
+    QTRY_VERIFY(movie.isNull());
+    QTRY_VERIFY(viewer.windowTitle().contains("still.png (100x50)"));
 }
 
 int main(int argc, char** argv)
