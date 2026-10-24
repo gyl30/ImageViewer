@@ -1149,6 +1149,7 @@ void image_viewer_window::keyPressEvent(QKeyEvent* event)
 void image_viewer_window::closeEvent(QCloseEvent* event)
 {
     save_settings();
+    pending_preload_paths_.clear();
 
     if (image_watcher_ != nullptr)
     {
@@ -1166,6 +1167,8 @@ void image_viewer_window::closeEvent(QCloseEvent* event)
         {
             preload_watcher_->waitForFinished();
         }
+        delete preload_watcher_;
+        preload_watcher_ = nullptr;
     }
 
     scene_->clear();

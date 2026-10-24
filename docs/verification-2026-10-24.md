@@ -8,3 +8,4 @@
 | C2 | `imageviewer_tests queued_cache_clear`：queued clear_cache 后 marker.png 仍存在 | 同命令及 C1 回归通过；每个工作事件解码一项，空闲时返回事件循环，删除条件变量和永久循环 |
 | C3 | `relayout_preserves_image`：普通重排像素变灰；追加批次时旧项仍使用旧宽度 | 两个数据用例和对象池重用测试通过；常态像素宽度按 scale×pixmap.width 检查，排除 Qt 选择框边距；累计 CTest 通过 |
 | C4 | `latest_layout_width`：同宽重复后 840 错停在 640，440→640→440 错停在 640 | 四个序列通过，另含 future 已结束但通知未消费、布局中清空换目录；累计 CTest 通过 |
+| C5 | `preloads_after_reopen`：重开后无法完成左右两个邻居的预加载 | 换一组未缓存图片重开后，两个邻居依次完成；累计 CTest 通过 |

@@ -12,6 +12,7 @@
 #include <QtConcurrent>
 #include "common_types.h"
 #include "image_loader.h"
+#include "image_viewer_window.h"
 #include "waterfall_item.h"
 #include "waterfall_scene.h"
 
@@ -90,6 +91,7 @@ class correctness_test : public QObject
     void item_reuse_resets_image();
     void latest_layout_width_data();
     void latest_layout_width();
+    void preloads_after_reopen();
 };
 
 void correctness_test::large_visible_batch()
@@ -255,6 +257,44 @@ void correctness_test::latest_layout_width()
         scene.layout_models(840);
     }
     QTRY_COMPARE_WITH_TIMEOUT(scene.sceneRect().width(), 840, 500);
+}
+
+void correctness_test::preloads_after_reopen()
+{
+    QTemporaryDir dir;
+    std::vector<QString> paths;
+    for (int i = 0; i < 6; ++i)
+    {
+        QImage image(100, 50, QImage::Format_RGB32);
+        image.fill(i == 3 ? Qt::blue : Qt::green);
+        paths.push_back(dir.filePath(QString::number(i) + ".png"));
+        QVERIFY(image.save(paths.back()));
+    }
+
+    image_viewer_window viewer;
+    viewer.set_image_list(paths);
+    viewer.show();
+    viewer.set_image_path(paths[1]);
+    QTRY_VERIFY(viewer.windowTitle().startsWith("Viewer -"));
+    QVERIFY(viewer.close());
+    viewer.show();
+    viewer.set_image_path(paths[4]);
+    QTRY_VERIFY(viewer.windowTitle().startsWith("Viewer -"));
+
+    const auto both_neighbors_loaded = [&viewer]()
+    {
+        for (auto* watcher : viewer.findChildren<QFutureWatcherBase*>())
+        {
+            auto* preload = dynamic_cast<QFutureWatcher<std::pair<QString, QImage>>*>(watcher);
+            if (preload != nullptr && preload->isFinished())
+            {
+                const QImage result = preload->result().second;
+                return !result.isNull() && result.pixelColor(0, 0) == QColor(Qt::blue);
+            }
+        }
+        return false;
+    };
+    QTRY_VERIFY_WITH_TIMEOUT(both_neighbors_loaded(), 500);
 }
 
 int main(int argc, char** argv)
