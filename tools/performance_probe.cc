@@ -105,16 +105,34 @@ class performance_probe
             {
                 first_thumbnail_ms_ = timer_.elapsed();
             }
-            if (!image.isNull() && first_visible_ms_ < 0)
+            if (!image.isNull())
             {
                 const QRectF visible = window_.view_->mapToScene(window_.view_->viewport()->rect()).boundingRect();
+                bool matched = false;
                 for (auto* item : window_.scene_->active_items_)
                 {
-                    if (item->get_request_id() == id && item->sceneBoundingRect().intersects(visible))
+                    if (item->get_request_id() != id)
                     {
-                        first_visible_ms_ = timer_.elapsed();
-                        break;
+                        continue;
                     }
+                    matched = true;
+                    if (item->sceneBoundingRect().intersects(visible))
+                    {
+                        ++visible_results_;
+                        if (first_visible_ms_ < 0)
+                        {
+                            first_visible_ms_ = timer_.elapsed();
+                        }
+                    }
+                    else
+                    {
+                        ++prefetch_results_;
+                    }
+                    break;
+                }
+                if (!matched)
+                {
+                    ++stale_results_;
                 }
             }
         });
@@ -149,7 +167,9 @@ class performance_probe
                             scene->item_bottom_index_.capacity() * sizeof(int) + scene->image_paths_.capacity() * sizeof(QString))},
                         {"active_items", scene->active_items_.size()}, {"pool_items", scene->pool_.size()},
                         {"total_items", scene->items().size()}, {"loaded_stat_paths", 0},
-                        {"decoded_count", decoded_count_}, {"scan_cpu_ms", scan_cpu_ms_.load()},
+                        {"decoded_count", decoded_count_}, {"visible_results", visible_results_},
+                        {"prefetch_results", prefetch_results_}, {"stale_results", stale_results_},
+                        {"scan_cpu_ms", scan_cpu_ms_.load()},
                         {"loader_cpu_ms", loader_cpu_ms_.load()}};
         qint64 path_bytes = 0;
         for (const auto& path : scene->image_paths_)
@@ -322,6 +342,9 @@ class performance_probe
     qint64 first_visible_ms_ = -1;
     qint64 scan_ms_ = 0;
     int decoded_count_ = 0;
+    int visible_results_ = 0;
+    int prefetch_results_ = 0;
+    int stale_results_ = 0;
     double idle_cpu_ms_ = 0;
     std::atomic<double> loader_cpu_ms_{0};
     std::atomic<double> scan_cpu_ms_{0};
