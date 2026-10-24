@@ -7,7 +7,6 @@
 #include <QList>
 #include <QSize>
 #include <QMutex>
-#include <QWaitCondition>
 #include <QString>
 #include <atomic>
 #include "common_types.h"
@@ -21,7 +20,6 @@ class image_loader : public QObject
     ~image_loader() override;
 
    public slots:
-    void start_loop();
     void stop();
     void request_thumbnails(const QList<load_task>& tasks);
     void cancel_thumbnails(const QList<QString>& paths);
@@ -32,6 +30,7 @@ class image_loader : public QObject
     void thumbnail_loaded(quint64 id, QString path, QImage image, int session_id);
 
    private:
+    void load_next();
     [[nodiscard]] QString memory_cache_key(const load_task& task) const;
     [[nodiscard]] QString disk_cache_path(const load_task& task) const;
     [[nodiscard]] QImage load_disk_cached_image(const load_task& task) const;
@@ -45,7 +44,7 @@ class image_loader : public QObject
     QString disk_cache_dir_;
 
     QMutex mutex_;
-    QWaitCondition condition_;
+    bool is_loading_ = false;
     std::atomic<bool> abort_;
 };
 

@@ -22,7 +22,6 @@ image_loader::~image_loader() { stop(); }
 void image_loader::stop()
 {
     abort_ = true;
-    condition_.wakeAll();
 }
 
 QString image_loader::memory_cache_key(const load_task& task) const
@@ -88,7 +87,6 @@ void image_loader::cleanup_disk_cache()
 void image_loader::request_thumbnails(const QList<load_task>& tasks)
 {
     QMutexLocker locker(&mutex_);
-    bool has_new_tasks = false;
     for (const auto& task : tasks)
     {
         const QString cache_key = memory_cache_key(task);
@@ -99,12 +97,12 @@ void image_loader::request_thumbnails(const QList<load_task>& tasks)
         }
 
         task_queue_.prepend(task);
-        has_new_tasks = true;
     }
 
-    if (has_new_tasks)
+    if (!task_queue_.isEmpty() && !is_loading_ && !abort_)
     {
-        condition_.wakeOne();
+        is_loading_ = true;
+        QMetaObject::invokeMethod(this, &image_loader::load_next, Qt::QueuedConnection);
     }
 }
 
@@ -135,40 +133,21 @@ void image_loader::clear_cache()
     }
 }
 
-void image_loader::start_loop()
+void image_loader::load_next()
 {
-    while (!abort_)
+    load_task current_task;
     {
-        load_task current_task;
-        bool valid_task_found = false;
-
+        QMutexLocker locker(&mutex_);
+        if (abort_ || task_queue_.isEmpty())
         {
-            QMutexLocker locker(&mutex_);
-
-            while (task_queue_.isEmpty() && !abort_)
-            {
-                condition_.wait(&mutex_);
-            }
-
-            if (abort_)
-            {
-                return;
-            }
-
-            while (!task_queue_.isEmpty())
-            {
-                current_task = task_queue_.takeFirst();
-
-                valid_task_found = true;
-                break;
-            }
+            is_loading_ = false;
+            return;
         }
-
-        if (valid_task_found)
-        {
-            load_image_internal(current_task);
-        }
+        current_task = task_queue_.takeFirst();
     }
+
+    load_image_internal(current_task);
+    QMetaObject::invokeMethod(this, &image_loader::load_next, Qt::QueuedConnection);
 }
 
 void image_loader::load_image_internal(const load_task& current_task)

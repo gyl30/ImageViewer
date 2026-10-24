@@ -5,3 +5,4 @@
 | 问题 | 修复前实际失败 | 修复后验证 |
 | --- | --- | --- |
 | C1 | `imageviewer_tests large_visible_batch`：submissions 实际 5，预期 1；测试限制重入深度，避免栈溢出 | 同命令通过，一次提交的 240 张缩略图全部收到；应用与测试编译通过，`git diff --check` 通过 |
+| C2 | `imageviewer_tests queued_cache_clear`：queued clear_cache 后 marker.png 仍存在 | 同命令及 C1 回归通过；每个工作事件解码一项，空闲时返回事件循环，删除条件变量和永久循环 |

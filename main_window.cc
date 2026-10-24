@@ -237,7 +237,6 @@ void main_window::setup_worker()
     image_loader_ = new image_loader();
     image_loader_->moveToThread(worker_thread_);
     connect(worker_thread_, &QThread::finished, image_loader_, &QObject::deleteLater);
-    connect(worker_thread_, &QThread::started, image_loader_, &image_loader::start_loop);
     worker_thread_->start();
 }
 

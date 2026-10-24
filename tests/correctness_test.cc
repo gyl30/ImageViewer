@@ -1,6 +1,9 @@
 #include <QApplication>
 #include <QGraphicsView>
 #include <QImageReader>
+#include <QFile>
+#include <QFileInfo>
+#include <QStandardPaths>
 #include <QSignalSpy>
 #include <QTemporaryDir>
 #include <QThread>
@@ -17,7 +20,6 @@ class loader_worker
     {
         loader = new image_loader();
         loader->moveToThread(&thread);
-        QObject::connect(&thread, &QThread::started, loader, &image_loader::start_loop);
         QObject::connect(&thread, &QThread::finished, loader, &QObject::deleteLater);
     }
 
@@ -42,6 +44,7 @@ class correctness_test : public QObject
 
    private slots:
     void large_visible_batch();
+    void queued_cache_clear();
 };
 
 void correctness_test::large_visible_batch()
@@ -79,6 +82,19 @@ void correctness_test::large_visible_batch()
 
     worker.thread.start();
     QTRY_COMPARE(loaded.size(), models.size());
+}
+
+void correctness_test::queued_cache_clear()
+{
+    const QString marker = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + "/thumbnails/marker.png";
+    loader_worker worker;
+    QFile file(marker);
+    QVERIFY(file.open(QIODevice::WriteOnly));
+    file.close();
+
+    worker.thread.start();
+    QVERIFY(QMetaObject::invokeMethod(worker.loader, &image_loader::clear_cache, Qt::QueuedConnection));
+    QTRY_VERIFY_WITH_TIMEOUT(!QFileInfo::exists(marker), 500);
 }
 
 int main(int argc, char** argv)
