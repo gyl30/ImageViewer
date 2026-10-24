@@ -1,0 +1,107 @@
+Start testing: Oct 25 06:20 CST
+----------------------------------------------------------
+1/1 Testing: correctness
+1/1 Test: correctness
+Command: "/tmp/iv-release/imageviewer_tests"
+Directory: /tmp/iv-release
+"correctness" start time: Oct 25 06:20 CST
+Output:
+----------------------------------------------------------
+********* Start testing of correctness_test *********
+Config: Using QtTest library 6.9.3, Qt 6.9.3 (x86_64-little_endian-lp64 shared (dynamic) release build; by GCC 10.3.1 20210422 (Red Hat 10.3.1-1)), ubuntu 22.04
+PASS   : correctness_test::initTestCase()
+PASS   : correctness_test::large_visible_batch()
+PASS   : correctness_test::queued_cache_clear()
+PASS   : correctness_test::relayout_preserves_image(resize)
+PASS   : correctness_test::relayout_preserves_image(append-during-resize)
+PASS   : correctness_test::item_reuse_resets_image()
+PASS   : correctness_test::latest_layout_width(repeat-then-new-width)
+PASS   : correctness_test::latest_layout_width(return-to-applied-width)
+PASS   : correctness_test::latest_layout_width(finished-before-notification)
+PASS   : correctness_test::latest_layout_width(clear-during-layout)
+QWARN  : correctness_test::no_background_preload() This plugin does not support propagateSizeHints()
+PASS   : correctness_test::no_background_preload()
+PASS   : correctness_test::stale_queued_scans()
+PASS   : correctness_test::exif_orientation(1)
+PASS   : correctness_test::exif_orientation(2)
+PASS   : correctness_test::exif_orientation(3)
+PASS   : correctness_test::exif_orientation(4)
+PASS   : correctness_test::exif_orientation(5)
+PASS   : correctness_test::exif_orientation(6)
+PASS   : correctness_test::exif_orientation(7)
+PASS   : correctness_test::exif_orientation(8)
+PASS   : correctness_test::thumbnail_file_replaced()
+PASS   : correctness_test::viewer_file_replaced(same-window)
+QWARN  : correctness_test::viewer_file_replaced(after-close) This plugin does not support propagateSizeHints()
+PASS   : correctness_test::viewer_file_replaced(after-close)
+QWARN  : correctness_test::movie_stops_on_close() This plugin does not support propagateSizeHints()
+PASS   : correctness_test::movie_stops_on_close()
+PASS   : correctness_test::tall_image_stays_visible()
+PASS   : correctness_test::item_geometry(upscale)
+PASS   : correctness_test::item_geometry(downscale)
+QWARN  : correctness_test::main_window_switches_folders() This plugin does not support propagateSizeHints()
+PASS   : correctness_test::main_window_switches_folders()
+QWARN  : correctness_test::fast_navigation() This plugin does not support propagateSizeHints()
+PASS   : correctness_test::fast_navigation()
+QWARN  : correctness_test::large_image_and_close() This plugin does not support propagateSizeHints()
+PASS   : correctness_test::large_image_and_close()
+PASS   : correctness_test::loader_cancel_and_clear()
+PASS   : correctness_test::scanner_cancel_during_batch()
+PASS   : correctness_test::panorama_is_requested(full-layout)
+PASS   : correctness_test::panorama_is_requested(incremental-layout)
+PASS   : correctness_test::loader_failure_finishes()
+PASS   : correctness_test::foreground_is_serial()
+QWARN  : correctness_test::navigation_focus(space) This plugin does not support propagateSizeHints()
+PASS   : correctness_test::navigation_focus(space)
+QWARN  : correctness_test::navigation_focus(backspace) This plugin does not support propagateSizeHints()
+PASS   : correctness_test::navigation_focus(backspace)
+QWARN  : correctness_test::navigation_focus(home) This plugin does not support propagateSizeHints()
+PASS   : correctness_test::navigation_focus(home)
+QWARN  : correctness_test::navigation_focus(end) This plugin does not support propagateSizeHints()
+PASS   : correctness_test::navigation_focus(end)
+PASS   : correctness_test::catalog_snapshot_is_shared()
+PASS   : correctness_test::thumbnail_budget_and_bound()
+PASS   : correctness_test::visible_requests_first()
+PASS   : correctness_test::disk_cache_budget()
+PASS   : correctness_test::thumbnail_alpha_roundtrip()
+QWARN  : correctness_test::main_close_closes_viewer() This plugin does not support propagateSizeHints()
+QWARN  : correctness_test::main_close_closes_viewer() This plugin does not support propagateSizeHints()
+QWARN  : correctness_test::main_close_closes_viewer() This plugin does not support raise()
+PASS   : correctness_test::main_close_closes_viewer()
+PASS   : correctness_test::scanner_reports_root_error()
+PASS   : correctness_test::theme_keeps_scene_items()
+PASS   : correctness_test::scroll_updates_during_motion()
+QWARN  : correctness_test::viewer_error_is_visible() This plugin does not support propagateSizeHints()
+PASS   : correctness_test::viewer_error_is_visible()
+PASS   : correctness_test::scanner_sort_modes(0-up)
+PASS   : correctness_test::scanner_sort_modes(0-down)
+PASS   : correctness_test::scanner_sort_modes(1-up)
+PASS   : correctness_test::scanner_sort_modes(1-down)
+PASS   : correctness_test::scanner_sort_modes(2-up)
+PASS   : correctness_test::scanner_sort_modes(2-down)
+PASS   : correctness_test::clear_resets_scroll_range()
+PASS   : correctness_test::reprioritize_after_scroll()
+PASS   : correctness_test::same_path_replaced_inflight()
+PASS   : correctness_test::layout_result_is_consumed()
+PASS   : correctness_test::natural_sort_in_c_locale()
+PASS   : correctness_test::viewer_snapshot_is_shared()
+PASS   : correctness_test::scanner_formats(jpg)
+PASS   : correctness_test::scanner_formats(png)
+PASS   : correctness_test::scanner_formats(bmp)
+PASS   : correctness_test::scanner_formats(gif)
+PASS   : correctness_test::scanner_formats(webp)
+PASS   : correctness_test::jpeg_cache_roundtrip()
+PASS   : correctness_test::only_visible_requests()
+PASS   : correctness_test::scrolled_result_skips_old()
+PASS   : correctness_test::cleanupTestCase()
+Totals: 71 passed, 0 failed, 0 skipped, 0 blacklisted, 3872ms
+********* Finished testing of correctness_test *********
+<end of output>
+Test time =   3.88 sec
+----------------------------------------------------------
+Test Passed.
+"correctness" end time: Oct 25 06:20 CST
+"correctness" time elapsed: 00:00:03
+----------------------------------------------------------
+
+End testing: Oct 25 06:20 CST

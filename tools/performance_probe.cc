@@ -135,6 +135,10 @@ class performance_probe
                     ++stale_results_;
                 }
             }
+            else
+            {
+                ++failed_results_;
+            }
         });
     }
 
@@ -169,6 +173,7 @@ class performance_probe
                         {"total_items", scene->items().size()}, {"loaded_stat_paths", 0},
                         {"decoded_count", decoded_count_}, {"visible_results", visible_results_},
                         {"prefetch_results", prefetch_results_}, {"stale_results", stale_results_},
+                        {"failed_results", failed_results_},
                         {"scan_cpu_ms", scan_cpu_ms_.load()},
                         {"loader_cpu_ms", loader_cpu_ms_.load()}};
         qint64 path_bytes = 0;
@@ -345,6 +350,7 @@ class performance_probe
     int visible_results_ = 0;
     int prefetch_results_ = 0;
     int stale_results_ = 0;
+    int failed_results_ = 0;
     double idle_cpu_ms_ = 0;
     std::atomic<double> loader_cpu_ms_{0};
     std::atomic<double> scan_cpu_ms_{0};
