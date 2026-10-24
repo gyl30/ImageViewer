@@ -29,6 +29,7 @@
 #include "waterfall_view.h"
 #include <QAction>
 #include <QScrollBar>
+#include <QScopeGuard>
 
 namespace
 {
@@ -149,6 +150,7 @@ class correctness_test : public QObject
     void reprioritize_after_scroll();
     void same_path_replaced_inflight();
     void layout_result_is_consumed();
+    void natural_sort_in_c_locale();
 };
 
 void correctness_test::large_visible_batch()
@@ -1205,6 +1207,24 @@ void correctness_test::layout_result_is_consumed()
     QTRY_COMPARE(scene.sceneRect().width(), 440);
     const auto future = scene.layout_watcher_.future();
     QVERIFY(!future.isValid() || future.result().rects.empty());
+}
+
+void correctness_test::natural_sort_in_c_locale()
+{
+    const QLocale previous;
+    const auto restore = qScopeGuard([previous]() { QLocale::setDefault(previous); });
+    QLocale::setDefault(QLocale::c());
+    QTemporaryDir dir;
+    QImage image(2, 2, QImage::Format_RGB32);
+    image.fill(Qt::blue);
+    QVERIFY(image.save(dir.filePath("image2.png")));
+    QVERIFY(image.save(dir.filePath("image10.png")));
+    file_scanner scanner;
+    QSignalSpy batches(&scanner, &file_scanner::images_scanned_batch);
+    scanner.start_scan(dir.path(), scanner.stop_scan(), 0, false);
+    QCOMPARE(batches.size(), 1);
+    const auto images = qvariant_cast<QList<image_meta>>(batches.first().first());
+    QCOMPARE(QFileInfo(images.first().path).fileName(), QString("image2.png"));
 }
 
 int main(int argc, char** argv)

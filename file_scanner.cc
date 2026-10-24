@@ -7,6 +7,7 @@
 #include <QFileInfo>
 #include <QDateTime>
 #include <QDebug>
+#include <QLocale>
 
 namespace
 {
@@ -70,6 +71,10 @@ void file_scanner::start_scan(const QString& dir_path, int session_id, int sort_
     }
 
     QCollator collator;
+    if (collator.locale().language() == QLocale::C)
+    {
+        collator.setLocale(QLocale(QLocale::English));
+    }
     collator.setNumericMode(true);
     collator.setCaseSensitivity(Qt::CaseInsensitive);
 
