@@ -1,0 +1,57 @@
+[
+    {
+        "bytes": 77842,
+        "codec": "PNG",
+        "compression": 50,
+        "cpu_ms_100_decodes": 98.27799999999996,
+        "cpu_ms_100_encodes": 418.246,
+        "format": 6,
+        "lossless": true,
+        "mean_absolute_error": 0,
+        "quality": -1
+    },
+    {
+        "bytes": 84148,
+        "codec": "PNG",
+        "compression": 15,
+        "cpu_ms_100_decodes": 103.20899999999995,
+        "cpu_ms_100_encodes": 251.46400000000006,
+        "format": 6,
+        "lossless": true,
+        "mean_absolute_error": 0,
+        "quality": -1
+    },
+    {
+        "bytes": 69404,
+        "codec": "PNG",
+        "compression": 50,
+        "cpu_ms_100_decodes": 81.62199999999984,
+        "cpu_ms_100_encodes": 364.4520000000001,
+        "format": 4,
+        "lossless": true,
+        "mean_absolute_error": 0,
+        "quality": -1
+    },
+    {
+        "bytes": 73628,
+        "codec": "PNG",
+        "compression": 15,
+        "cpu_ms_100_decodes": 89.93100000000004,
+        "cpu_ms_100_encodes": 205.58899999999994,
+        "format": 4,
+        "lossless": true,
+        "mean_absolute_error": 0,
+        "quality": -1
+    },
+    {
+        "bytes": 18466,
+        "codec": "JPEG",
+        "compression": -1,
+        "cpu_ms_100_decodes": 25.488000000000284,
+        "cpu_ms_100_encodes": 48.118999999999915,
+        "format": 4,
+        "lossless": false,
+        "mean_absolute_error": 1.5417412651909723,
+        "quality": 95
+    }
+]

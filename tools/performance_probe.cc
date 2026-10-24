@@ -176,7 +176,7 @@ class performance_probe
         }
         qint64 cache_bytes = 0;
         int cache_files = 0;
-        QDirIterator files(loader->disk_cache_dir_, {"*.png"}, QDir::Files);
+        QDirIterator files(loader->disk_cache_dir_, QDir::Files);
         while (files.hasNext())
         {
             files.next();
@@ -400,30 +400,65 @@ static int encoding_benchmark(const QString& source, const QString& output)
         return 2;
     }
     QJsonArray rows;
-    for (QImage::Format format : {QImage::Format_ARGB32_Premultiplied, QImage::Format_RGB32})
+    struct encoding_option
     {
-        const QImage image = original.convertToFormat(format);
-        for (int compression : {50, 15})
+        QImage::Format format;
+        QByteArray codec;
+        int compression;
+        int quality;
+    };
+    const encoding_option options[] = {
+        {QImage::Format_ARGB32_Premultiplied, "PNG", 50, -1},
+        {QImage::Format_ARGB32_Premultiplied, "PNG", 15, -1},
+        {QImage::Format_RGB32, "PNG", 50, -1},
+        {QImage::Format_RGB32, "PNG", 15, -1},
+        {QImage::Format_RGB32, "JPEG", -1, 95}};
+    for (const auto& option : options)
+    {
+        const QImage image = original.convertToFormat(option.format);
+        const double start = process_cpu_ms();
+        QByteArray bytes;
+        for (int index = 0; index < 100; ++index)
         {
-            const double start = process_cpu_ms();
-            QByteArray bytes;
-            for (int index = 0; index < 100; ++index)
+            bytes.clear();
+            QBuffer buffer(&bytes);
+            buffer.open(QIODevice::WriteOnly);
+            QImageWriter writer(&buffer, option.codec);
+            writer.setCompression(option.compression);
+            writer.setQuality(option.quality);
+            if (!writer.write(image))
             {
-                bytes.clear();
-                QBuffer buffer(&bytes);
-                buffer.open(QIODevice::WriteOnly);
-                QImageWriter writer(&buffer, "PNG");
-                writer.setCompression(compression);
-                if (!writer.write(image))
-                {
-                    return 3;
-                }
+                return 3;
             }
-            const bool lossless = QImage::fromData(bytes).convertToFormat(QImage::Format_RGB32) ==
-                                  image.convertToFormat(QImage::Format_RGB32);
-            rows.append(QJsonObject{{"format", static_cast<int>(format)}, {"compression", compression},
-                {"cpu_ms_100_encodes", process_cpu_ms() - start}, {"bytes", bytes.size()}, {"lossless", lossless}});
         }
+        const double encode_cpu = process_cpu_ms() - start;
+        const double decode_start = process_cpu_ms();
+        QImage decoded;
+        for (int index = 0; index < 100; ++index)
+        {
+            decoded = QImage::fromData(bytes).convertToFormat(QImage::Format_RGB32);
+        }
+        if (decoded.isNull())
+        {
+            return 4;
+        }
+        const double decode_cpu = process_cpu_ms() - decode_start;
+        qint64 error = 0;
+        for (int y = 0; y < image.height(); ++y)
+        {
+            for (int x = 0; x < image.width(); ++x)
+            {
+                const QColor left = image.pixelColor(x, y);
+                const QColor right = decoded.pixelColor(x, y);
+                error += std::abs(left.red() - right.red()) + std::abs(left.green() - right.green()) +
+                         std::abs(left.blue() - right.blue());
+            }
+        }
+        rows.append(QJsonObject{{"format", static_cast<int>(option.format)},
+            {"codec", QString::fromLatin1(option.codec)}, {"compression", option.compression},
+            {"quality", option.quality}, {"cpu_ms_100_encodes", encode_cpu},
+            {"cpu_ms_100_decodes", decode_cpu}, {"bytes", bytes.size()}, {"lossless", error == 0},
+            {"mean_absolute_error", error / (3.0 * image.width() * image.height())}});
     }
     QFile file(output);
     if (!file.open(QIODevice::WriteOnly))
