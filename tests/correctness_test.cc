@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QBuffer>
 #include <QGraphicsView>
 #include <QImageReader>
 #include <QFile>
@@ -94,6 +95,8 @@ class correctness_test : public QObject
     void latest_layout_width();
     void preloads_after_reopen();
     void stale_queued_scans();
+    void exif_orientation_data();
+    void exif_orientation();
 };
 
 void correctness_test::large_visible_batch()
@@ -322,6 +325,76 @@ void correctness_test::stale_queued_scans()
     QCOMPARE(finished.first()[2].toInt(), 3);
     QCOMPARE(batches.size(), 1);
     QCOMPARE(batches.first()[1].toInt(), 3);
+}
+
+void correctness_test::exif_orientation_data()
+{
+    QTest::addColumn<int>("orientation");
+    for (int i = 1; i <= 8; ++i)
+    {
+        QTest::newRow(qPrintable(QString::number(i))) << i;
+    }
+}
+
+void correctness_test::exif_orientation()
+{
+    QFETCH(int, orientation);
+    QTemporaryDir dir;
+    QImage source(120, 60, QImage::Format_RGB32);
+    for (int y = 0; y < source.height(); ++y)
+    {
+        for (int x = 0; x < source.width(); ++x)
+        {
+            const QColor color = y < 30 ? (x < 60 ? Qt::red : Qt::green) : (x < 60 ? Qt::blue : Qt::yellow);
+            source.setPixelColor(x, y, color);
+        }
+    }
+    QByteArray jpeg;
+    QBuffer buffer(&jpeg);
+    QVERIFY(buffer.open(QIODevice::WriteOnly));
+    QVERIFY(source.save(&buffer, "JPEG", 100));
+    QByteArray exif = QByteArray::fromHex("ffe1002245786966000049492a000800000001001201030001000000");
+    exif.append(static_cast<char>(orientation));
+    exif.append(QByteArray(7, '\0'));
+    jpeg.insert(2, exif);
+    const QString path = dir.filePath("oriented.jpg");
+    QFile file(path);
+    QVERIFY(file.open(QIODevice::WriteOnly));
+    QCOMPARE(file.write(jpeg), jpeg.size());
+    file.close();
+
+    QImageReader reader(path);
+    reader.setAutoTransform(true);
+    const QImage expected = reader.read();
+    QVERIFY(!expected.isNull());
+    const QSize display_size = orientation >= 5 ? QSize(60, 120) : QSize(120, 60);
+    QCOMPARE(expected.size(), display_size);
+
+    file_scanner scanner;
+    QSignalSpy batches(&scanner, &file_scanner::images_scanned_batch);
+    scanner.start_scan(dir.path(), scanner.stop_scan(), 0, false);
+    QCOMPARE(batches.size(), 1);
+    const auto metadata = qvariant_cast<QList<image_meta>>(batches.first().first());
+    QCOMPARE(metadata.first().original_size, display_size);
+
+    loader_worker worker;
+    QSignalSpy loaded(worker.loader, &image_loader::thumbnail_loaded);
+    const QSize target_size = display_size * (2.0 / 3.0);
+    worker.loader->request_thumbnails({{1, path, target_size, 1}});
+    worker.thread.start();
+    QTRY_COMPARE(loaded.size(), 1);
+    const QImage thumbnail = qvariant_cast<QImage>(loaded.first()[2]);
+    QCOMPARE(thumbnail.size(), target_size);
+    for (const QPoint& corner : {QPoint(0, 0), QPoint(1, 0), QPoint(0, 1), QPoint(1, 1)})
+    {
+        const QColor actual = thumbnail.pixelColor(thumbnail.width() * (1 + 2 * corner.x()) / 4,
+                                                   thumbnail.height() * (1 + 2 * corner.y()) / 4);
+        const QColor reference = expected.pixelColor(expected.width() * (1 + 2 * corner.x()) / 4,
+                                                     expected.height() * (1 + 2 * corner.y()) / 4);
+        QVERIFY(std::abs(actual.red() - reference.red()) < 10);
+        QVERIFY(std::abs(actual.green() - reference.green()) < 10);
+        QVERIFY(std::abs(actual.blue() - reference.blue()) < 10);
+    }
 }
 
 int main(int argc, char** argv)

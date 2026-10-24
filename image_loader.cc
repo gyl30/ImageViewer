@@ -9,6 +9,11 @@
 #include <QStandardPaths>
 #include "image_loader.h"
 
+namespace
+{
+constexpr int kThumbnailCacheVersion = 2;
+}
+
 image_loader::image_loader(QObject* parent) : QObject(parent), abort_(false)
 {
     cache_.setMaxCost(200L * 1024 * 1024);
@@ -33,7 +38,8 @@ QString image_loader::disk_cache_path(const load_task& task) const
 {
     QFileInfo file_info(task.path);
     const QString cache_seed =
-        QString("%1|%2|%3|%4x%5")
+        QString("%1|%2|%3|%4|%5x%6")
+            .arg(kThumbnailCacheVersion)
             .arg(file_info.absoluteFilePath())
             .arg(file_info.lastModified().toMSecsSinceEpoch())
             .arg(file_info.size())
@@ -193,6 +199,11 @@ void image_loader::load_image_internal(const load_task& current_task)
         if (supports_scaled_size && !current_task.target_size.isEmpty())
         {
             QSize scaled_size = current_task.target_size;
+            if (reader.transformation().testFlag(QImageIOHandler::TransformationRotate90))
+            {
+                scaled_size.transpose();
+            }
+            scaled_size = source_size.scaled(scaled_size, Qt::KeepAspectRatio).expandedTo(QSize(1, 1));
             if (exceeds_allocation_limit)
             {
                 const double scale_factor = std::sqrt(kMaxImageAllocMB / estimated_mb);

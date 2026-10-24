@@ -122,6 +122,10 @@ void file_scanner::start_scan(const QString& dir_path, int session_id, int sort_
             {
                 continue;
             }
+            if (reader.transformation().testFlag(QImageIOHandler::TransformationRotate90))
+            {
+                size.transpose();
+            }
 
             batch.append({scanned_images[j].path, size});
             total_count++;

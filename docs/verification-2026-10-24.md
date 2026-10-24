@@ -10,3 +10,4 @@
 | C4 | `latest_layout_width`：同宽重复后 840 错停在 640，440→640→440 错停在 640 | 四个序列通过，另含 future 已结束但通知未消费、布局中清空换目录；累计 CTest 通过 |
 | C5 | `preloads_after_reopen`：重开后无法完成左右两个邻居的预加载 | 换一组未缓存图片重开后，两个邻居依次完成；累计 CTest 通过 |
 | C6 | `stale_queued_scans`：连续三个 queued 请求产生三个 finished，预期仅一个 | 仅最新请求发出 batch/finished；扫描会话直接取自 scanner 原子代次，累计 CTest 通过 |
+| C7 | `exif_orientation`：5–8 方向元数据为 120×60 而非 60×120；先修元数据后再次观察到缩略图 40×20 而非 40×80 | 1–8 方向的元数据、目标尺寸和四象限颜色全部通过；磁盘缓存版本更新，避免复用旧错误缩略图；累计 CTest 通过 |
