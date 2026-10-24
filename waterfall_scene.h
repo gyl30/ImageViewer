@@ -25,6 +25,7 @@ class waterfall_scene : public QGraphicsScene
     ~waterfall_scene() override;
 
     void clear_items();
+    void reserve_images(qsizetype count);
     void add_images(const QList<image_meta>& batch);
     void layout_models(int view_width);
     void update_viewport(const QRectF& visible_rect);

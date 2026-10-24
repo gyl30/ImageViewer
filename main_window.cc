@@ -249,6 +249,13 @@ void main_window::setup_scanner()
     connect(scan_thread_, &QThread::finished, file_scanner_, &QObject::deleteLater);
 
     connect(this, &main_window::request_start_scan, file_scanner_, &file_scanner::start_scan);
+    connect(file_scanner_, &file_scanner::scan_prepared, this, [this](qsizetype count, int session)
+    {
+        if (session == current_scan_session_id_)
+        {
+            scene_->reserve_images(count);
+        }
+    });
     connect(file_scanner_, &file_scanner::images_scanned_batch, this, &main_window::on_scan_batch_received);
     connect(file_scanner_, &file_scanner::scan_finished, this, &main_window::on_scan_all_finished);
 
@@ -531,7 +538,6 @@ void main_window::on_scan_batch_received(const QList<image_meta>& batch, int ses
     scene_->add_images(batch);
     total_count_ += static_cast<int>(batch.size());
     scene_->layout_models(view_->viewport()->width());
-    QMetaObject::invokeMethod(view_, [this]() { view_->check_visible_area(); }, Qt::QueuedConnection);
     update_status_bar();
 }
 
@@ -545,7 +551,6 @@ void main_window::on_scan_all_finished(int total, qint64 duration, int session_i
     scan_duration_ = duration;
     total_count_ = total;
     scene_->layout_models(view_->viewport()->width());
-    QMetaObject::invokeMethod(view_, [this]() { view_->check_visible_area(); }, Qt::QueuedConnection);
     update_status_bar();
 }
 

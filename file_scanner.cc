@@ -18,7 +18,7 @@ constexpr int kSortByFileSize = 2;
 struct scanned_image
 {
     QString path;
-    QString file_name;
+    qsizetype name_offset;
     qint64 modified_time = 0;
     qint64 file_size = 0;
 };
@@ -51,9 +51,11 @@ void file_scanner::start_scan(const QString& dir_path, int session_id, int sort_
         }
 
         QString file_path = it.next();
-        QFileInfo file_info(file_path);
+        const QFileInfo file_info = it.fileInfo();
         scanned_images.append(
-            {file_path, file_info.fileName(), file_info.lastModified().toMSecsSinceEpoch(), file_info.size()});
+            {file_path, file_path.lastIndexOf('/') + 1,
+             sort_mode == kSortByModifiedTime ? file_info.lastModified().toMSecsSinceEpoch() : 0,
+             sort_mode == kSortByFileSize ? file_info.size() : 0});
     }
 
     if (session_id != scan_generation_)
@@ -68,7 +70,8 @@ void file_scanner::start_scan(const QString& dir_path, int session_id, int sort_
     const auto compare_file_name =
         [&collator](const scanned_image& left, const scanned_image& right)
     {
-        int cmp = collator.compare(left.file_name, right.file_name);
+        int cmp = collator.compare(QStringView(left.path).sliced(left.name_offset),
+                                   QStringView(right.path).sliced(right.name_offset));
         if (cmp != 0)
         {
             return cmp;
@@ -96,6 +99,12 @@ void file_scanner::start_scan(const QString& dir_path, int session_id, int sort_
 
                   return descending ? cmp > 0 : cmp < 0;
               });
+
+    if (session_id != scan_generation_)
+    {
+        return;
+    }
+    emit scan_prepared(scanned_images.size(), session_id);
 
     int total_count = 0;
     QList<image_meta> batch;

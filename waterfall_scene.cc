@@ -107,11 +107,15 @@ void waterfall_scene::clear_items()
     setSceneRect(0, 0, 0, 0);
 }
 
+void waterfall_scene::reserve_images(qsizetype count)
+{
+    all_models_.reserve(count);
+    image_paths_.reserve(count);
+    item_bottom_index_.reserve(count);
+}
+
 void waterfall_scene::add_images(const QList<image_meta>& batch)
 {
-    all_models_.reserve(all_models_.size() + batch.size());
-    item_bottom_index_.reserve(all_models_.size() + batch.size());
-
     for (int i = 0; i < batch.size(); ++i)
     {
         layout_model model;
