@@ -263,7 +263,6 @@ void main_window::setup_connections()
     connect(scene_, &waterfall_scene::request_cancel_batch, image_loader_, &image_loader::cancel_thumbnails, Qt::DirectConnection);
     connect(scene_, &waterfall_scene::request_cancel_all, image_loader_, &image_loader::clear_all, Qt::DirectConnection);
     connect(image_loader_, &image_loader::thumbnail_loaded, scene_, &waterfall_scene::on_image_loaded);
-    connect(image_loader_, &image_loader::tasks_dropped, scene_, &waterfall_scene::on_tasks_dropped);
 
     connect(view_, &waterfall_view::view_resized, this, [this](int width) { scene_->layout_models(width); });
 

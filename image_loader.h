@@ -6,7 +6,6 @@
 #include <QCache>
 #include <QList>
 #include <QSize>
-#include <QSet>
 #include <QMutex>
 #include <QWaitCondition>
 #include <QString>
@@ -31,7 +30,6 @@ class image_loader : public QObject
 
    signals:
     void thumbnail_loaded(quint64 id, QString path, QImage image, int session_id);
-    void tasks_dropped(const QList<QString>& paths);
 
    private:
     [[nodiscard]] QString memory_cache_key(const load_task& task) const;
@@ -44,7 +42,6 @@ class image_loader : public QObject
    private:
     QCache<QString, QImage> cache_;
     QList<load_task> task_queue_;
-    QSet<QString> pending_cancels_;
     QString disk_cache_dir_;
 
     QMutex mutex_;

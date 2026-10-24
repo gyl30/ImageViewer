@@ -91,11 +91,6 @@ void image_loader::request_thumbnails(const QList<load_task>& tasks)
     bool has_new_tasks = false;
     for (const auto& task : tasks)
     {
-        if (pending_cancels_.contains(task.path))
-        {
-            pending_cancels_.remove(task.path);
-        }
-
         const QString cache_key = memory_cache_key(task);
         if (cache_.contains(cache_key))
         {
@@ -107,20 +102,6 @@ void image_loader::request_thumbnails(const QList<load_task>& tasks)
         has_new_tasks = true;
     }
 
-    QList<QString> dropped_paths;
-    while (task_queue_.size() > 200)
-    {
-        load_task task = task_queue_.takeLast();
-        dropped_paths.append(task.path);
-    }
-
-    if (!dropped_paths.isEmpty())
-    {
-        locker.unlock();
-        emit tasks_dropped(dropped_paths);
-        locker.relock();
-    }
-
     if (has_new_tasks)
     {
         condition_.wakeOne();
@@ -130,17 +111,13 @@ void image_loader::request_thumbnails(const QList<load_task>& tasks)
 void image_loader::cancel_thumbnails(const QList<QString>& paths)
 {
     QMutexLocker locker(&mutex_);
-    for (const auto& path : paths)
-    {
-        pending_cancels_.insert(path);
-    }
+    task_queue_.removeIf([&paths](const load_task& task) { return paths.contains(task.path); });
 }
 
 void image_loader::clear_all()
 {
     QMutexLocker locker(&mutex_);
     task_queue_.clear();
-    pending_cancels_.clear();
 }
 
 void image_loader::clear_cache()
@@ -181,12 +158,6 @@ void image_loader::start_loop()
             while (!task_queue_.isEmpty())
             {
                 current_task = task_queue_.takeFirst();
-
-                if (pending_cancels_.contains(current_task.path))
-                {
-                    pending_cancels_.remove(current_task.path);
-                    continue;
-                }
 
                 valid_task_found = true;
                 break;

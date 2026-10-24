@@ -28,3 +28,20 @@ set(PROJECT_SOURCES
 add_executable(ImageViewer ${PROJECT_SOURCES})
 
 target_link_libraries(ImageViewer PRIVATE Qt6::Widgets Qt6::Core Qt6::Gui Qt6::Concurrent)
+
+include(CTest)
+if(BUILD_TESTING)
+    find_package(Qt6 REQUIRED COMPONENTS Test)
+    add_executable(imageviewer_tests
+        tests/correctness_test.cc
+        image_loader.cc
+        waterfall_item.cc
+        waterfall_scene.cc
+        image_viewer_window.cc
+        file_scanner.cc
+    )
+    target_include_directories(imageviewer_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    target_link_libraries(imageviewer_tests PRIVATE Qt6::Widgets Qt6::Concurrent Qt6::Test)
+    add_test(NAME correctness COMMAND imageviewer_tests)
+    set_tests_properties(correctness PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 90)
+endif()
