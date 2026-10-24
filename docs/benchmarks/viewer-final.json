@@ -1,0 +1,50 @@
+{
+    "close_ms": 21,
+    "first_display_ms": 273,
+    "gif_cache_all": false,
+    "gif_frames": 120,
+    "samples": [
+        {
+            "cpu_ms": 32.97,
+            "peak_rss_kib": 36988,
+            "phase": "empty",
+            "pss_kib": 22940,
+            "rss_kib": 36988
+        },
+        {
+            "cpu_ms": 305.793,
+            "peak_rss_kib": 258432,
+            "phase": "large_and_neighbors",
+            "pss_kib": 242157,
+            "rss_kib": 257700
+        },
+        {
+            "cpu_ms": 583.383,
+            "peak_rss_kib": 258432,
+            "phase": "closed",
+            "pss_kib": 27081,
+            "rss_kib": 42624
+        },
+        {
+            "cpu_ms": 584.083,
+            "peak_rss_kib": 258432,
+            "phase": "destroyed",
+            "pss_kib": 25221,
+            "rss_kib": 40756
+        },
+        {
+            "cpu_ms": 713.6,
+            "peak_rss_kib": 258432,
+            "phase": "gif_3_seconds",
+            "pss_kib": 35889,
+            "rss_kib": 43832
+        },
+        {
+            "cpu_ms": 714.733,
+            "peak_rss_kib": 258432,
+            "phase": "gif_destroyed",
+            "pss_kib": 35890,
+            "rss_kib": 43896
+        }
+    ]
+}

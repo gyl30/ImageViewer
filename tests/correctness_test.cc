@@ -726,6 +726,7 @@ void correctness_test::large_image_and_close()
     auto* item = dynamic_cast<QGraphicsPixmapItem*>(scene->items().first());
     QVERIFY(item != nullptr);
     QVERIFY(item->pixmap().width() < 9000);
+    QVERIFY(item->pixmap().width() <= 7875);
     QVERIFY(item->pixmap().height() < 8000);
     {
         const QImage decoded = item->pixmap().toImage();

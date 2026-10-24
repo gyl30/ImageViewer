@@ -62,7 +62,16 @@ std::pair<QImage, QString> load_image_file(const QString& path)
         if (estimated_mb > kMaxImageAllocMB && supports_scaled_size)
         {
             const double scale_factor = std::sqrt(kMaxImageAllocMB / estimated_mb);
-            const QSize safe_size = (img_size * scale_factor).expandedTo(QSize(1, 1));
+            QSize safe_size = (img_size * scale_factor).expandedTo(QSize(1, 1));
+            const QByteArray format = reader.format();
+            constexpr int kJpegScaleDenominator = 8;
+            if ((format == "jpeg" || format == "jpg") && scale_factor >= 1.0 / kJpegScaleDenominator)
+            {
+                // 对齐 JPEG 原生缩放，避免先分配完整图再分配缩放结果。
+                const int numerator = static_cast<int>(scale_factor * kJpegScaleDenominator);
+                safe_size = QSize(img_size.width() * numerator / kJpegScaleDenominator,
+                                  img_size.height() * numerator / kJpegScaleDenominator).expandedTo(QSize(1, 1));
+            }
             reader.setScaledSize(safe_size);
         }
         else if (estimated_mb > kQtImageReaderAllocMB && !supports_scaled_size)
