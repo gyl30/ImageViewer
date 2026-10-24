@@ -11,6 +11,8 @@
 #include <QMimeData>
 #include <QPainter>
 #include <QMovie>
+#include <QImageWriter>
+#include <QBuffer>
 #include <QScrollBar>
 #include <QStandardPaths>
 #include <QtTest>
@@ -347,6 +349,48 @@ static int viewer_benchmark(const QString& directory, const QString& output)
     return 0;
 }
 
+static int encoding_benchmark(const QString& source, const QString& output)
+{
+    const QImage original = QImage(source).scaledToWidth(256, Qt::SmoothTransformation);
+    if (original.isNull())
+    {
+        return 2;
+    }
+    QJsonArray rows;
+    for (QImage::Format format : {QImage::Format_ARGB32_Premultiplied, QImage::Format_RGB32})
+    {
+        const QImage image = original.convertToFormat(format);
+        for (int compression : {50, 15})
+        {
+            const double start = process_cpu_ms();
+            QByteArray bytes;
+            for (int index = 0; index < 100; ++index)
+            {
+                bytes.clear();
+                QBuffer buffer(&bytes);
+                buffer.open(QIODevice::WriteOnly);
+                QImageWriter writer(&buffer, "PNG");
+                writer.setCompression(compression);
+                if (!writer.write(image))
+                {
+                    return 3;
+                }
+            }
+            const bool lossless = QImage::fromData(bytes).convertToFormat(QImage::Format_RGB32) ==
+                                  image.convertToFormat(QImage::Format_RGB32);
+            rows.append(QJsonObject{{"format", static_cast<int>(format)}, {"compression", compression},
+                {"cpu_ms_100_encodes", process_cpu_ms() - start}, {"bytes", bytes.size()}, {"lossless", lossless}});
+        }
+    }
+    QFile file(output);
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        return 6;
+    }
+    file.write(QJsonDocument(rows).toJson());
+    return 0;
+}
+
 int main(int argc, char** argv)
 {
     QApplication app(argc, argv);
@@ -356,6 +400,10 @@ int main(int argc, char** argv)
     }
     QLocale::setDefault(QLocale(QLocale::English, QLocale::UnitedStates));
     QImageReader::setAllocationLimit(kQtImageReaderAllocMB);
+    if (QString::fromLocal8Bit(argv[1]) == "--encode")
+    {
+        return encoding_benchmark(QString::fromLocal8Bit(argv[2]), QString::fromLocal8Bit(argv[3]));
+    }
     if (QString::fromLocal8Bit(argv[1]) == "--viewer")
     {
         return viewer_benchmark(QString::fromLocal8Bit(argv[2]), QString::fromLocal8Bit(argv[3]));

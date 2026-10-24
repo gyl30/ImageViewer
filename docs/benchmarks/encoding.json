@@ -1,0 +1,30 @@
+[
+    {
+        "bytes": 77842,
+        "compression": 50,
+        "cpu_ms_100_encodes": 424.148,
+        "format": 6,
+        "lossless": true
+    },
+    {
+        "bytes": 84148,
+        "compression": 15,
+        "cpu_ms_100_encodes": 254.54599999999994,
+        "format": 6,
+        "lossless": true
+    },
+    {
+        "bytes": 69404,
+        "compression": 50,
+        "cpu_ms_100_encodes": 368.35,
+        "format": 4,
+        "lossless": true
+    },
+    {
+        "bytes": 73628,
+        "compression": 15,
+        "cpu_ms_100_encodes": 206.31399999999985,
+        "format": 4,
+        "lossless": true
+    }
+]
