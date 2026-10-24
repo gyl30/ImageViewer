@@ -1,0 +1,18 @@
+{
+  "type": "design",
+  "designSystems": [],
+  "primaryDesignSystem": null,
+  "assets": {
+    "UI": {
+      "versions": [
+        {
+          "path": "UI.html",
+          "createdAt": "2026-10-24T12:27:35.110Z",
+          "status": "needs-review"
+        }
+      ]
+    }
+  },
+  "createdAt": "2026-10-24T12:27:35.110Z",
+  "updatedAt": "2026-10-24T12:54:02.007Z"
+}

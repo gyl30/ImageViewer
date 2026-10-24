@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ImageViewer · 界面核验</title>
+  <!-- 基于现有 Qt Widgets；保留原生控件，只统一层级、状态、主题和卡片反馈。 -->
+  <style>
+    :root { color-scheme: light; --bg:#f3f5f7; --text:#222831; --line:#d7dce3; --accent:#286dc6; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font-family:system-ui,"Noto Sans CJK SC",sans-serif; }
+    main { max-width:1360px; margin:auto; padding:24px; }
+    header { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px; margin-bottom:16px; }
+    h1 { font-size:20px; margin:0 0 6px; font-weight:600; }
+    p { font-size:13px; margin:0; line-height:1.7; color:#536170; }
+    nav { display:flex; flex-wrap:wrap; gap:6px; }
+    button { border:1px solid var(--line); border-radius:6px; padding:8px 14px; background:#fff; color:inherit; font:inherit; font-size:13px; cursor:pointer; }
+    button[aria-pressed="true"] { border-color:var(--accent); color:var(--accent); }
+    button:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+    figure { margin:0; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:#e8ecf1; display:grid; place-items:center; }
+    img { display:block; width:auto; max-width:100%; height:auto; }
+    footer { padding-top:12px; font-size:12px; color:#536170; line-height:1.7; }
+    a { color:var(--accent); }
+    @media(max-width:600px) { main { padding:12px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div><h1>ImageViewer</h1><p>实际 Qt 界面截图 · 原生工具栏、轻量卡片与明确的状态反馈</p></div>
+      <nav aria-label="查看场景">
+        <button type="button" data-image="light.png" aria-pressed="true">浅色</button>
+        <button type="button" data-image="dark.png" aria-pressed="false">深色</button>
+        <button type="button" data-image="preview.png" aria-pressed="false">大图预览</button>
+        <button type="button" data-image="empty.png" aria-pressed="false">空文件夹</button>
+      </nav>
+    </header>
+    <figure><img id="screen" src="light.png" alt="ImageViewer 浅色界面实际截图" width="1280" height="800"></figure>
+    <footer>使用系统字体与 SVG 图标；无阴影、模糊或逐卡片子控件。高 DPI 已通过 DPR=2 截图核验。</footer>
+  </main>
+  <script>
+    const buttons = [...document.querySelectorAll("button")];
+    for (const button of buttons) {
+      button.addEventListener("click", () => {
+        for (const item of buttons) {
+          item.setAttribute("aria-pressed", String(item === button));
+        }
+        const image = document.getElementById("screen");
+        image.src = button.dataset.image;
+        image.alt = `ImageViewer ${button.textContent}实际截图`;
+      });
+    }
+  </script>
+</body>
+</html>
