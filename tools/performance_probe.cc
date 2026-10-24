@@ -13,12 +13,18 @@
 #include <QMovie>
 #include <QImageWriter>
 #include <QBuffer>
+#include <QTemporaryDir>
+#include <QAction>
 #include <QScrollBar>
 #include <QStandardPaths>
 #include <QtTest>
 #include <atomic>
 #include <sys/resource.h>
 #include <time.h>
+#include <fcntl.h>
+#ifdef __GLIBC__
+#include <malloc.h>
+#endif
 #include "main_window.h"
 #include "image_loader.h"
 #include "image_viewer_window.h"
@@ -61,6 +67,7 @@ static qint64 proc_value(const QString& path, const QByteArray& key)
 class performance_probe
 {
    public:
+    enum class run_mode { cold, warm, capture, trim };
     explicit performance_probe(main_window& window) : window_(window)
     {
         timer_.start();
@@ -181,8 +188,9 @@ class performance_probe
         samples_.append(row);
     }
 
-    int run(const QString& directory, const QString& output, bool clear_disk)
+    int run(const QString& directory, const QString& output, run_mode mode)
     {
+        const bool clear_disk = mode == run_mode::warm;
         sample("empty");
         const double idle_start = process_cpu_ms();
         QTest::qWait(500);
@@ -200,6 +208,33 @@ class performance_probe
         }
         QTest::qWait(200);
         sample("ready");
+        if (mode == run_mode::capture)
+        {
+            QDir().mkpath(output);
+            if (window_.scene_->active_items_.contains(0))
+            {
+                window_.scene_->active_items_[0]->setSelected(true);
+            }
+            window_.grab().save(output + "/light.png");
+            window_.dark_theme_action_->setChecked(true);
+            QTest::qWait(40);
+            window_.grab().save(output + "/dark.png");
+            window_.show_image_viewer(window_.scene_->image_paths_.first(), window_.scene_->get_all_paths());
+            QElapsedTimer wait;
+            wait.start();
+            while (!window_.viewer_window_->windowTitle().startsWith("Viewer -") && wait.elapsed() < 10000)
+            {
+                QTest::qWait(20);
+            }
+            window_.viewer_window_->grab().save(output + "/preview.png");
+            window_.viewer_window_->close();
+            window_.dark_theme_action_->setChecked(false);
+            QTemporaryDir empty;
+            window_.open_path(empty.path(), false);
+            QTest::qWait(100);
+            window_.grab().save(output + "/empty.png");
+            return 0;
+        }
         QImage surface(window_.view_->size(), QImage::Format_RGB32);
         double render_ms = 0;
         auto* scroll = window_.view_->verticalScrollBar();
@@ -242,7 +277,7 @@ class performance_probe
         window_.scene_->clear_items();
         if (clear_disk)
         {
-            QMetaObject::invokeMethod(window_.image_loader_, &image_loader::clear_cache, Qt::QueuedConnection);
+            QMetaObject::invokeMethod(window_.image_loader_, &image_loader::clear_cache, Qt::BlockingQueuedConnection);
         }
         else
         {
@@ -254,6 +289,13 @@ class performance_probe
             return 5;
         }
         sample("cleared");
+        if (mode == run_mode::trim)
+        {
+#ifdef __GLIBC__
+            malloc_trim(0);
+#endif
+            sample("trimmed");
+        }
         QJsonObject result{{"qt", qVersion()}, {"dataset", directory}, {"viewport", "1280x800 window"},
                            {"first_batch_ms", first_batch_ms_}, {"first_thumbnail_ms", first_thumbnail_ms_},
                            {"first_visible_ms", first_visible_ms_},
@@ -391,6 +433,62 @@ static int encoding_benchmark(const QString& source, const QString& output)
     return 0;
 }
 
+static int header_benchmark(const QString& directory, const QString& output)
+{
+    QStringList paths;
+    QDirIterator files(directory, {"*.jpg"}, QDir::Files, QDirIterator::Subdirectories);
+    while (files.hasNext())
+    {
+        paths.append(files.next());
+    }
+    QJsonArray rows;
+    for (int mode = 0; mode < 3; ++mode)
+    {
+        const qint64 read_start = proc_value("/proc/self/io", "rchar");
+        const qint64 disk_start = proc_value("/proc/self/io", "read_bytes");
+        const double cpu_start = process_cpu_ms();
+        qint64 pixels = 0;
+        for (const auto& path : std::as_const(paths))
+        {
+            QFile file(path);
+            QIODevice::OpenMode flags = QIODevice::ReadOnly;
+            if (mode != 0)
+            {
+                flags |= QIODevice::Unbuffered;
+            }
+            if (!file.open(flags))
+            {
+                return 2;
+            }
+            posix_fadvise(file.handle(), 0, 0, POSIX_FADV_DONTNEED);
+            if (mode == 2)
+            {
+                posix_fadvise(file.handle(), 0, 0, POSIX_FADV_RANDOM);
+            }
+            QImageReader reader(&file);
+            const QSize size = reader.size();
+            if (!size.isValid())
+            {
+                return 3;
+            }
+            pixels += static_cast<qint64>(size.width()) * size.height();
+            reader.transformation();
+        }
+        const QString mode_name = QStringList{"buffered", "unbuffered", "unbuffered_random"}.at(mode);
+        rows.append(QJsonObject{{"mode", mode_name}, {"files", paths.size()}, {"pixels", pixels},
+            {"cpu_ms", process_cpu_ms() - cpu_start},
+            {"rchar", proc_value("/proc/self/io", "rchar") - read_start},
+            {"read_bytes", proc_value("/proc/self/io", "read_bytes") - disk_start}});
+    }
+    QFile file(output);
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        return 6;
+    }
+    file.write(QJsonDocument(rows).toJson());
+    return 0;
+}
+
 int main(int argc, char** argv)
 {
     QApplication app(argc, argv);
@@ -400,6 +498,10 @@ int main(int argc, char** argv)
     }
     QLocale::setDefault(QLocale(QLocale::English, QLocale::UnitedStates));
     QImageReader::setAllocationLimit(kQtImageReaderAllocMB);
+    if (QString::fromLocal8Bit(argv[1]) == "--headers")
+    {
+        return header_benchmark(QString::fromLocal8Bit(argv[2]), QString::fromLocal8Bit(argv[3]));
+    }
     if (QString::fromLocal8Bit(argv[1]) == "--encode")
     {
         return encoding_benchmark(QString::fromLocal8Bit(argv[2]), QString::fromLocal8Bit(argv[3]));
@@ -413,5 +515,18 @@ int main(int argc, char** argv)
     window.show();
     QTest::qWait(200);
     performance_probe probe(window);
-    return probe.run(QString::fromLocal8Bit(argv[1]), QString::fromLocal8Bit(argv[2]), QString::fromLocal8Bit(argv[3]) == "warm");
+    if (QString::fromLocal8Bit(argv[1]) == "--ui")
+    {
+        return probe.run(QString::fromLocal8Bit(argv[2]), QString::fromLocal8Bit(argv[3]), performance_probe::run_mode::capture);
+    }
+    auto mode = performance_probe::run_mode::cold;
+    if (QString::fromLocal8Bit(argv[3]) == "warm")
+    {
+        mode = performance_probe::run_mode::warm;
+    }
+    else if (QString::fromLocal8Bit(argv[3]) == "trim")
+    {
+        mode = performance_probe::run_mode::trim;
+    }
+    return probe.run(QString::fromLocal8Bit(argv[1]), QString::fromLocal8Bit(argv[2]), mode);
 }

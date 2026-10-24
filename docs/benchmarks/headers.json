@@ -1,0 +1,26 @@
+[
+    {
+        "cpu_ms": 163.709,
+        "files": 10000,
+        "mode": "buffered",
+        "pixels": 4084480000,
+        "rchar": 163841260,
+        "read_bytes": 327680000
+    },
+    {
+        "cpu_ms": 142.569,
+        "files": 10000,
+        "mode": "unbuffered",
+        "pixels": 4084480000,
+        "rchar": 40980220,
+        "read_bytes": 163840000
+    },
+    {
+        "cpu_ms": 99.90000000000003,
+        "files": 10000,
+        "mode": "unbuffered_random",
+        "pixels": 4084480000,
+        "rchar": 40980220,
+        "read_bytes": 40960000
+    }
+]

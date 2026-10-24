@@ -51,12 +51,14 @@ if(BUILD_TESTING)
     add_test(NAME correctness COMMAND imageviewer_tests)
     set_tests_properties(correctness PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 90)
 
-    add_executable(imageviewer_benchmark
-        tools/performance_probe.cc
-        image_loader.cc waterfall_item.cc waterfall_scene.cc waterfall_view.cc
-        file_scanner.cc main_window.cc image_viewer_window.cc
-        resources.qrc
-    )
-    target_include_directories(imageviewer_benchmark PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-    target_link_libraries(imageviewer_benchmark PRIVATE Qt6::Widgets Qt6::Concurrent Qt6::Test Qt6::Svg)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        add_executable(imageviewer_benchmark
+            tools/performance_probe.cc
+            image_loader.cc waterfall_item.cc waterfall_scene.cc waterfall_view.cc
+            file_scanner.cc main_window.cc image_viewer_window.cc
+            resources.qrc
+        )
+        target_include_directories(imageviewer_benchmark PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+        target_link_libraries(imageviewer_benchmark PRIVATE Qt6::Widgets Qt6::Concurrent Qt6::Test Qt6::Svg)
+    endif()
 endif()
