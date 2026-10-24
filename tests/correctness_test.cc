@@ -157,6 +157,7 @@ class correctness_test : public QObject
     void jpeg_cache_roundtrip();
     void only_visible_requests();
     void scrolled_result_skips_old();
+    void viewer_status_tracks_loading();
 };
 
 void correctness_test::large_visible_batch()
@@ -1108,11 +1109,44 @@ void correctness_test::viewer_error_is_visible()
     viewer.show();
     viewer.set_image_path(path);
     QTRY_VERIFY(viewer.windowTitle().startsWith("Viewer -"));
+    for (int index = 0; index < 10; ++index)
+    {
+        QMetaObject::invokeMethod(&viewer, "zoom_in");
+    }
     viewer.set_image_path("/missing/imageviewer.png");
     QTRY_COMPARE(viewer.windowTitle(), QString("加载图片失败"));
     auto* view = viewer.findChild<QGraphicsView*>();
     QCOMPARE(view->scene()->items().size(), 1);
-    QVERIFY(view->mapToScene(view->viewport()->rect()).boundingRect().intersects(view->scene()->items().first()->sceneBoundingRect()));
+    const QRectF visible = view->mapToScene(view->viewport()->rect()).boundingRect();
+    QVERIFY(visible.contains(view->scene()->items().first()->sceneBoundingRect().center()));
+}
+
+void correctness_test::viewer_status_tracks_loading()
+{
+    QTemporaryDir dir;
+    const QString path = dir.filePath("image.png");
+    QImage image(100, 50, QImage::Format_RGB32);
+    image.fill(Qt::blue);
+    QVERIFY(image.save(path));
+    image_viewer_window viewer;
+    viewer.set_image_path(path);
+    QTRY_VERIFY(viewer.windowTitle().startsWith("Viewer -"));
+    const auto labels = viewer.findChildren<QLabel*>();
+    QVERIFY(!labels.isEmpty());
+    QVERIFY(std::any_of(labels.cbegin(), labels.cend(), [](QLabel* label)
+    {
+        return label->text().contains("image.png");
+    }));
+    viewer.set_image_path("/missing/imageviewer.png");
+    for (auto* label : labels)
+    {
+        QVERIFY2(label->text().isEmpty(), qPrintable(label->text()));
+    }
+    QTRY_COMPARE(viewer.windowTitle(), QString("加载图片失败"));
+    for (auto* label : labels)
+    {
+        QVERIFY(label->text().isEmpty());
+    }
 }
 
 void correctness_test::scanner_sort_modes_data()

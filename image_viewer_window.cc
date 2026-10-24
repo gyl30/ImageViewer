@@ -274,6 +274,8 @@ void image_viewer_window::set_image_path(const QString& path)
 {
     current_path_ = path;
     has_manual_zoom_ = false;
+    image_info_label_->clear();
+    zoom_label_->clear();
     update_index_from_path();
     update_navigation_buttons();
     emit current_image_changed(path);
@@ -346,6 +348,9 @@ void image_viewer_window::load_image(const QString& path)
 
                     QRectF text_rect = text_item->boundingRect();
                     text_item->setPos(-text_rect.width() / 2, -text_rect.height() / 2);
+                    scene_->setSceneRect(text_item->sceneBoundingRect());
+                    view_->resetTransform();
+                    view_->centerOn(text_item);
 
                     return;
                 }
