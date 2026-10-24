@@ -240,6 +240,7 @@ class performance_probe
             {
                 window_.scene_->active_items_[0]->setSelected(true);
             }
+            QTest::qWait(40);
             window_.grab().save(output + "/light.png");
             window_.dark_theme_action_->setChecked(true);
             QTest::qWait(40);
