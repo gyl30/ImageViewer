@@ -18,6 +18,7 @@ class waterfall_item;
 class waterfall_scene : public QGraphicsScene
 {
     Q_OBJECT
+    friend class performance_probe;
 
    public:
     explicit waterfall_scene(QObject* parent = nullptr);

@@ -14,6 +14,7 @@
 class image_loader : public QObject
 {
     Q_OBJECT
+    friend class performance_probe;
 
    public:
     explicit image_loader(QObject* parent = nullptr);

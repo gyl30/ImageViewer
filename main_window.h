@@ -25,6 +25,7 @@ class image_viewer_window;
 class main_window : public QMainWindow
 {
     Q_OBJECT
+    friend class performance_probe;
 
    public:
     explicit main_window(QWidget* parent = nullptr);
