@@ -274,6 +274,12 @@ void waterfall_scene::on_layout_finished()
     current_col_width_ = static_cast<int>(result.rects.empty() ? kMinColWidth : (result.rects[0].width()));
     last_layout_index_ = count;
 
+    for (auto it = active_items_.begin(); it != active_items_.end(); ++it)
+    {
+        waterfall_item* item = it.value();
+        item->bind_model(all_models_[it.key()], current_col_width_, item->get_request_id());
+    }
+
     if (count < all_models_.size())
     {
         layout_models(result.view_width);
@@ -286,17 +292,6 @@ void waterfall_scene::on_layout_finished()
         {
             QGraphicsView* v = views().first();
             QRectF visible_rect = v->mapToScene(v->viewport()->rect()).boundingRect();
-
-            for (auto it = active_items_.begin(); it != active_items_.end(); ++it)
-            {
-                waterfall_item* item = it.value();
-                int idx = it.key();
-
-                if (idx < static_cast<int>(all_models_.size()))
-                {
-                    item->bind_model(all_models_[idx], current_col_width_, item->get_request_id());
-                }
-            }
 
             update_viewport(visible_rect);
         }

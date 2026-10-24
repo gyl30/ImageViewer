@@ -4,10 +4,12 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QStandardPaths>
+#include <QSemaphore>
 #include <QSignalSpy>
 #include <QTemporaryDir>
 #include <QThread>
 #include <QtTest>
+#include <QtConcurrent>
 #include "common_types.h"
 #include "image_loader.h"
 #include "waterfall_item.h"
@@ -38,6 +40,44 @@ class loader_worker
     image_loader* loader;
 };
 
+class pool_blocker
+{
+   public:
+    pool_blocker() : max_threads_(QThreadPool::globalInstance()->maxThreadCount())
+    {
+        QThreadPool::globalInstance()->setMaxThreadCount(1);
+        future_ = QtConcurrent::run([this]()
+        {
+            started_.release();
+            gate_.acquire();
+        });
+        started_.acquire();
+    }
+
+    ~pool_blocker()
+    {
+        unblock();
+        future_.waitForFinished();
+        QThreadPool::globalInstance()->setMaxThreadCount(max_threads_);
+    }
+
+    void unblock()
+    {
+        if (!released_)
+        {
+            released_ = true;
+            gate_.release();
+        }
+    }
+
+   private:
+    int max_threads_;
+    bool released_ = false;
+    QSemaphore started_;
+    QSemaphore gate_;
+    QFuture<void> future_;
+};
+
 class correctness_test : public QObject
 {
     Q_OBJECT
@@ -45,6 +85,9 @@ class correctness_test : public QObject
    private slots:
     void large_visible_batch();
     void queued_cache_clear();
+    void relayout_preserves_image_data();
+    void relayout_preserves_image();
+    void item_reuse_resets_image();
 };
 
 void correctness_test::large_visible_batch()
@@ -95,6 +138,66 @@ void correctness_test::queued_cache_clear()
     worker.thread.start();
     QVERIFY(QMetaObject::invokeMethod(worker.loader, &image_loader::clear_cache, Qt::QueuedConnection));
     QTRY_VERIFY_WITH_TIMEOUT(!QFileInfo::exists(marker), 500);
+}
+
+void correctness_test::relayout_preserves_image_data()
+{
+    QTest::addColumn<bool>("append_batch");
+    QTest::newRow("resize") << false;
+    QTest::newRow("append-during-resize") << true;
+}
+
+void correctness_test::relayout_preserves_image()
+{
+    QFETCH(bool, append_batch);
+    waterfall_scene scene;
+    QGraphicsView view(&scene);
+    QSignalSpy requests(&scene, &waterfall_scene::request_load_batch);
+    scene.add_images({{"first.png", QSize(100, 50)}});
+    scene.layout_models(440);
+    QTRY_COMPARE(scene.sceneRect().width(), 440);
+    scene.update_viewport(QRectF(0, 0, 440, 600));
+    QVERIFY(!requests.isEmpty());
+    const auto task = qvariant_cast<QList<load_task>>(requests.first().first()).first();
+    QImage image(100, 50, QImage::Format_RGB32);
+    image.fill(Qt::red);
+    scene.on_image_loaded(task.id, task.path, image, task.session_id);
+
+    waterfall_item* item = nullptr;
+    for (auto* candidate : scene.items())
+    {
+        auto* thumbnail = dynamic_cast<waterfall_item*>(candidate);
+        if (thumbnail != nullptr && thumbnail->isVisible() && thumbnail->get_index() == 0)
+        {
+            item = thumbnail;
+            break;
+        }
+    }
+    QVERIFY(item != nullptr);
+    pool_blocker blocker;
+    scene.layout_models(640);
+    if (append_batch)
+    {
+        scene.add_images({{"second.png", QSize(100, 50)}});
+    }
+    blocker.unblock();
+    QTRY_COMPARE(scene.sceneRect().width(), 640);
+    QCOMPARE(item->pixmap().toImage().pixelColor(0, 0), QColor(Qt::red));
+    QCOMPARE(item->scale() * item->pixmap().width(), 305);
+}
+
+void correctness_test::item_reuse_resets_image()
+{
+    waterfall_item item;
+    layout_model model{0, "first.png", QSize(100, 50), QRectF(10, 10, 200, 100)};
+    item.bind_model(model, 200, 1);
+    QPixmap image(100, 50);
+    image.fill(Qt::red);
+    item.set_pixmap_safe(image);
+    item.reset();
+    model.path = "second.png";
+    item.bind_model(model, 200, 2);
+    QCOMPARE(item.pixmap().toImage().pixelColor(0, 0), QColor(Qt::lightGray));
 }
 
 int main(int argc, char** argv)

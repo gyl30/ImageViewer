@@ -25,6 +25,11 @@ waterfall_item::waterfall_item(QGraphicsItem* parent) : QGraphicsPixmapItem(pare
 
 void waterfall_item::bind_model(const layout_model& model, int display_width, quint64 request_id)
 {
+    if (current_request_id_ != request_id || path_ != model.path)
+    {
+        setPixmap(get_placeholder());
+    }
+
     index_ = model.index;
     path_ = model.path;
     original_size_ = model.original_size;
@@ -36,7 +41,6 @@ void waterfall_item::bind_model(const layout_model& model, int display_width, qu
     setGraphicsEffect(nullptr);
 
     setPos(model.layout_rect.topLeft());
-    setPixmap(get_placeholder());
     update_scale();
     setVisible(true);
 }
