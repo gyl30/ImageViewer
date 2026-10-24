@@ -1,5 +1,4 @@
 #include <cmath>
-#include <array>
 #include <algorithm>
 #include <QDir>
 #include <QScrollBar>
@@ -34,17 +33,6 @@
 
 namespace
 {
-constexpr qint64 kAnimatedCacheAllMaxBytes = 20LL * 1024 * 1024;
-
-QString image_cache_key(const QString& path)
-{
-    const QFileInfo file_info(path);
-    return QString("%1|%2|%3")
-        .arg(file_info.absoluteFilePath())
-        .arg(file_info.lastModified().toMSecsSinceEpoch())
-        .arg(file_info.size());
-}
-
 bool is_animated_image(const QString& path)
 {
     QImageReader reader(path);
@@ -106,7 +94,6 @@ image_viewer_window::image_viewer_window(QWidget* parent)
     : QMainWindow(parent), current_index_(-1), view_(nullptr), scene_(nullptr), image_item_(nullptr), btn_prev_(nullptr), btn_next_(nullptr)
 {
     setup_ui();
-    image_cache_.setMaxCost(kMaxImageAllocMB * 1024 * 1024);
     load_settings();
 }
 
@@ -123,16 +110,7 @@ image_viewer_window::~image_viewer_window()
         }
     }
 
-    if (preload_watcher_ != nullptr)
-    {
-        preload_watcher_->disconnect();
-        if (preload_watcher_->isRunning())
-        {
-            preload_watcher_->waitForFinished();
-        }
-        delete preload_watcher_;
-        preload_watcher_ = nullptr;
-    }
+
 }
 
 void image_viewer_window::setup_ui()
@@ -307,18 +285,10 @@ void image_viewer_window::set_image_path(const QString& path)
     image_item_ = nullptr;
     setWindowTitle(QString("Loading %1...").arg(QFileInfo(path).fileName()));
 
-    pending_preload_paths_.clear();
 
     if (is_animated_image(path))
     {
         start_movie(path);
-        return;
-    }
-
-    const QString cache_key = image_cache_key(path);
-    if (image_cache_.contains(cache_key))
-    {
-        display_image(*image_cache_.object(cache_key), path);
         return;
     }
 
@@ -332,16 +302,16 @@ void image_viewer_window::set_image_path(const QString& path)
 void image_viewer_window::load_image(const QString& path)
 {
     loading_path_ = path;
-    const QString cache_key = image_cache_key(path);
 
     disconnect(image_watcher_, &QFutureWatcher<std::pair<QImage, QString>>::finished, this, nullptr);
 
     connect(image_watcher_,
             &QFutureWatcher<std::pair<QImage, QString>>::finished,
             this,
-            [this, path, cache_key]()
+            [this, path]()
             {
                 loading_path_.clear();
+                auto result = image_watcher_->future().takeResult();
                 if (current_path_ != path)
                 {
                     if (!current_path_.isEmpty() && image_item_ == nullptr && movie_ == nullptr)
@@ -351,9 +321,8 @@ void image_viewer_window::load_image(const QString& path)
                     return;
                 }
 
-                auto result = image_watcher_->result();
-                QImage image = result.first;
-                QString error_msg = result.second;
+                QImage image = std::move(result.first);
+                QString error_msg = std::move(result.second);
 
                 if (image.isNull())
                 {
@@ -373,8 +342,7 @@ void image_viewer_window::load_image(const QString& path)
 
                     return;
                 }
-                image_cache_.insert(cache_key, new QImage(image), image.sizeInBytes());
-                display_image(image, path);
+                display_image(std::move(image), path);
             });
 
     image_watcher_->setFuture(QtConcurrent::run(load_image_file, path));
@@ -459,9 +427,9 @@ void image_viewer_window::save_settings() const
     settings.setValue("viewer_window/slideshow_loop_enabled", slideshow_loop_enabled_);
 }
 
-void image_viewer_window::display_image(const QImage& image, const QString& path)
+void image_viewer_window::display_image(QImage image, const QString& path)
 {
-    QPixmap pixmap = QPixmap::fromImage(image);
+    QPixmap pixmap = QPixmap::fromImage(std::move(image));
     image_item_ = scene_->addPixmap(pixmap);
     scene_->setSceneRect(pixmap.rect());
     rotation_degrees_ = 0;
@@ -484,7 +452,6 @@ void image_viewer_window::display_image(const QImage& image, const QString& path
                        .arg(current_index_ + 1)
                        .arg(image_list_.size()));
 
-    queue_adjacent_preloads();
 }
 
 void image_viewer_window::update_image_status(const QString& path, const QSize& image_size)
@@ -582,78 +549,6 @@ void image_viewer_window::update_zoom_status()
     zoom_label_->setText(QString("%1%").arg(scale * 100.0, 0, 'f', 0));
 }
 
-void image_viewer_window::queue_adjacent_preloads()
-{
-    pending_preload_paths_.clear();
-
-    if (current_index_ < 0 || image_list_.empty())
-    {
-        return;
-    }
-
-    const std::array<ptrdiff_t, 2> offsets = {1, -1};
-    for (ptrdiff_t offset : offsets)
-    {
-        ptrdiff_t idx = current_index_ + offset;
-        if (idx < 0 || idx >= static_cast<ptrdiff_t>(image_list_.size()))
-        {
-            continue;
-        }
-
-        const QString& path = image_list_[idx];
-        if (image_cache_.contains(image_cache_key(path)))
-        {
-            continue;
-        }
-        pending_preload_paths_.append(path);
-    }
-
-    if (preload_watcher_ == nullptr)
-    {
-        preload_watcher_ = new QFutureWatcher<std::pair<QString, QImage>>(this);
-        connect(preload_watcher_,
-                &QFutureWatcher<std::pair<QString, QImage>>::finished,
-                this,
-                [this]()
-                {
-                    const auto result = preload_watcher_->result();
-                    if (!result.second.isNull())
-                    {
-                        image_cache_.insert(result.first, new QImage(result.second), result.second.sizeInBytes());
-                    }
-                    start_next_preload();
-                });
-    }
-
-    start_next_preload();
-}
-
-void image_viewer_window::start_next_preload()
-{
-    if (preload_watcher_ == nullptr || preload_watcher_->isRunning())
-    {
-        return;
-    }
-
-    while (!pending_preload_paths_.isEmpty())
-    {
-        QString preload_path = pending_preload_paths_.takeFirst();
-        const QString cache_key = image_cache_key(preload_path);
-        if (image_cache_.contains(cache_key))
-        {
-            continue;
-        }
-
-        preload_watcher_->setFuture(QtConcurrent::run(
-            [preload_path, cache_key]()
-            {
-                auto result = load_image_file(preload_path);
-                return std::make_pair(cache_key, result.first);
-            }));
-        return;
-    }
-}
-
 void image_viewer_window::apply_image_transform()
 {
     if (image_item_ == nullptr)
@@ -695,8 +590,7 @@ void image_viewer_window::clear_movie()
 void image_viewer_window::start_movie(const QString& path)
 {
     movie_ = new QMovie(path, QByteArray(), this);
-    const qint64 file_size = QFileInfo(path).size();
-    movie_->setCacheMode(file_size > kAnimatedCacheAllMaxBytes ? QMovie::CacheNone : QMovie::CacheAll);
+    movie_->setCacheMode(QMovie::CacheNone);
     movie_initialized_ = false;
 
     if (!movie_->isValid())
@@ -742,8 +636,7 @@ void image_viewer_window::start_movie(const QString& path)
                                        .arg(pixmap.height())
                                        .arg(current_index_ + 1)
                                        .arg(image_list_.size()));
-                    queue_adjacent_preloads();
-                    return;
+                                    return;
                 }
 
                 image_item_->setPixmap(pixmap);
@@ -1174,33 +1067,17 @@ void image_viewer_window::keyPressEvent(QKeyEvent* event)
 void image_viewer_window::closeEvent(QCloseEvent* event)
 {
     save_settings();
-    pending_preload_paths_.clear();
     clear_movie();
 
-    if (image_watcher_ != nullptr)
-    {
-        image_watcher_->disconnect();
-        if (image_watcher_->isRunning())
-        {
-            image_watcher_->waitForFinished();
-        }
-    }
 
-    if (preload_watcher_ != nullptr)
-    {
-        preload_watcher_->disconnect();
-        if (preload_watcher_->isRunning())
-        {
-            preload_watcher_->waitForFinished();
-        }
-        delete preload_watcher_;
-        preload_watcher_ = nullptr;
-    }
+
+
 
     scene_->clear();
     image_item_ = nullptr;
     current_path_.clear();
-    loading_path_.clear();
+    image_list_ = QStringList();
+    current_index_ = -1;
     if (slideshow_timer_ != nullptr)
     {
         slideshow_timer_->stop();

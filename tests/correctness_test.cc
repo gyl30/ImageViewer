@@ -108,7 +108,7 @@ class correctness_test : public QObject
     void item_reuse_resets_image();
     void latest_layout_width_data();
     void latest_layout_width();
-    void preloads_after_reopen();
+    void no_background_preload();
     void stale_queued_scans();
     void exif_orientation_data();
     void exif_orientation();
@@ -301,42 +301,29 @@ void correctness_test::latest_layout_width()
     QTRY_COMPARE_WITH_TIMEOUT(scene.sceneRect().width(), 840, 500);
 }
 
-void correctness_test::preloads_after_reopen()
+void correctness_test::no_background_preload()
 {
     QTemporaryDir dir;
     QStringList paths;
-    for (int i = 0; i < 6; ++i)
+    for (int i = 0; i < 3; ++i)
     {
         QImage image(100, 50, QImage::Format_RGB32);
-        image.fill(i == 3 ? Qt::blue : Qt::green);
-        paths.push_back(dir.filePath(QString::number(i) + ".png"));
+        image.fill(Qt::blue);
+        paths.append(dir.filePath(QString::number(i) + ".png"));
         QVERIFY(image.save(paths.back()));
     }
-
     image_viewer_window viewer;
     viewer.set_image_list(paths);
-    viewer.show();
     viewer.set_image_path(paths[1]);
     QTRY_VERIFY(viewer.windowTitle().startsWith("Viewer -"));
+    QCOMPARE(viewer.findChildren<QFutureWatcherBase*>().size(), 1);
+    viewer.show();
     QVERIFY(viewer.close());
     viewer.show();
-    viewer.set_image_path(paths[4]);
-    QTRY_VERIFY(viewer.windowTitle().startsWith("Viewer -"));
-
-    const auto both_neighbors_loaded = [&viewer]()
-    {
-        for (auto* watcher : viewer.findChildren<QFutureWatcherBase*>())
-        {
-            auto* preload = dynamic_cast<QFutureWatcher<std::pair<QString, QImage>>*>(watcher);
-            if (preload != nullptr && preload->isFinished())
-            {
-                const QImage result = preload->result().second;
-                return !result.isNull() && result.pixelColor(0, 0) == QColor(Qt::blue);
-            }
-        }
-        return false;
-    };
-    QTRY_VERIFY_WITH_TIMEOUT(both_neighbors_loaded(), 500);
+    viewer.set_image_list(paths);
+    viewer.set_image_path(paths[2]);
+    QTRY_VERIFY(viewer.windowTitle().contains("2.png (100x50)"));
+    QCOMPARE(viewer.findChildren<QFutureWatcherBase*>().size(), 1);
 }
 
 void correctness_test::stale_queued_scans()
@@ -470,14 +457,14 @@ void correctness_test::thumbnail_file_replaced()
 
 void correctness_test::viewer_file_replaced_data()
 {
-    QTest::addColumn<bool>("preloaded");
-    QTest::newRow("foreground-cache") << false;
-    QTest::newRow("preload-cache") << true;
+    QTest::addColumn<bool>("reopen");
+    QTest::newRow("same-window") << false;
+    QTest::newRow("after-close") << true;
 }
 
 void correctness_test::viewer_file_replaced()
 {
-    QFETCH(bool, preloaded);
+    QFETCH(bool, reopen);
     QTemporaryDir dir;
     const QString path = dir.filePath("image.png");
     const QString neighbor = dir.filePath("neighbor.png");
@@ -489,25 +476,13 @@ void correctness_test::viewer_file_replaced()
     const QDateTime modified = QFileInfo(path).lastModified();
     image_viewer_window viewer;
     viewer.set_image_list({neighbor, path});
-    viewer.set_image_path(preloaded ? neighbor : path);
+    viewer.set_image_path(path);
     QTRY_VERIFY(viewer.windowTitle().startsWith("Viewer -"));
-    if (preloaded)
+    if (reopen)
     {
-        const auto cached_neighbor = [&viewer]()
-        {
-            for (auto* watcher : viewer.findChildren<QFutureWatcherBase*>())
-            {
-                auto* preload = dynamic_cast<QFutureWatcher<std::pair<QString, QImage>>*>(watcher);
-                if (preload != nullptr && preload->isFinished())
-                {
-                    const QImage result = preload->result().second;
-                    return !result.isNull() && result.pixelColor(0, 0) == QColor(Qt::red);
-                }
-            }
-            return false;
-        };
-        QTRY_VERIFY(cached_neighbor());
-        QCoreApplication::sendPostedEvents();
+        viewer.show();
+        QVERIFY(viewer.close());
+        viewer.show();
     }
 
     image.fill(Qt::blue);
@@ -546,6 +521,7 @@ void correctness_test::movie_stops_on_close()
     QPointer<QMovie> movie = viewer.findChild<QMovie*>();
     QVERIFY(!movie.isNull());
     QCOMPARE(movie->frameCount(), 2);
+    QCOMPARE(movie->cacheMode(), QMovie::CacheNone);
     QCOMPARE(movie->state(), QMovie::Running);
     QVERIFY(viewer.close());
     QVERIFY(movie.isNull() || movie->state() == QMovie::NotRunning);

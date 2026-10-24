@@ -4,7 +4,6 @@
 #include <QMainWindow>
 #include <QFutureWatcher>
 #include <QCloseEvent>
-#include <QCache>
 #include <QString>
 #include <QStringList>
 #include <utility>
@@ -75,9 +74,7 @@ class image_viewer_window : public QMainWindow
     void apply_auto_view();
     void load_settings();
     void save_settings() const;
-    void display_image(const QImage& image, const QString& path);
-    void queue_adjacent_preloads();
-    void start_next_preload();
+    void display_image(QImage image, const QString& path);
     void apply_image_transform();
     void clear_movie();
     void start_movie(const QString& path);
@@ -119,8 +116,6 @@ class image_viewer_window : public QMainWindow
     QAction* slideshow_action_ = nullptr;
     QAction* slideshow_loop_action_ = nullptr;
     QAction* slideshow_interval_action_ = nullptr;
-    QCache<QString, QImage> image_cache_;
-    QStringList pending_preload_paths_;
     QLabel* image_info_label_ = nullptr;
     QLabel* zoom_label_ = nullptr;
     QTimer* slideshow_timer_ = nullptr;
@@ -130,7 +125,6 @@ class image_viewer_window : public QMainWindow
     int slideshow_interval_ms_ = 3000;
 
     QFutureWatcher<std::pair<QImage, QString>>* image_watcher_ = nullptr;
-    QFutureWatcher<std::pair<QString, QImage>>* preload_watcher_ = nullptr;
 };
 
 #endif
