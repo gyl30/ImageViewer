@@ -126,6 +126,7 @@ class correctness_test : public QObject
     void scanner_cancel_during_batch();
     void panorama_is_requested_data();
     void panorama_is_requested();
+    void loader_failure_finishes();
 };
 
 void correctness_test::large_visible_batch()
@@ -859,6 +860,17 @@ void correctness_test::panorama_is_requested()
         }
     }
     QVERIFY(visible);
+}
+
+void correctness_test::loader_failure_finishes()
+{
+    loader_worker worker;
+    QSignalSpy loaded(worker.loader, &image_loader::thumbnail_loaded);
+    worker.loader->request_thumbnails({{1, "/missing/imageviewer.png", QSize(100, 100), 7}});
+    worker.thread.start();
+    QTRY_COMPARE_WITH_TIMEOUT(loaded.size(), 1, 300);
+    QCOMPARE(loaded.first()[3].toInt(), 7);
+    QVERIFY(qvariant_cast<QImage>(loaded.first()[2]).isNull());
 }
 
 int main(int argc, char** argv)

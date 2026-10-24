@@ -191,6 +191,7 @@ void image_loader::load_image_internal(const load_task& current_task)
         }
         else if (exceeds_allocation_limit)
         {
+            emit thumbnail_loaded(current_task.id, current_task.path, QImage(), current_task.session_id);
             return;
         }
     }
@@ -216,6 +217,6 @@ void image_loader::load_image_internal(const load_task& current_task)
         image.save(cache_key, "PNG");
         cleanup_disk_cache();
 
-        emit thumbnail_loaded(current_task.id, current_task.path, image, current_task.session_id);
     }
+    emit thumbnail_loaded(current_task.id, current_task.path, image, current_task.session_id);
 }
