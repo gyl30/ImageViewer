@@ -104,7 +104,8 @@ void waterfall_scene::clear_items()
     request_counter_ = 0;
     pending_view_width_ = 0;
 
-    setSceneRect(0, 0, 0, 0);
+    // 空矩形会恢复自动范围，把对象池的旧位置也算进去。
+    setSceneRect(0, 0, 1, 1);
 }
 
 void waterfall_scene::reserve_images(qsizetype count)

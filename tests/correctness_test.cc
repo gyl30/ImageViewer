@@ -26,6 +26,7 @@
 #include "main_window.h"
 #include "waterfall_item.h"
 #include "waterfall_scene.h"
+#include <QScrollBar>
 
 namespace
 {
@@ -135,6 +136,7 @@ class correctness_test : public QObject
     void visible_requests_first();
     void disk_cache_budget();
     void thumbnail_alpha_roundtrip();
+    void clear_resets_scroll_range();
 };
 
 void correctness_test::large_visible_batch()
@@ -990,6 +992,24 @@ void correctness_test::thumbnail_alpha_roundtrip()
         QTRY_COMPARE(loaded.size(), 1);
         QCOMPARE(qvariant_cast<QImage>(loaded.first()[2]).pixelColor(0, 0), QColor(255, 0, 0, 128));
     }
+}
+
+void correctness_test::clear_resets_scroll_range()
+{
+    waterfall_scene scene;
+    QGraphicsView view(&scene);
+    view.resize(440, 600);
+    view.show();
+    QList<image_meta> images;
+    for (int index = 0; index < 100; ++index)
+    {
+        images.append({QString::number(index), QSize(100, 100)});
+    }
+    scene.add_images(images);
+    scene.layout_models(440);
+    QTRY_VERIFY(view.verticalScrollBar()->maximum() > 0);
+    scene.clear_items();
+    QTRY_COMPARE_WITH_TIMEOUT(view.verticalScrollBar()->maximum(), 0, 300);
 }
 
 int main(int argc, char** argv)
