@@ -25,6 +25,7 @@ class waterfall_view : public QGraphicsView
 
    private:
     QTimer* debounce_timer_;
+    QTimer* viewport_timer_;
     int last_width_ = -1;
 };
 

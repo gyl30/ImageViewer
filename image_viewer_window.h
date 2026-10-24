@@ -11,7 +11,6 @@
 class QGraphicsView;
 class QGraphicsScene;
 class QGraphicsPixmapItem;
-class QPushButton;
 class QLabel;
 class QAction;
 class QActionGroup;
@@ -102,8 +101,8 @@ class image_viewer_window : public QMainWindow
     QGraphicsScene* scene_;
     QGraphicsPixmapItem* image_item_;
 
-    QPushButton* btn_prev_;
-    QPushButton* btn_next_;
+    QAction* prev_action_;
+    QAction* next_action_;
     QActionGroup* view_mode_group_ = nullptr;
     QAction* fit_window_action_ = nullptr;
     QAction* actual_size_action_ = nullptr;

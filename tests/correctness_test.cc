@@ -26,6 +26,8 @@
 #include "main_window.h"
 #include "waterfall_item.h"
 #include "waterfall_scene.h"
+#include "waterfall_view.h"
+#include <QAction>
 #include <QScrollBar>
 
 namespace
@@ -136,6 +138,13 @@ class correctness_test : public QObject
     void visible_requests_first();
     void disk_cache_budget();
     void thumbnail_alpha_roundtrip();
+    void main_close_closes_viewer();
+    void scanner_reports_root_error();
+    void theme_keeps_scene_items();
+    void scroll_updates_during_motion();
+    void viewer_error_is_visible();
+    void scanner_sort_modes_data();
+    void scanner_sort_modes();
     void clear_resets_scroll_range();
 };
 
@@ -599,7 +608,7 @@ void correctness_test::item_geometry()
     QVERIFY(scene.sendEvent(&item, &enter));
     const QRectF hovered = item.mapRectToScene(pixels);
     QCOMPARE(hovered.center(), expected.center());
-    QCOMPARE(hovered.width(), expected.width() * 1.08);
+    QCOMPARE(hovered.width(), expected.width());
     QGraphicsSceneHoverEvent leave(QEvent::GraphicsSceneHoverLeave);
     QVERIFY(scene.sendEvent(&item, &leave));
     QCOMPARE(item.mapRectToScene(pixels), expected);
@@ -992,6 +1001,132 @@ void correctness_test::thumbnail_alpha_roundtrip()
         QTRY_COMPARE(loaded.size(), 1);
         QCOMPARE(qvariant_cast<QImage>(loaded.first()[2]).pixelColor(0, 0), QColor(255, 0, 0, 128));
     }
+}
+
+void correctness_test::main_close_closes_viewer()
+{
+    QTemporaryDir dir;
+    const QString path = dir.filePath("image.png");
+    QImage image(100, 50, QImage::Format_RGB32);
+    image.fill(Qt::blue);
+    QVERIFY(image.save(path));
+    main_window window;
+    window.show();
+    QMimeData mime;
+    mime.setUrls({QUrl::fromLocalFile(path)});
+    QDragEnterEvent enter(QPoint(1, 1), Qt::CopyAction, &mime, Qt::LeftButton, Qt::NoModifier);
+    QApplication::sendEvent(&window, &enter);
+    QDropEvent drop(QPointF(1, 1), Qt::CopyAction, &mime, Qt::LeftButton, Qt::NoModifier);
+    QApplication::sendEvent(&window, &drop);
+    auto* viewer = window.findChild<image_viewer_window*>();
+    QVERIFY(viewer != nullptr && viewer->isVisible());
+    QVERIFY(window.close());
+    QVERIFY(!viewer->isVisible());
+    QVERIFY(viewer->current_image_path().isEmpty());
+}
+
+void correctness_test::scanner_reports_root_error()
+{
+    file_scanner scanner;
+    QSignalSpy failed(&scanner, &file_scanner::scan_failed);
+    scanner.start_scan("/missing/imageviewer-directory", scanner.stop_scan(), 0, false);
+    QCOMPARE(failed.size(), 1);
+    QTemporaryDir dir;
+    QVERIFY(QFile::setPermissions(dir.path(), {}));
+    scanner.start_scan(dir.path(), scanner.stop_scan(), 0, false);
+    QVERIFY(QFile::setPermissions(dir.path(), QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner));
+    QCOMPARE(failed.size(), 2);
+}
+
+void correctness_test::theme_keeps_scene_items()
+{
+    main_window window;
+    auto* theme = window.findChild<QAction*>("dark_theme");
+    QVERIFY(theme != nullptr);
+    QVERIFY(!theme->icon().pixmap(18, 18).isNull());
+    auto* scene = window.findChild<waterfall_scene*>();
+    const int items = scene->items().size();
+    theme->setChecked(true);
+    QVERIFY(QApplication::palette().base().color().lightness() < 128);
+    QCOMPARE(scene->items().size(), items);
+    theme->setChecked(false);
+    QVERIFY(QApplication::palette().base().color().lightness() > 128);
+    QCOMPARE(scene->items().size(), items);
+}
+
+void correctness_test::scroll_updates_during_motion()
+{
+    waterfall_scene scene;
+    waterfall_view view;
+    view.setScene(&scene);
+    view.resize(440, 600);
+    view.show();
+    QList<image_meta> images;
+    for (int i = 0; i < 200; ++i)
+    {
+        images.append({QString::number(i), QSize(100, 100)});
+    }
+    scene.add_images(images);
+    scene.layout_models(view.viewport()->width());
+    QSignalSpy requests(&scene, &waterfall_scene::request_load_batch);
+    QTRY_VERIFY(!requests.isEmpty());
+    requests.clear();
+    view.verticalScrollBar()->setValue(4000);
+    QTest::qWait(40);
+    QVERIFY(!requests.isEmpty());
+}
+
+void correctness_test::viewer_error_is_visible()
+{
+    QTemporaryDir dir;
+    const QString path = dir.filePath("image.png");
+    QImage image(600, 400, QImage::Format_RGB32);
+    image.fill(Qt::blue);
+    QVERIFY(image.save(path));
+    image_viewer_window viewer;
+    viewer.show();
+    viewer.set_image_path(path);
+    QTRY_VERIFY(viewer.windowTitle().startsWith("Viewer -"));
+    viewer.set_image_path("/missing/imageviewer.png");
+    QTRY_COMPARE(viewer.windowTitle(), QString("加载图片失败"));
+    auto* view = viewer.findChild<QGraphicsView*>();
+    QCOMPARE(view->scene()->items().size(), 1);
+    QVERIFY(view->mapToScene(view->viewport()->rect()).boundingRect().intersects(view->scene()->items().first()->sceneBoundingRect()));
+}
+
+void correctness_test::scanner_sort_modes_data()
+{
+    QTest::addColumn<int>("mode");
+    QTest::addColumn<bool>("descending");
+    for (int mode = 0; mode < 3; ++mode)
+    {
+        QTest::newRow(qPrintable(QString("%1-up").arg(mode))) << mode << false;
+        QTest::newRow(qPrintable(QString("%1-down").arg(mode))) << mode << true;
+    }
+}
+
+void correctness_test::scanner_sort_modes()
+{
+    QFETCH(int, mode);
+    QFETCH(bool, descending);
+    QTemporaryDir dir;
+    const QString large = dir.filePath("image2.png");
+    const QString small = dir.filePath("image10.png");
+    QImage image(100, 50, QImage::Format_RGB32);
+    image.fill(Qt::red);
+    QVERIFY(image.save(large));
+    QVERIFY(image.scaled(2, 2).save(small));
+    QFile file(small);
+    QVERIFY(file.open(QIODevice::ReadWrite));
+    QVERIFY(file.setFileTime(QFileInfo(large).lastModified().addSecs(-10), QFileDevice::FileModificationTime));
+    file.close();
+    file_scanner scanner;
+    QSignalSpy batches(&scanner, &file_scanner::images_scanned_batch);
+    scanner.start_scan(dir.path(), scanner.stop_scan(), mode, descending);
+    QCOMPARE(batches.size(), 1);
+    const auto images = qvariant_cast<QList<image_meta>>(batches.first().first());
+    const bool large_first = mode == 0 ? !descending : descending;
+    QCOMPARE(images.first().path, large_first ? large : small);
 }
 
 void correctness_test::clear_resets_scroll_range()

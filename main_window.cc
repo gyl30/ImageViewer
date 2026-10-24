@@ -21,6 +21,12 @@
 #include <QProcess>
 #include <QStandardPaths>
 #include <QToolBar>
+#include <QApplication>
+#include <QLineEdit>
+#include <QProgressBar>
+#include <QStyle>
+#include <QPalette>
+#include <QSignalBlocker>
 
 #include "main_window.h"
 #include "image_loader.h"
@@ -80,12 +86,13 @@ void main_window::setup_ui()
         open_path(current_root_path_, false);
     };
 
-    auto* act_open = new QAction("Open", this);
+    setWindowTitle("ImageViewer");
+    auto* act_open = new QAction(QIcon(":/icons/folder.svg"), "打开文件夹", this);
     act_open->setShortcut(QKeySequence::Open);
     addAction(act_open);
     connect(act_open, &QAction::triggered, this, &main_window::on_add_folder);
 
-    auto* act_open_file = new QAction("Open Image", this);
+    auto* act_open_file = new QAction(QIcon(":/icons/image.svg"), "打开图片", this);
     act_open_file->setShortcut(QKeySequence("Ctrl+Shift+O"));
     addAction(act_open_file);
     connect(act_open_file,
@@ -104,7 +111,7 @@ void main_window::setup_ui()
                 }
             });
 
-    auto* act_open_recent = new QAction("Open Recent", this);
+    auto* act_open_recent = new QAction(QIcon(":/icons/history.svg"), "最近", this);
     act_open_recent->setShortcut(QKeySequence("Ctrl+Alt+O"));
     addAction(act_open_recent);
     connect(act_open_recent,
@@ -143,8 +150,22 @@ void main_window::setup_ui()
                     "F5 幻灯片");
             });
 
-    auto* sort_toolbar = addToolBar("Sort");
+    auto* sort_toolbar = addToolBar("浏览");
     sort_toolbar->setMovable(false);
+    sort_toolbar->setIconSize(QSize(18, 18));
+    sort_toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    sort_toolbar->addAction(act_open);
+    sort_toolbar->addAction(act_open_file);
+    sort_toolbar->addAction(act_open_recent);
+    sort_toolbar->addSeparator();
+    path_edit_ = new QLineEdit(this);
+    path_edit_->setObjectName("directory_path");
+    path_edit_->setPlaceholderText("输入路径，或将文件夹拖到这里");
+    path_edit_->setMinimumWidth(160);
+    path_edit_->setClearButtonEnabled(true);
+    sort_toolbar->addWidget(path_edit_);
+    connect(path_edit_, &QLineEdit::returnPressed, this, [this]() { open_path(path_edit_->text(), true); });
+    sort_toolbar->addSeparator();
 
     sort_group_ = new QActionGroup(this);
     sort_group_->setExclusive(true);
@@ -216,6 +237,12 @@ void main_window::setup_ui()
                 rescan_current_folder();
             });
 
+    sort_toolbar->addSeparator();
+    dark_theme_action_ = sort_toolbar->addAction(QIcon(":/icons/theme.svg"), "深色");
+    dark_theme_action_->setObjectName("dark_theme");
+    dark_theme_action_->setCheckable(true);
+    connect(dark_theme_action_, &QAction::toggled, this, &main_window::set_dark_theme);
+
     scene_ = new waterfall_scene(this);
     view_ = new waterfall_view(this);
     view_->setScene(scene_);
@@ -223,8 +250,14 @@ void main_window::setup_ui()
     setCentralWidget(view_);
     setAcceptDrops(true);
 
-    status_label_ = new QLabel("Press Ctrl+O to load folder", this);
+    status_label_ = new QLabel("打开或拖入文件夹，开始浏览图片", this);
     statusBar()->addWidget(status_label_);
+    scan_progress_ = new QProgressBar(this);
+    scan_progress_->setObjectName("scan_progress");
+    scan_progress_->setMaximumWidth(160);
+    scan_progress_->setTextVisible(false);
+    scan_progress_->hide();
+    statusBar()->addPermanentWidget(scan_progress_);
 
     info_label_ = new QLabel(this);
     statusBar()->addPermanentWidget(info_label_);
@@ -254,7 +287,19 @@ void main_window::setup_scanner()
         if (session == current_scan_session_id_)
         {
             scene_->reserve_images(count);
+            scan_progress_->setRange(0, std::max<qsizetype>(1, count));
         }
+    });
+    connect(file_scanner_, &file_scanner::scan_failed, this, [this](const QString& message, int session)
+    {
+        if (session != current_scan_session_id_)
+        {
+            return;
+        }
+        is_scanning_ = false;
+        scan_progress_->hide();
+        status_label_->setText(message);
+        scene_->set_empty_text(message);
     });
     connect(file_scanner_, &file_scanner::images_scanned_batch, this, &main_window::on_scan_batch_received);
     connect(file_scanner_, &file_scanner::scan_finished, this, &main_window::on_scan_all_finished);
@@ -292,6 +337,10 @@ void main_window::load_settings()
     QSettings settings("gyl30", "ImageViewer");
 
     restoreGeometry(settings.value("main_window/geometry").toByteArray());
+    const bool dark = settings.value("main_window/dark_theme", QApplication::palette().base().color().lightness() < 128).toBool();
+    const QSignalBlocker theme_signals(dark_theme_action_);
+    dark_theme_action_->setChecked(dark);
+    set_dark_theme(dark);
 
     recent_folder_paths_ = settings.value("main_window/recent_folder_paths").toStringList();
     recent_image_paths_ = settings.value("main_window/recent_image_paths").toStringList();
@@ -345,6 +394,7 @@ void main_window::save_settings() const
 {
     QSettings settings("gyl30", "ImageViewer");
     settings.setValue("main_window/geometry", saveGeometry());
+    settings.setValue("main_window/dark_theme", dark_theme_action_->isChecked());
     settings.setValue("main_window/recent_folder_paths", recent_folder_paths_);
     settings.setValue("main_window/recent_image_paths", recent_image_paths_);
     settings.setValue("main_window/last_open_dir", last_open_dir_);
@@ -393,6 +443,7 @@ void main_window::open_path(const QString& path, bool add_to_recent)
     QFileInfo file_info(path);
     if (!file_info.exists())
     {
+        statusBar()->showMessage("路径不存在，请检查后重试", 4000);
         return;
     }
 
@@ -415,15 +466,21 @@ void main_window::open_path(const QString& path, bool add_to_recent)
 
     last_open_dir_ = path;
     current_root_path_ = path;
+    path_edit_->setText(QDir::toNativeSeparators(QFileInfo(path).absoluteFilePath()));
+    path_edit_->setToolTip(path_edit_->text());
 
     current_scan_session_id_ = file_scanner_->stop_scan();
 
     scene_->clear_items();
+    scene_->set_empty_text("正在查找图片…");
     total_count_ = 0;
     scan_duration_ = 0;
     info_label_->clear();
 
-    status_label_->setText(QString("Scanning: %1").arg(path));
+    is_scanning_ = true;
+    scan_progress_->setRange(0, 0);
+    scan_progress_->show();
+    status_label_->setText("正在查找图片…");
 
     if (add_to_recent)
     {
@@ -537,6 +594,7 @@ void main_window::on_scan_batch_received(const QList<image_meta>& batch, int ses
 
     scene_->add_images(batch);
     total_count_ += static_cast<int>(batch.size());
+    scan_progress_->setValue(total_count_);
     scene_->layout_models(view_->viewport()->width());
     update_status_bar();
 }
@@ -549,14 +607,26 @@ void main_window::on_scan_all_finished(int total, qint64 duration, int session_i
     }
 
     scan_duration_ = duration;
+    is_scanning_ = false;
+    scan_progress_->hide();
     total_count_ = total;
+    if (total == 0)
+    {
+        scene_->set_empty_text("此文件夹没有可读取的图片");
+    }
     scene_->layout_models(view_->viewport()->width());
     update_status_bar();
 }
 
 void main_window::update_status_bar()
 {
-    status_label_->setText(QString("已索引 %1 张图片 · 扫描 %2 ms").arg(total_count_).arg(scan_duration_));
+    if (is_scanning_)
+    {
+        status_label_->setText(QString("正在读取图片信息… %1 张").arg(total_count_));
+        return;
+    }
+    status_label_->setText(total_count_ == 0 ? "此文件夹没有可读取的图片" :
+        QString("%1 张图片 · 扫描 %2 秒").arg(total_count_).arg(scan_duration_ / 1000.0, 0, 'f', 2));
 }
 
 void main_window::on_selection_changed()
@@ -684,8 +754,44 @@ void main_window::on_move_path_to_trash(const QString& path)
 
 void main_window::closeEvent(QCloseEvent* event)
 {
+    if (viewer_window_ != nullptr)
+    {
+        viewer_window_->close();
+    }
     save_settings();
     QMainWindow::closeEvent(event);
+}
+
+void main_window::set_dark_theme(bool enabled)
+{
+    QPalette palette = QApplication::style()->standardPalette();
+    if (enabled)
+    {
+        const QColor text("#eef1f6");
+        const QColor disabled("#778294");
+        const QColor alternate("#292e37");
+        palette.setColor(QPalette::Window, QColor("#17191e"));
+        palette.setColor(QPalette::Base, QColor("#20232a"));
+        palette.setColor(QPalette::AlternateBase, alternate);
+        palette.setColor(QPalette::Button, QColor("#262b33"));
+        palette.setColor(QPalette::Text, text);
+        palette.setColor(QPalette::WindowText, text);
+        palette.setColor(QPalette::ButtonText, text);
+        palette.setColor(QPalette::PlaceholderText, QColor("#a2adbf"));
+        palette.setColor(QPalette::Mid, QColor("#738097"));
+        palette.setColor(QPalette::Highlight, QColor("#4b94ee"));
+        palette.setColor(QPalette::HighlightedText, Qt::white);
+        palette.setColor(QPalette::Disabled, QPalette::Text, disabled);
+        palette.setColor(QPalette::Disabled, QPalette::ButtonText, disabled);
+        palette.setColor(QPalette::ToolTipBase, alternate);
+        palette.setColor(QPalette::ToolTipText, text);
+    }
+    QApplication::setPalette(palette);
+    for (auto* view : findChildren<QGraphicsView*>())
+    {
+        view->setBackgroundBrush(palette.base());
+    }
+    scene_->update();
 }
 
 void main_window::dragEnterEvent(QDragEnterEvent* event)

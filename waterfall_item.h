@@ -21,6 +21,7 @@ class waterfall_item : public QGraphicsPixmapItem
     [[nodiscard]] quint64 get_request_id() const { return current_request_id_; }
     [[nodiscard]] load_state state() const { return state_; }
     void set_pixmap_safe(const QPixmap& pixmap);
+    [[nodiscard]] QRectF boundingRect() const override;
 
    protected:
     void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;
@@ -35,6 +36,7 @@ class waterfall_item : public QGraphicsPixmapItem
     QString path_;
     QSize original_size_;
     int target_width_ = 0;
+    int target_height_ = 0;
     quint64 current_request_id_ = 0;
     bool is_hovered_ = false;
     load_state state_ = load_state::empty;

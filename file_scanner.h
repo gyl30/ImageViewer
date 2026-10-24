@@ -21,6 +21,7 @@ class file_scanner : public QObject
 
    signals:
     void scan_prepared(qsizetype count, int session_id);
+    void scan_failed(QString message, int session_id);
     void images_scanned_batch(QList<image_meta> batch, int session_id);
     void scan_finished(int total_count, qint64 duration_ms, int session_id);
 

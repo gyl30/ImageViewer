@@ -16,6 +16,8 @@
 class QImage;
 class QAction;
 class QActionGroup;
+class QLineEdit;
+class QProgressBar;
 class waterfall_view;
 class waterfall_scene;
 class image_loader;
@@ -45,6 +47,7 @@ class main_window : public QMainWindow
     void update_status_bar();
     void load_settings();
     void save_settings() const;
+    void set_dark_theme(bool enabled);
     void prune_recent_paths();
     void open_path(const QString& path, bool add_to_recent);
     void add_recent_path(const QString& path);
@@ -78,6 +81,10 @@ class main_window : public QMainWindow
     file_scanner* file_scanner_ = nullptr;
     QLabel* status_label_ = nullptr;
     QLabel* info_label_ = nullptr;
+    QLineEdit* path_edit_ = nullptr;
+    QProgressBar* scan_progress_ = nullptr;
+    QAction* dark_theme_action_ = nullptr;
+    bool is_scanning_ = false;
     qint64 scan_duration_ = 0;
     int total_count_ = 0;
     QStringList recent_folder_paths_;

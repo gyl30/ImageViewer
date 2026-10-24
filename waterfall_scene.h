@@ -31,6 +31,7 @@ class waterfall_scene : public QGraphicsScene
     void update_viewport(const QRectF& visible_rect);
     bool focus_path(const QString& path);
     void set_recent_paths(const QStringList& recent_folder_paths, const QStringList& recent_image_paths);
+    void set_empty_text(const QString& text);
     [[nodiscard]] QStringList get_all_paths() const;
 
    signals:
@@ -53,6 +54,7 @@ class waterfall_scene : public QGraphicsScene
    protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
+    void drawForeground(QPainter* painter, const QRectF& rect) override;
 
    private:
     waterfall_item* obtain_item();
@@ -78,6 +80,7 @@ class waterfall_scene : public QGraphicsScene
     int pending_view_width_ = 0;
     QStringList recent_folder_paths_;
     QStringList recent_image_paths_;
+    QString empty_text_ = "把文件夹拖到这里\n或使用上方「打开文件夹」";
 };
 
 #endif

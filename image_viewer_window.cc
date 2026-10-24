@@ -15,7 +15,7 @@
 #include <QResizeEvent>
 #include <QEvent>
 #include <QWheelEvent>
-#include <QPushButton>
+#include <QApplication>
 #include <QFileInfo>
 #include <QFont>
 #include <QLabel>
@@ -100,7 +100,7 @@ std::pair<QImage, QString> load_image_file(const QString& path)
 }
 
 image_viewer_window::image_viewer_window(QWidget* parent)
-    : QMainWindow(parent), current_index_(-1), view_(nullptr), scene_(nullptr), image_item_(nullptr), btn_prev_(nullptr), btn_next_(nullptr)
+    : QMainWindow(parent), current_index_(-1), view_(nullptr), scene_(nullptr), image_item_(nullptr), prev_action_(nullptr), next_action_(nullptr)
 {
     setup_ui();
     load_settings();
@@ -135,7 +135,7 @@ void image_viewer_window::setup_ui()
     view_->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
     view_->setResizeAnchor(QGraphicsView::AnchorViewCenter);
 
-    view_->setBackgroundBrush(Qt::black);
+    view_->setBackgroundBrush(QApplication::palette().base());
 
     view_->viewport()->installEventFilter(this);
     view_->installEventFilter(this);
@@ -150,6 +150,16 @@ void image_viewer_window::setup_ui()
 
     auto* toolbar = addToolBar("View");
     toolbar->setMovable(false);
+    toolbar->setIconSize(QSize(18, 18));
+    toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    prev_action_ = toolbar->addAction(QIcon(":/icons/previous.svg"), "上一张");
+    next_action_ = toolbar->addAction(QIcon(":/icons/next.svg"), "下一张");
+    prev_action_->setToolTip("上一张（Left / Backspace）");
+    next_action_->setToolTip("下一张（Right / Space）");
+    connect(prev_action_, &QAction::triggered, this, &image_viewer_window::load_prev_image);
+    connect(next_action_, &QAction::triggered, this, &image_viewer_window::load_next_image);
+    toolbar->addSeparator();
+
 
     view_mode_group_ = new QActionGroup(this);
     view_mode_group_->setExclusive(true);
@@ -177,6 +187,13 @@ void image_viewer_window::setup_ui()
     full_screen_action_->setShortcut(QKeySequence(Qt::Key_F11));
     connect(full_screen_action_, &QAction::triggered, this, &image_viewer_window::toggle_full_screen);
 
+    toolbar->addSeparator();
+    auto* zoom_out_action = toolbar->addAction(QIcon(":/icons/zoom-out.svg"), "缩小");
+    auto* zoom_in_action = toolbar->addAction(QIcon(":/icons/zoom-in.svg"), "放大");
+    zoom_out_action->setShortcut(QKeySequence::ZoomOut);
+    zoom_in_action->setShortcut(QKeySequence::ZoomIn);
+    connect(zoom_out_action, &QAction::triggered, this, &image_viewer_window::zoom_out);
+    connect(zoom_in_action, &QAction::triggered, this, &image_viewer_window::zoom_in);
     toolbar->addSeparator();
 
     rotate_left_action_ = toolbar->addAction("左转");
@@ -220,7 +237,7 @@ void image_viewer_window::setup_ui()
                     this,
                     "快捷键",
                     "Left/Right 上一张/下一张\n"
-                    "Space/Backspace 上一张/下一张\n"
+                    "Space 下一张，Backspace 上一张\n"
                     "Home/End 跳到首张/末张\n"
                     "Ctrl+滚轮 缩放\n"
                     "Ctrl+0 适应窗口\n"
@@ -251,35 +268,13 @@ void image_viewer_window::setup_ui()
     slideshow_timer_->setInterval(slideshow_interval_ms_);
     connect(slideshow_timer_, &QTimer::timeout, this, &image_viewer_window::advance_slideshow);
 
-    const QString btn_style = R"(
-        QPushButton {
-            background-color: transparent;
-            color: rgba(255, 255, 255, 100);
-            font-size: 60px;
-            font-weight: bold;
-            border: none;
-        }
-        QPushButton:hover {
-            color: white;
-        }
-    )";
-
-    btn_prev_ = new QPushButton("<", this);
-    btn_prev_->setStyleSheet(btn_style);
-    btn_prev_->setCursor(Qt::ArrowCursor);
-
-    btn_next_ = new QPushButton(">", this);
-    btn_next_->setStyleSheet(btn_style);
-    btn_next_->setCursor(Qt::ArrowCursor);
-
-    connect(btn_prev_, &QPushButton::clicked, this, &image_viewer_window::load_prev_image);
-    connect(btn_next_, &QPushButton::clicked, this, &image_viewer_window::load_next_image);
     update_navigation_buttons();
 }
 
 void image_viewer_window::set_image_path(const QString& path)
 {
     current_path_ = path;
+    has_manual_zoom_ = false;
     update_index_from_path();
     update_navigation_buttons();
     emit current_image_changed(path);
@@ -292,7 +287,7 @@ void image_viewer_window::set_image_path(const QString& path)
 
     scene_->clear();
     image_item_ = nullptr;
-    setWindowTitle(QString("Loading %1...").arg(QFileInfo(path).fileName()));
+    setWindowTitle(QString("正在打开 %1…").arg(QFileInfo(path).fileName()));
 
 
     if (is_animated_image(path))
@@ -605,10 +600,10 @@ void image_viewer_window::start_movie(const QString& path)
     if (!movie_->isValid())
     {
         clear_movie();
-        setWindowTitle("Error loading image");
+        setWindowTitle("无法读取动图");
         scene_->clear();
         image_item_ = nullptr;
-        image_info_label_->setText("Failed to load animated image");
+        image_info_label_->setText("文件损坏或不支持动画解码");
         zoom_label_->clear();
         return;
     }
@@ -777,15 +772,7 @@ void image_viewer_window::resizeEvent(QResizeEvent* event)
         apply_auto_view();
     }
 
-    int btn_w = 80;
-    int btn_h = 150;
-    int y_pos = (height() - btn_h) / 2;
 
-    btn_prev_->setGeometry(0, y_pos, btn_w, btn_h);
-    btn_next_->setGeometry(width() - btn_w, y_pos, btn_w, btn_h);
-
-    btn_prev_->raise();
-    btn_next_->raise();
 }
 
 bool image_viewer_window::eventFilter(QObject* watched, QEvent* event)
@@ -1012,8 +999,8 @@ void image_viewer_window::update_navigation_buttons()
     bool has_prev = current_index_ > 0;
     bool has_next = current_index_ >= 0 && current_index_ < static_cast<ptrdiff_t>(image_list_.size()) - 1;
 
-    btn_prev_->setEnabled(has_prev);
-    btn_next_->setEnabled(has_next);
+    prev_action_->setEnabled(has_prev);
+    next_action_->setEnabled(has_next);
 }
 
 void image_viewer_window::keyPressEvent(QKeyEvent* event)

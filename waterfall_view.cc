@@ -14,6 +14,10 @@ waterfall_view::waterfall_view(QWidget* parent) : QGraphicsView(parent)
     debounce_timer_->setInterval(150);
 
     connect(debounce_timer_, &QTimer::timeout, this, &waterfall_view::on_interaction_finished);
+    viewport_timer_ = new QTimer(this);
+    viewport_timer_->setSingleShot(true);
+    viewport_timer_->setInterval(16);
+    connect(viewport_timer_, &QTimer::timeout, this, &waterfall_view::check_visible_area);
 }
 
 void waterfall_view::resizeEvent(QResizeEvent* event)
@@ -21,12 +25,19 @@ void waterfall_view::resizeEvent(QResizeEvent* event)
     QGraphicsView::resizeEvent(event);
 
     debounce_timer_->start();
+    if (!viewport_timer_->isActive())
+    {
+        viewport_timer_->start();
+    }
 }
 
 void waterfall_view::scrollContentsBy(int dx, int dy)
 {
     QGraphicsView::scrollContentsBy(dx, dy);
-    debounce_timer_->start();
+    if (!viewport_timer_->isActive())
+    {
+        viewport_timer_->start();
+    }
 }
 
 void waterfall_view::on_interaction_finished()
@@ -37,7 +48,6 @@ void waterfall_view::on_interaction_finished()
         last_width_ = current_width;
         emit view_resized(current_width);
     }
-    check_visible_area();
 }
 void waterfall_view::check_visible_area()
 {

@@ -1,6 +1,10 @@
 #include <QPen>
 #include <QBrush>
 #include <QPainter>
+#include <QApplication>
+#include <QPainterPath>
+#include <QPalette>
+#include <algorithm>
 #include "waterfall_item.h"
 
 static QPixmap& get_placeholder()
@@ -21,10 +25,13 @@ waterfall_item::waterfall_item(QGraphicsItem* parent) : QGraphicsPixmapItem(pare
     setAcceptHoverEvents(true);
     setPixmap(get_placeholder());
     setTransformationMode(Qt::SmoothTransformation);
+    setCursor(Qt::PointingHandCursor);
 }
 
 void waterfall_item::bind_model(const layout_model& model, int index, const QString& path, int display_width, quint64 request_id)
 {
+    prepareGeometryChange();
+    target_height_ = qRound(model.layout_rect.height());
     if (current_request_id_ != request_id || path_ != path)
     {
         setPixmap(get_placeholder());
@@ -39,9 +46,9 @@ void waterfall_item::bind_model(const layout_model& model, int index, const QStr
 
     is_hovered_ = false;
     setZValue(0);
-    setGraphicsEffect(nullptr);
 
     setPos(model.layout_rect.topLeft());
+    setToolTip(path);
     update_scale();
     setVisible(true);
 }
@@ -56,7 +63,6 @@ void waterfall_item::reset()
 
     setPixmap(get_placeholder());
     state_ = load_state::empty;
-    setGraphicsEffect(nullptr);
     setZValue(0);
     setVisible(false);
 }
@@ -88,21 +94,12 @@ void waterfall_item::update_scale()
     setTransform(QTransform::fromScale(base_scale, base_scale));
     setTransformOriginPoint(QRectF(pixmap().rect()).center());
 
-    if (is_hovered_)
-    {
-        setScale(1.08);
-    }
-    else
-    {
-        setScale(1.0);
-    }
+    setScale(1.0);
 }
 
 void waterfall_item::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
 {
     setZValue(1.0);
-
-    setScale(1.08);
 
     is_hovered_ = true;
 
@@ -115,8 +112,6 @@ void waterfall_item::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
 {
     setZValue(0.0);
 
-    setScale(1.0);
-
     is_hovered_ = false;
 
     update();
@@ -126,15 +121,56 @@ void waterfall_item::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
 
 void waterfall_item::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
-    QGraphicsPixmapItem::paint(painter, option, widget);
-    if (!is_hovered_)
+    Q_UNUSED(option)
+    Q_UNUSED(widget)
+    const QRectF bounds = boundingRect();
+    const qreal scale = transform().m11();
+    const qreal radius = std::min({6.0 / scale, bounds.width() / 2, bounds.height() / 2});
+    const QPalette palette = QApplication::palette();
+    QPainterPath clip;
+    clip.addRoundedRect(bounds, radius, radius);
+    painter->save();
+    painter->setRenderHint(QPainter::Antialiasing);
+    painter->setClipPath(clip);
+    if (state_ == load_state::ready)
+    {
+        painter->drawPixmap(bounds, pixmap(), QRectF(pixmap().rect()));
+    }
+    else
+    {
+        painter->fillRect(bounds, palette.alternateBase());
+        if (bounds.width() * scale >= 80 && bounds.height() * scale >= 32)
+        {
+            QFont font = painter->font();
+            font.setPixelSize(std::max(1, qRound(12 / scale)));
+            painter->setFont(font);
+            painter->setPen(palette.color(QPalette::Text));
+            painter->drawText(bounds, Qt::AlignCenter, state_ == load_state::failed ? "无法读取" : "正在加载…");
+        }
+    }
+    painter->restore();
+    if (bounds.height() * scale < 3)
     {
         return;
     }
     painter->save();
-    QPen pen(QColor(255, 255, 255, 200), 6);
-    pen.setJoinStyle(Qt::MiterJoin);
+    painter->setRenderHint(QPainter::Antialiasing);
+    const bool selected = isSelected();
+    const qreal inset = 1.0 / scale;
+    QPen pen(selected || is_hovered_ ? palette.color(QPalette::Highlight) : palette.color(QPalette::Mid),
+             (selected ? 2.0 : 1.0) / scale);
     painter->setPen(pen);
-    painter->drawRect(pixmap().rect());
+    painter->setBrush(Qt::NoBrush);
+    painter->drawRoundedRect(bounds.adjusted(inset, inset, -inset, -inset), radius, radius);
     painter->restore();
+}
+
+QRectF waterfall_item::boundingRect() const
+{
+    if (target_width_ <= 0 || target_height_ <= 0)
+    {
+        return QGraphicsPixmapItem::boundingRect();
+    }
+    const qreal width = pixmap().width();
+    return QRectF(0, 0, width, target_height_ * width / target_width_);
 }

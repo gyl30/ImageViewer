@@ -10,6 +10,8 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsView>
 #include <QDebug>
+#include <QPainter>
+#include <QPalette>
 #include <QtConcurrent>
 #include "common_types.h"
 #include "waterfall_scene.h"
@@ -132,6 +134,26 @@ void waterfall_scene::set_recent_paths(const QStringList& recent_folder_paths, c
 {
     recent_folder_paths_ = recent_folder_paths;
     recent_image_paths_ = recent_image_paths;
+}
+
+void waterfall_scene::set_empty_text(const QString& text)
+{
+    empty_text_ = text;
+    update();
+}
+
+void waterfall_scene::drawForeground(QPainter* painter, const QRectF& rect)
+{
+    if (!all_models_.empty())
+    {
+        return;
+    }
+    const QRectF bounds = views().isEmpty() ? rect :
+        views().first()->mapToScene(views().first()->viewport()->rect()).boundingRect();
+    painter->save();
+    painter->setPen(QApplication::palette().color(QPalette::Text));
+    painter->drawText(bounds, Qt::AlignCenter, empty_text_);
+    painter->restore();
 }
 
 bool waterfall_scene::focus_path(const QString& path)

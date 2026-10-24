@@ -34,6 +34,12 @@ void file_scanner::start_scan(const QString& dir_path, int session_id, int sort_
     {
         return;
     }
+    const QFileInfo root(dir_path);
+    if (!root.isDir() || !root.isReadable())
+    {
+        emit scan_failed("无法读取此文件夹，请检查路径和访问权限", session_id);
+        return;
+    }
     QElapsedTimer timer;
     timer.start();
 
