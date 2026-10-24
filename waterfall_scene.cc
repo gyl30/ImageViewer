@@ -334,10 +334,8 @@ void waterfall_scene::update_viewport(const QRectF& visible_rect)
         return;
     }
 
-    const qreal preload_height = visible_rect.height() / 2;
-    QRectF load_rect = visible_rect.adjusted(0, -preload_height, 0, preload_height);
-    int top_y = static_cast<int>(load_rect.top());
-    int bottom_y = static_cast<int>(load_rect.bottom());
+    int top_y = static_cast<int>(visible_rect.top());
+    int bottom_y = static_cast<int>(visible_rect.bottom());
 
     // 前缀最大底边保证二分有序，也能找到跨越多行的长图。
     const auto laid_out_end = item_bottom_index_.begin() + last_layout_index_;
@@ -359,7 +357,7 @@ void waterfall_scene::update_viewport(const QRectF& visible_rect)
     for (int i = start_idx; i < end_idx; ++i)
     {
         const auto& model = all_models_[i];
-        if (!load_rect.intersects(model.layout_rect))
+        if (!visible_rect.intersects(model.layout_rect))
         {
             continue;
         }
@@ -408,7 +406,8 @@ void waterfall_scene::request_visible_images(const QRectF& visible_rect, request
                 pending.push_back(it.key());
             }
         }
-        else if (it.value()->state() == waterfall_item::load_state::empty)
+        else if (it.value()->state() == waterfall_item::load_state::empty &&
+                 all_models_[it.key()].layout_rect.intersects(visible_rect))
         {
             pending.push_back(it.key());
         }

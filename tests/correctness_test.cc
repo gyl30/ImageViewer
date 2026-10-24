@@ -155,6 +155,8 @@ class correctness_test : public QObject
     void scanner_formats_data();
     void scanner_formats();
     void jpeg_cache_roundtrip();
+    void only_visible_requests();
+    void scrolled_result_skips_old();
 };
 
 void correctness_test::large_visible_batch()
@@ -176,6 +178,8 @@ void correctness_test::large_visible_batch()
     waterfall_scene scene;
     QGraphicsView view(&scene);
     view.resize(440, 2000);
+    view.show();
+    QTRY_VERIFY(view.viewport()->height() > 1900);
     QSignalSpy loaded(worker.loader, &image_loader::thumbnail_loaded);
     connect(worker.loader, &image_loader::thumbnail_loaded, &scene, &waterfall_scene::on_image_loaded);
 
@@ -1336,6 +1340,57 @@ void correctness_test::jpeg_cache_roundtrip()
         }
         QVERIFY(error / (3.0 * decoded.width() * decoded.height()) < 2.0);
     }
+}
+
+void correctness_test::only_visible_requests()
+{
+    waterfall_scene scene;
+    QList<image_meta> images;
+    for (int index = 0; index < 100; ++index)
+    {
+        images.append({QString::number(index), QSize(100, 100)});
+    }
+    scene.add_images(images);
+    scene.layout_models(440);
+    QTRY_VERIFY(!scene.is_laying_out_);
+    QSignalSpy requests(&scene, &waterfall_scene::request_load_batch);
+    const QRectF visible(0, 500, 440, 300);
+    scene.update_viewport(visible);
+    QCOMPARE(requests.size(), 1);
+    const auto tasks = qvariant_cast<QList<load_task>>(requests.first().first());
+    QVERIFY(!tasks.isEmpty());
+    for (const auto& task : tasks)
+    {
+        QVERIFY2(scene.all_models_[task.path.toInt()].layout_rect.intersects(visible), qPrintable(task.path));
+    }
+}
+
+void correctness_test::scrolled_result_skips_old()
+{
+    waterfall_scene scene;
+    QGraphicsView view(&scene);
+    view.resize(440, 2000);
+    view.show();
+    QTRY_VERIFY(view.viewport()->height() > 1900);
+    QList<image_meta> images;
+    for (int index = 0; index < 1000; ++index)
+    {
+        images.append({QString::number(index), QSize(200, 2)});
+    }
+    QSignalSpy requests(&scene, &waterfall_scene::request_load_batch);
+    scene.add_images(images);
+    scene.layout_models(440);
+    QTRY_VERIFY(!scene.is_laying_out_);
+    view.verticalScrollBar()->setValue(0);
+    scene.update_viewport(view.mapToScene(view.viewport()->rect()).boundingRect());
+    QVERIFY(!requests.isEmpty());
+    const auto task = qvariant_cast<QList<load_task>>(requests.last().first()).first();
+    requests.clear();
+    view.verticalScrollBar()->setValue(4000);
+    scene.on_image_loaded(task.id, task.path, QImage(), 0);
+    QVERIFY(requests.isEmpty());
+    scene.update_viewport(view.mapToScene(view.viewport()->rect()).boundingRect());
+    QVERIFY(!requests.isEmpty());
 }
 
 int main(int argc, char** argv)
