@@ -134,6 +134,7 @@ class correctness_test : public QObject
     void thumbnail_budget_and_bound();
     void visible_requests_first();
     void disk_cache_budget();
+    void thumbnail_alpha_roundtrip();
 };
 
 void correctness_test::large_visible_batch()
@@ -971,6 +972,24 @@ void correctness_test::disk_cache_budget()
     QVERIFY(QDir(directory).entryList({"*.png"}, QDir::Files).size() <= 1000);
     loader.clear_cache();
     QVERIFY(QDir(directory).entryList({"*.png"}, QDir::Files).isEmpty());
+}
+
+void correctness_test::thumbnail_alpha_roundtrip()
+{
+    QTemporaryDir dir;
+    const QString path = dir.filePath("alpha.png");
+    QImage source(100, 50, QImage::Format_ARGB32_Premultiplied);
+    source.fill(QColor(255, 0, 0, 128));
+    QVERIFY(source.save(path));
+    for (int pass = 0; pass < 2; ++pass)
+    {
+        loader_worker worker;
+        QSignalSpy loaded(worker.loader, &image_loader::thumbnail_loaded);
+        worker.loader->request_thumbnails({{1, path, source.size(), 1}});
+        worker.thread.start();
+        QTRY_COMPARE(loaded.size(), 1);
+        QCOMPARE(qvariant_cast<QImage>(loaded.first()[2]).pixelColor(0, 0), QColor(255, 0, 0, 128));
+    }
 }
 
 int main(int argc, char** argv)

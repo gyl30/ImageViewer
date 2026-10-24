@@ -6,6 +6,7 @@
 #include <QFileInfo>
 #include <QMetaObject>
 #include <QImageReader>
+#include <QImageWriter>
 #include <QStandardPaths>
 #include "image_loader.h"
 
@@ -15,6 +16,7 @@ constexpr int kThumbnailCacheVersion = 2;
 constexpr qint64 kMaxDiskCacheBytes = 128LL * 1024 * 1024;
 constexpr int kMaxDiskCacheFiles = 1000;
 constexpr int kCacheRetainPercent = 80;
+constexpr int kPngCompression = 15;
 }
 
 image_loader::image_loader(QObject* parent) : QObject(parent), abort_(false)
@@ -160,9 +162,10 @@ void image_loader::load_image_internal(const load_task& current_task)
     QImage image(cache_key);
     if (!image.isNull())
     {
-        if (image.format() != QImage::Format_ARGB32_Premultiplied)
+        const auto format = image.hasAlphaChannel() ? QImage::Format_ARGB32_Premultiplied : QImage::Format_RGB32;
+        if (image.format() != format)
         {
-            image = image.convertToFormat(QImage::Format_ARGB32_Premultiplied);
+            image = image.convertToFormat(format);
         }
 
         QMutexLocker locker(&mutex_);
@@ -215,9 +218,10 @@ void image_loader::load_image_internal(const load_task& current_task)
             image = image.scaled(current_task.target_size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }
 
-        if (image.format() != QImage::Format_ARGB32_Premultiplied)
+        const auto format = image.hasAlphaChannel() ? QImage::Format_ARGB32_Premultiplied : QImage::Format_RGB32;
+        if (image.format() != format)
         {
-            image = image.convertToFormat(QImage::Format_ARGB32_Premultiplied);
+            image = image.convertToFormat(format);
         }
         {
             QMutexLocker locker(&mutex_);
@@ -229,7 +233,9 @@ void image_loader::load_image_internal(const load_task& current_task)
         const QFileInfo previous(cache_key);
         const bool existed = previous.exists();
         const qint64 previous_size = previous.size();
-        if (image.save(cache_key, "PNG"))
+        QImageWriter writer(cache_key, "PNG");
+        writer.setCompression(kPngCompression);
+        if (writer.write(image))
         {
             disk_cache_bytes_ += QFileInfo(cache_key).size() - previous_size;
             disk_cache_files_ += existed ? 0 : 1;
