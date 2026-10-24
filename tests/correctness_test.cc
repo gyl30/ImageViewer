@@ -124,6 +124,8 @@ class correctness_test : public QObject
     void large_image_and_close();
     void loader_cancel_and_clear();
     void scanner_cancel_during_batch();
+    void panorama_is_requested_data();
+    void panorama_is_requested();
 };
 
 void correctness_test::large_visible_batch()
@@ -802,6 +804,61 @@ void correctness_test::scanner_cancel_during_batch()
     QCOMPARE(batches.size(), 1);
     QCOMPARE(qvariant_cast<QList<image_meta>>(batches.first().first()).size(), 500);
     QVERIFY(finished.isEmpty());
+}
+
+void correctness_test::panorama_is_requested_data()
+{
+    QTest::addColumn<bool>("append");
+    QTest::newRow("full-layout") << false;
+    QTest::newRow("incremental-layout") << true;
+}
+
+void correctness_test::panorama_is_requested()
+{
+    QFETCH(bool, append);
+    waterfall_scene scene;
+    QGraphicsView view(&scene);
+    QSignalSpy requests(&scene, &waterfall_scene::request_load_batch);
+    if (append)
+    {
+        scene.add_images({{"square.png", QSize(100, 100)}});
+        scene.layout_models(440);
+        QTRY_COMPARE(scene.sceneRect().width(), 440);
+    }
+    scene.add_images({{"panorama.png", QSize(30000, 100)}});
+    scene.layout_models(440);
+    QTRY_COMPARE(scene.sceneRect().width(), 440);
+    scene.update_viewport(QRectF(0, 0, 440, 600));
+    bool panorama_requested = false;
+    load_task panorama_task{};
+    for (const auto& request : requests)
+    {
+        for (const auto& task : qvariant_cast<QList<load_task>>(request.first()))
+        {
+            if (task.path == "panorama.png")
+            {
+                panorama_requested = true;
+                panorama_task = task;
+                QVERIFY(task.target_size.height() >= 1);
+            }
+        }
+    }
+    QVERIFY(panorama_requested);
+    QImage thumbnail(panorama_task.target_size, QImage::Format_RGB32);
+    thumbnail.fill(Qt::red);
+    scene.on_image_loaded(panorama_task.id, panorama_task.path, thumbnail, panorama_task.session_id);
+    bool visible = false;
+    for (auto* candidate : scene.items())
+    {
+        auto* item = dynamic_cast<waterfall_item*>(candidate);
+        if (item != nullptr && item->get_path() == "panorama.png" && item->isVisible())
+        {
+            visible = true;
+            QVERIFY(item->mapRectToScene(QRectF(item->pixmap().rect())).height() >= 1);
+            QCOMPARE(item->pixmap().toImage().pixelColor(0, 0), QColor(Qt::red));
+        }
+    }
+    QVERIFY(visible);
 }
 
 int main(int argc, char** argv)

@@ -49,7 +49,7 @@ static layout_result calculate_layout_job(const std::vector<QSize>& sizes, int v
         {
             ratio = static_cast<double>(original_size.height()) / original_size.width();
         }
-        int h = static_cast<int>(real_col_width * ratio);
+        int h = std::max(1, static_cast<int>(real_col_width * ratio));
 
         result.rects.emplace_back(x, y, real_col_width, h);
         const int previous_bottom = result.item_bottom_index.empty() ? 0 : result.item_bottom_index.back();
@@ -205,7 +205,7 @@ void waterfall_scene::layout_models(int view_width)
                 {
                     ratio = static_cast<double>(model.original_size.height()) / model.original_size.width();
                 }
-                int h = static_cast<int>(real_col_width * ratio);
+                int h = std::max(1, static_cast<int>(real_col_width * ratio));
 
                 model.layout_rect = QRectF(x, y, real_col_width, h);
                 const int previous_bottom = i == 0 ? 0 : item_bottom_index_[i - 1];
