@@ -42,7 +42,6 @@ class image_viewer_window : public QMainWindow
     void request_move_to_trash(QString path);
 
    protected:
-    void showEvent(QShowEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
     bool eventFilter(QObject* watched, QEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
@@ -93,9 +92,6 @@ class image_viewer_window : public QMainWindow
     int rotation_degrees_ = 0;
     bool flip_horizontal_ = false;
     bool flip_vertical_ = false;
-    QSize current_image_size_;
-    QString current_image_format_;
-    qint64 current_file_size_ = 0;
 
     QGraphicsView* view_;
     QGraphicsScene* scene_;
@@ -119,7 +115,6 @@ class image_viewer_window : public QMainWindow
     QLabel* zoom_label_ = nullptr;
     QTimer* slideshow_timer_ = nullptr;
     QMovie* movie_ = nullptr;
-    bool movie_initialized_ = false;
     bool slideshow_loop_enabled_ = false;
     int slideshow_interval_ms_ = 3000;
 

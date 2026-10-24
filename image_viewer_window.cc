@@ -120,7 +120,6 @@ image_viewer_window::~image_viewer_window()
         }
     }
 
-
 }
 
 void image_viewer_window::setup_ui()
@@ -160,7 +159,6 @@ void image_viewer_window::setup_ui()
     connect(prev_action_, &QAction::triggered, this, &image_viewer_window::load_prev_image);
     connect(next_action_, &QAction::triggered, this, &image_viewer_window::load_next_image);
     toolbar->addSeparator();
-
 
     view_mode_group_ = new QActionGroup(this);
     view_mode_group_->setExclusive(true);
@@ -289,7 +287,6 @@ void image_viewer_window::set_image_path(const QString& path)
     scene_->clear();
     image_item_ = nullptr;
     setWindowTitle(QString("正在打开 %1…").arg(QFileInfo(path).fileName()));
-
 
     if (is_animated_image(path))
     {
@@ -467,29 +464,28 @@ void image_viewer_window::display_image(QImage image, const QString& path)
 void image_viewer_window::update_image_status(const QString& path, const QSize& image_size)
 {
     QFileInfo file_info(path);
-    current_image_size_ = image_size;
-    current_file_size_ = file_info.size();
+    const qint64 file_size = file_info.size();
 
     QImageReader reader(path);
     const QSize source_size = reader.size();
-    current_image_format_ = QString::fromLatin1(reader.format()).toUpper();
-    if (current_image_format_.isEmpty())
+    QString image_format = QString::fromLatin1(reader.format()).toUpper();
+    if (image_format.isEmpty())
     {
-        current_image_format_ = file_info.suffix().toUpper();
+        image_format = file_info.suffix().toUpper();
     }
 
     QString size_str;
-    if (current_file_size_ < 1024)
+    if (file_size < 1024)
     {
-        size_str = QString("%1 B").arg(current_file_size_);
+        size_str = QString("%1 B").arg(file_size);
     }
-    else if (current_file_size_ < static_cast<qint64>(1024 * 1024))
+    else if (file_size < static_cast<qint64>(1024 * 1024))
     {
-        size_str = QString("%1 KB").arg(static_cast<double>(current_file_size_) / 1024.0, 0, 'f', 1);
+        size_str = QString("%1 KB").arg(static_cast<double>(file_size) / 1024.0, 0, 'f', 1);
     }
     else
     {
-        size_str = QString("%1 MB").arg(static_cast<double>(current_file_size_) / (1024.0 * 1024.0), 0, 'f', 2);
+        size_str = QString("%1 MB").arg(static_cast<double>(file_size) / (1024.0 * 1024.0), 0, 'f', 2);
     }
 
     const auto read_text =
@@ -512,8 +508,8 @@ void image_viewer_window::update_image_status(const QString& path, const QSize& 
 
     QStringList info_parts = {
         file_info.fileName(),
-        current_image_format_,
-        QString("%1x%2").arg(current_image_size_.width()).arg(current_image_size_.height()),
+        image_format,
+        QString("%1x%2").arg(image_size.width()).arg(image_size.height()),
         size_str};
 
     if (!capture_time.isEmpty())
@@ -537,7 +533,7 @@ void image_viewer_window::update_image_status(const QString& path, const QSize& 
         info_parts.append(camera_make);
     }
 
-    if (source_size.isValid() && source_size != current_image_size_)
+    if (source_size.isValid() && source_size != image_size)
     {
         const double estimated_mb =
             (static_cast<double>(source_size.width()) * source_size.height() * 4.0) / (1024.0 * 1024.0);
@@ -594,14 +590,12 @@ void image_viewer_window::clear_movie()
     movie_->stop();
     movie_->deleteLater();
     movie_ = nullptr;
-    movie_initialized_ = false;
 }
 
 void image_viewer_window::start_movie(const QString& path)
 {
     movie_ = new QMovie(path, QByteArray(), this);
     movie_->setCacheMode(QMovie::CacheNone);
-    movie_initialized_ = false;
 
     if (!movie_->isValid())
     {
@@ -636,7 +630,6 @@ void image_viewer_window::start_movie(const QString& path)
                     rotation_degrees_ = 0;
                     flip_horizontal_ = false;
                     flip_vertical_ = false;
-                    movie_initialized_ = true;
                     update_image_status(path, pixmap.size());
                     resize_window_to_image(pixmap.size());
                     apply_image_transform();
@@ -646,19 +639,11 @@ void image_viewer_window::start_movie(const QString& path)
                                        .arg(pixmap.height())
                                        .arg(current_index_ + 1)
                                        .arg(image_list_.size()));
-                                    return;
+                    return;
                 }
 
                 image_item_->setPixmap(pixmap);
                 scene_->setSceneRect(image_item_->sceneBoundingRect());
-
-                if (!movie_initialized_)
-                {
-                    movie_initialized_ = true;
-                    update_image_status(path, pixmap.size());
-                    resize_window_to_image(pixmap.size());
-                    apply_image_transform();
-                }
             });
 
     movie_->start();
@@ -767,8 +752,6 @@ void image_viewer_window::update_index_from_path()
     }
 }
 
-void image_viewer_window::showEvent(QShowEvent* event) { QMainWindow::showEvent(event); }
-
 void image_viewer_window::resizeEvent(QResizeEvent* event)
 {
     QMainWindow::resizeEvent(event);
@@ -777,7 +760,6 @@ void image_viewer_window::resizeEvent(QResizeEvent* event)
     {
         apply_auto_view();
     }
-
 
 }
 
@@ -1070,10 +1052,6 @@ void image_viewer_window::closeEvent(QCloseEvent* event)
 {
     save_settings();
     clear_movie();
-
-
-
-
 
     scene_->clear();
     image_item_ = nullptr;
