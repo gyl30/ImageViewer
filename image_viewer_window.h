@@ -90,6 +90,7 @@ class image_viewer_window : public QMainWindow
 
    private:
     QString current_path_;
+    QString loading_path_;
     std::vector<QString> image_list_;
     ptrdiff_t current_index_;
     bool has_manual_zoom_ = false;

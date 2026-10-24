@@ -127,6 +127,9 @@ class correctness_test : public QObject
     void panorama_is_requested_data();
     void panorama_is_requested();
     void loader_failure_finishes();
+    void foreground_is_serial();
+    void navigation_focus_data();
+    void navigation_focus();
 };
 
 void correctness_test::large_visible_batch()
@@ -871,6 +874,59 @@ void correctness_test::loader_failure_finishes()
     QTRY_COMPARE_WITH_TIMEOUT(loaded.size(), 1, 300);
     QCOMPARE(loaded.first()[3].toInt(), 7);
     QVERIFY(qvariant_cast<QImage>(loaded.first()[2]).isNull());
+}
+
+void correctness_test::foreground_is_serial()
+{
+    QTemporaryDir dir;
+    std::vector<QString> paths;
+    QImage image(100, 50, QImage::Format_RGB32);
+    image.fill(Qt::blue);
+    for (int i = 0; i < 3; ++i)
+    {
+        paths.push_back(dir.filePath(QString::number(i) + ".png"));
+        QVERIFY(image.save(paths.back()));
+    }
+    image_viewer_window viewer;
+    pool_blocker blocker;
+    viewer.set_image_path(paths[0]);
+    auto* watcher = viewer.findChild<QFutureWatcherBase*>();
+    QVERIFY(watcher != nullptr);
+    QSignalSpy started(watcher, &QFutureWatcherBase::started);
+    QCoreApplication::sendPostedEvents();
+    viewer.set_image_path(paths[1]);
+    QCoreApplication::sendPostedEvents();
+    viewer.set_image_path(paths[2]);
+    QCoreApplication::sendPostedEvents();
+    const int submissions = started.size();
+    blocker.unblock();
+    QCOMPARE(submissions, 1);
+    QTRY_VERIFY(viewer.windowTitle().contains("2.png (100x50)"));
+}
+
+void correctness_test::navigation_focus_data()
+{
+    QTest::addColumn<int>("key");
+    QTest::addColumn<int>("expected");
+    QTest::newRow("space") << int(Qt::Key_Space) << 2;
+    QTest::newRow("backspace") << int(Qt::Key_Backspace) << 0;
+    QTest::newRow("home") << int(Qt::Key_Home) << 0;
+    QTest::newRow("end") << int(Qt::Key_End) << 2;
+}
+
+void correctness_test::navigation_focus()
+{
+    QFETCH(int, key);
+    QFETCH(int, expected);
+    image_viewer_window viewer;
+    const std::vector<QString> paths = {"/missing/first.png", "/missing/middle.png", "/missing/last.png"};
+    viewer.set_image_list(paths);
+    viewer.set_image_path(paths[1]);
+    viewer.show();
+    auto* view = viewer.findChild<QGraphicsView*>();
+    view->setFocus();
+    QTest::keyClick(view, static_cast<Qt::Key>(key));
+    QCOMPARE(viewer.current_image_path(), paths[expected]);
 }
 
 int main(int argc, char** argv)

@@ -28,3 +28,7 @@ RSS/PSS/HWM 与进程 CPU、proc I/O 为实际采样；元数据容量/UTF-16 �
 - Release 下上轮 35 个结果继续通过。后续新回归已经观察到：失败缩略图没有完成信号，三次待解码切换提交三个任务；四种焦点导航键均通过，不改未复现行为。
 
 基线完整矩阵已保存；下一阶段以同一数据和轨迹比较，不增加解码线程数。
+
+## 正确性阶段
+
+`loader_failure_finishes` 实际 RED 为 0 个完成结果（预期 1），修复后损坏/缺失/分配限制拒绝都会发出空图终态；`foreground_is_serial` 实际 RED 为三次 submitted/started（预期 1），修复后当前前景 future 完成前只合并最新路径，不再为中间路径增加解码。均通过回归。焦点下 Space/Backspace/Home/End 实测通过，保持原实现。累计 Qt Test 41 个结果、CTest 1/1 通过。

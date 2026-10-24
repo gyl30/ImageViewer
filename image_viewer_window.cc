@@ -322,6 +322,18 @@ void image_viewer_window::set_image_path(const QString& path)
         return;
     }
 
+    if (!loading_path_.isEmpty())
+    {
+        return;
+    }
+    load_image(path);
+}
+
+void image_viewer_window::load_image(const QString& path)
+{
+    loading_path_ = path;
+    const QString cache_key = image_cache_key(path);
+
     disconnect(image_watcher_, &QFutureWatcher<std::pair<QImage, QString>>::finished, this, nullptr);
 
     connect(image_watcher_,
@@ -329,8 +341,13 @@ void image_viewer_window::set_image_path(const QString& path)
             this,
             [this, path, cache_key]()
             {
+                loading_path_.clear();
                 if (current_path_ != path)
                 {
+                    if (!current_path_.isEmpty() && image_item_ == nullptr && movie_ == nullptr)
+                    {
+                        load_image(current_path_);
+                    }
                     return;
                 }
 
@@ -1098,8 +1115,6 @@ void image_viewer_window::update_navigation_buttons()
     btn_next_->setEnabled(has_next);
 }
 
-void image_viewer_window::load_image(const QString& path) { set_image_path(path); }
-
 void image_viewer_window::keyPressEvent(QKeyEvent* event)
 {
     if (event->key() == Qt::Key_Left)
@@ -1186,6 +1201,7 @@ void image_viewer_window::closeEvent(QCloseEvent* event)
     scene_->clear();
     image_item_ = nullptr;
     current_path_.clear();
+    loading_path_.clear();
     if (slideshow_timer_ != nullptr)
     {
         slideshow_timer_->stop();
