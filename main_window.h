@@ -8,7 +8,6 @@
 #include <QLabel>
 #include <QElapsedTimer>
 #include <QList>
-#include <QSet>
 #include <QStringList>
 #include <QCloseEvent>
 #include "common_types.h"
@@ -50,10 +49,9 @@ class main_window : public QMainWindow
     void open_path(const QString& path, bool add_to_recent);
     void add_recent_path(const QString& path);
     void show_recent_menu(const QPoint& global_pos);
-    void show_image_viewer(const QString& path, const std::vector<QString>& image_list);
+    void show_image_viewer(const QString& path, const QStringList& image_list);
 
     void on_add_folder();
-    void on_image_loaded_stat(quint64 id, const QString& path, const QImage& image, int session_id);
     void on_selection_changed();
     void on_image_double_clicked(const QString& path);
     void on_open_recent_path(const QString& path);
@@ -82,8 +80,6 @@ class main_window : public QMainWindow
     QLabel* info_label_ = nullptr;
     qint64 scan_duration_ = 0;
     int total_count_ = 0;
-    int loaded_count_ = 0;
-    QSet<QString> loaded_paths_;
     QStringList recent_folder_paths_;
     QStringList recent_image_paths_;
     QString last_open_dir_;

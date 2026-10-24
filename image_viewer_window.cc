@@ -380,7 +380,7 @@ void image_viewer_window::load_image(const QString& path)
     image_watcher_->setFuture(QtConcurrent::run(load_image_file, path));
 }
 
-void image_viewer_window::set_image_list(const std::vector<QString>& paths)
+void image_viewer_window::set_image_list(const QStringList& paths)
 {
     image_list_ = paths;
     update_index_from_path();
@@ -414,7 +414,6 @@ void image_viewer_window::remove_image_path(const QString& path)
     }
 
     ptrdiff_t next_index = std::min(removed_index, static_cast<ptrdiff_t>(image_list_.size()) - 1);
-    set_image_list(image_list_);
     set_image_path(image_list_[next_index]);
 }
 

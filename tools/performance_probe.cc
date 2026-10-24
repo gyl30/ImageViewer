@@ -136,15 +136,15 @@ class performance_probe
                         {"pss_kib", proc_value("/proc/self/smaps_rollup", "Pss")},
                         {"model_count", static_cast<qint64>(scene->all_models_.size())},
                         {"metadata_capacity_bytes", static_cast<qint64>(scene->all_models_.capacity() * sizeof(layout_model) +
-                            scene->item_bottom_index_.capacity() * sizeof(int))},
+                            scene->item_bottom_index_.capacity() * sizeof(int) + scene->image_paths_.capacity() * sizeof(QString))},
                         {"active_items", scene->active_items_.size()}, {"pool_items", scene->pool_.size()},
-                        {"total_items", scene->items().size()}, {"loaded_stat_paths", window_.loaded_paths_.size()},
+                        {"total_items", scene->items().size()}, {"loaded_stat_paths", 0},
                         {"decoded_count", decoded_count_}, {"scan_cpu_ms", scan_cpu_ms_.load()},
                         {"loader_cpu_ms", loader_cpu_ms_.load()}};
         qint64 path_bytes = 0;
-        for (const auto& model : scene->all_models_)
+        for (const auto& path : scene->image_paths_)
         {
-            path_bytes += (model.path.size() + 1) * sizeof(QChar);
+            path_bytes += (path.size() + 1) * sizeof(QChar);
         }
         row["metadata_path_bytes"] = path_bytes;
         qint64 pixel_bytes = 0;

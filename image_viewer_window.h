@@ -5,7 +5,6 @@
 #include <QFutureWatcher>
 #include <QCloseEvent>
 #include <QCache>
-#include <vector>
 #include <QString>
 #include <QStringList>
 #include <utility>
@@ -36,7 +35,7 @@ class image_viewer_window : public QMainWindow
     ~image_viewer_window() override;
 
     void set_image_path(const QString& path);
-    void set_image_list(const std::vector<QString>& paths);
+    void set_image_list(const QStringList& paths);
     void remove_image_path(const QString& path);
     [[nodiscard]] QString current_image_path() const { return current_path_; }
 
@@ -91,7 +90,7 @@ class image_viewer_window : public QMainWindow
    private:
     QString current_path_;
     QString loading_path_;
-    std::vector<QString> image_list_;
+    QStringList image_list_;
     ptrdiff_t current_index_;
     bool has_manual_zoom_ = false;
     view_mode current_view_mode_ = view_mode::fit_window;

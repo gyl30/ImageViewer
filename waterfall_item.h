@@ -11,7 +11,7 @@ class waterfall_item : public QGraphicsPixmapItem
    public:
     explicit waterfall_item(QGraphicsItem* parent = nullptr);
 
-    void bind_model(const layout_model& model, int display_width, quint64 request_id);
+    void bind_model(const layout_model& model, int index, const QString& path, int display_width, quint64 request_id);
     void reset();
 
     [[nodiscard]] int get_index() const { return index_; }

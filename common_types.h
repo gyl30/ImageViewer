@@ -15,8 +15,6 @@ struct image_meta
 
 struct layout_model
 {
-    int index;
-    QString path;
     QSize original_size;
     QRectF layout_rect;
 };

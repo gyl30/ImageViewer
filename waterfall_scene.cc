@@ -96,8 +96,9 @@ void waterfall_scene::clear_items()
         recycle_item(active_items_.take(idx));
     }
 
-    all_models_.clear();
-    item_bottom_index_.clear();
+    std::vector<layout_model>().swap(all_models_);
+    image_paths_ = QStringList();
+    std::vector<int>().swap(item_bottom_index_);
     col_heights_.clear();
     last_layout_index_ = 0;
     request_counter_ = 0;
@@ -108,15 +109,13 @@ void waterfall_scene::clear_items()
 
 void waterfall_scene::add_images(const QList<image_meta>& batch)
 {
-    int start_index = static_cast<int>(all_models_.size());
     all_models_.reserve(all_models_.size() + batch.size());
     item_bottom_index_.reserve(all_models_.size() + batch.size());
 
     for (int i = 0; i < batch.size(); ++i)
     {
         layout_model model;
-        model.index = start_index + i;
-        model.path = batch[i].path;
+        image_paths_.append(batch[i].path);
         model.original_size = batch[i].original_size;
 
         all_models_.push_back(model);
@@ -132,17 +131,13 @@ void waterfall_scene::set_recent_paths(const QStringList& recent_folder_paths, c
 
 bool waterfall_scene::focus_path(const QString& path)
 {
-    auto it = std::find_if(
-        all_models_.begin(),
-        all_models_.end(),
-        [&path](const layout_model& model) { return model.path == path; });
-    if (it == all_models_.end() || views().isEmpty())
+    const int index = image_paths_.indexOf(path);
+    if (index < 0 || views().isEmpty())
     {
         return false;
     }
 
-    const int index = static_cast<int>(std::distance(all_models_.begin(), it));
-    const QRectF target_rect = it->layout_rect;
+    const QRectF target_rect = all_models_[index].layout_rect;
     if (!target_rect.isValid())
     {
         return false;
@@ -278,7 +273,7 @@ void waterfall_scene::on_layout_finished()
     for (auto it = active_items_.begin(); it != active_items_.end(); ++it)
     {
         waterfall_item* item = it.value();
-        item->bind_model(all_models_[it.key()], current_col_width_, item->get_request_id());
+        item->bind_model(all_models_[it.key()], it.key(), image_paths_[it.key()], current_col_width_, item->get_request_id());
     }
 
     if (count < all_models_.size())
@@ -352,12 +347,12 @@ void waterfall_scene::update_viewport(const QRectF& visible_rect)
         waterfall_item* item = obtain_item();
         quint64 req_id = ++request_counter_;
 
-        item->bind_model(model, current_col_width_, req_id);
+        item->bind_model(model, i, image_paths_[i], current_col_width_, req_id);
         active_items_.insert(i, item);
 
         int req_w = static_cast<int>(model.layout_rect.width() * dpr);
         int req_h = static_cast<int>(model.layout_rect.height() * dpr);
-        tasks_to_load.append({req_id, model.path, QSize(req_w, req_h), current_session_id_});
+        tasks_to_load.append({req_id, image_paths_[i], QSize(req_w, req_h), current_session_id_});
     }
 
     auto current_keys = active_items_.keys();
@@ -422,15 +417,9 @@ void waterfall_scene::on_image_loaded(quint64 id, const QString& /*path*/, const
     }
 }
 
-std::vector<QString> waterfall_scene::get_all_paths() const
+QStringList waterfall_scene::get_all_paths() const
 {
-    std::vector<QString> paths;
-    paths.reserve(all_models_.size());
-    for (const auto& m : all_models_)
-    {
-        paths.push_back(m.path);
-    }
-    return paths;
+    return image_paths_;
 }
 
 void waterfall_scene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)

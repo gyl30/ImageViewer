@@ -30,7 +30,7 @@ class waterfall_scene : public QGraphicsScene
     void update_viewport(const QRectF& visible_rect);
     bool focus_path(const QString& path);
     void set_recent_paths(const QStringList& recent_folder_paths, const QStringList& recent_image_paths);
-    [[nodiscard]] std::vector<QString> get_all_paths() const;
+    [[nodiscard]] QStringList get_all_paths() const;
 
    signals:
     void request_cancel_all();
@@ -59,6 +59,7 @@ class waterfall_scene : public QGraphicsScene
 
    private:
     std::vector<layout_model> all_models_;
+    QStringList image_paths_;
     std::vector<int> item_bottom_index_;
     QStack<waterfall_item*> pool_;
     QHash<int, waterfall_item*> active_items_;

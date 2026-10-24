@@ -130,6 +130,7 @@ class correctness_test : public QObject
     void foreground_is_serial();
     void navigation_focus_data();
     void navigation_focus();
+    void catalog_snapshot_is_shared();
 };
 
 void correctness_test::large_visible_batch()
@@ -231,14 +232,13 @@ void correctness_test::relayout_preserves_image()
 void correctness_test::item_reuse_resets_image()
 {
     waterfall_item item;
-    layout_model model{0, "first.png", QSize(100, 50), QRectF(10, 10, 200, 100)};
-    item.bind_model(model, 200, 1);
+    layout_model model{QSize(100, 50), QRectF(10, 10, 200, 100)};
+    item.bind_model(model, 0, "first.png", 200, 1);
     QPixmap image(100, 50);
     image.fill(Qt::red);
     item.set_pixmap_safe(image);
     item.reset();
-    model.path = "second.png";
-    item.bind_model(model, 200, 2);
+    item.bind_model(model, 0, "second.png", 200, 2);
     QCOMPARE(item.pixmap().toImage().pixelColor(0, 0), QColor(Qt::lightGray));
 }
 
@@ -300,7 +300,7 @@ void correctness_test::latest_layout_width()
 void correctness_test::preloads_after_reopen()
 {
     QTemporaryDir dir;
-    std::vector<QString> paths;
+    QStringList paths;
     for (int i = 0; i < 6; ++i)
     {
         QImage image(100, 50, QImage::Format_RGB32);
@@ -605,7 +605,7 @@ void correctness_test::item_geometry()
     waterfall_item item;
     scene.addItem(&item);
     const QRectF expected(10, 20, 200, 100);
-    item.bind_model({0, "image.png", QSize(100, 50), expected}, 200, 1);
+    item.bind_model({QSize(100, 50), expected}, 0, "image.png", 200, 1);
     QPixmap image(pixel_size);
     image.fill(Qt::red);
     item.set_pixmap_safe(image);
@@ -625,7 +625,7 @@ void correctness_test::item_geometry()
 void correctness_test::main_window_switches_folders()
 {
     QTemporaryDir dir;
-    std::vector<QString> folders;
+    QStringList folders;
     for (int i = 0; i < 3; ++i)
     {
         const QString folder = dir.filePath(QString::number(i));
@@ -651,7 +651,7 @@ void correctness_test::main_window_switches_folders()
         QApplication::sendEvent(&window, &drop);
         QVERIFY(drop.isAccepted());
     }
-    const std::vector<QString> expected = {folders.back() + "/image2.png", folders.back() + "/image10.png"};
+    const QStringList expected = {folders.back() + "/image2.png", folders.back() + "/image10.png"};
     QTRY_COMPARE(scene->get_all_paths().size(), expected.size());
     QCOMPARE(scene->get_all_paths()[0], expected[0]);
     QCOMPARE(scene->get_all_paths()[1], expected[1]);
@@ -675,7 +675,7 @@ void correctness_test::main_window_switches_folders()
 void correctness_test::fast_navigation()
 {
     QTemporaryDir dir;
-    std::vector<QString> paths;
+    QStringList paths;
     for (int i = 0; i < 3; ++i)
     {
         QImage image(100 + i, 50, QImage::Format_RGB32);
@@ -879,7 +879,7 @@ void correctness_test::loader_failure_finishes()
 void correctness_test::foreground_is_serial()
 {
     QTemporaryDir dir;
-    std::vector<QString> paths;
+    QStringList paths;
     QImage image(100, 50, QImage::Format_RGB32);
     image.fill(Qt::blue);
     for (int i = 0; i < 3; ++i)
@@ -919,7 +919,7 @@ void correctness_test::navigation_focus()
     QFETCH(int, key);
     QFETCH(int, expected);
     image_viewer_window viewer;
-    const std::vector<QString> paths = {"/missing/first.png", "/missing/middle.png", "/missing/last.png"};
+    const QStringList paths = {"/missing/first.png", "/missing/middle.png", "/missing/last.png"};
     viewer.set_image_list(paths);
     viewer.set_image_path(paths[1]);
     viewer.show();
@@ -927,6 +927,19 @@ void correctness_test::navigation_focus()
     view->setFocus();
     QTest::keyClick(view, static_cast<Qt::Key>(key));
     QCOMPARE(viewer.current_image_path(), paths[expected]);
+}
+
+void correctness_test::catalog_snapshot_is_shared()
+{
+    waterfall_scene scene;
+    scene.add_images({{"first.png", QSize(100, 50)}});
+    const auto first = scene.get_all_paths();
+    const auto second = scene.get_all_paths();
+    QVERIFY(first.data() == second.data());
+    scene.clear_items();
+    scene.add_images({{"second.png", QSize(50, 100)}});
+    QCOMPARE(first.front(), QString("first.png"));
+    QCOMPARE(scene.get_all_paths().front(), QString("second.png"));
 }
 
 int main(int argc, char** argv)

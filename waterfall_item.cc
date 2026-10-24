@@ -23,15 +23,15 @@ waterfall_item::waterfall_item(QGraphicsItem* parent) : QGraphicsPixmapItem(pare
     setTransformationMode(Qt::SmoothTransformation);
 }
 
-void waterfall_item::bind_model(const layout_model& model, int display_width, quint64 request_id)
+void waterfall_item::bind_model(const layout_model& model, int index, const QString& path, int display_width, quint64 request_id)
 {
-    if (current_request_id_ != request_id || path_ != model.path)
+    if (current_request_id_ != request_id || path_ != path)
     {
         setPixmap(get_placeholder());
     }
 
-    index_ = model.index;
-    path_ = model.path;
+    index_ = index;
+    path_ = path;
     original_size_ = model.original_size;
     target_width_ = display_width;
     current_request_id_ = request_id;

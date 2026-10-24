@@ -21,7 +21,6 @@
 #include <QProcess>
 #include <QStandardPaths>
 #include <QToolBar>
-#include <vector>
 
 #include "main_window.h"
 #include "image_loader.h"
@@ -279,7 +278,6 @@ void main_window::setup_connections()
                 statusBar()->showMessage("已清理缩略图缓存", 3000);
             });
     connect(scene_, &QGraphicsScene::selectionChanged, this, &main_window::on_selection_changed);
-    connect(image_loader_, &image_loader::thumbnail_loaded, this, &main_window::on_image_loaded_stat);
 }
 
 void main_window::load_settings()
@@ -394,7 +392,7 @@ void main_window::open_path(const QString& path, bool add_to_recent)
     if (file_info.isFile())
     {
         last_open_dir_ = file_info.absolutePath();
-        std::vector<QString> image_list = scene_->get_all_paths();
+        QStringList image_list = scene_->get_all_paths();
         if (std::find(image_list.begin(), image_list.end(), path) == image_list.end())
         {
             image_list = {path};
@@ -415,8 +413,6 @@ void main_window::open_path(const QString& path, bool add_to_recent)
 
     scene_->clear_items();
     total_count_ = 0;
-    loaded_count_ = 0;
-    loaded_paths_.clear();
     scan_duration_ = 0;
     info_label_->clear();
 
@@ -494,7 +490,7 @@ void main_window::show_recent_menu(const QPoint& global_pos)
     menu.exec(global_pos);
 }
 
-void main_window::show_image_viewer(const QString& path, const std::vector<QString>& image_list)
+void main_window::show_image_viewer(const QString& path, const QStringList& image_list)
 {
     if (viewer_window_ == nullptr)
     {
@@ -553,32 +549,9 @@ void main_window::on_scan_all_finished(int total, qint64 duration, int session_i
     update_status_bar();
 }
 
-void main_window::on_image_loaded_stat(quint64 /*id*/, const QString& path, const QImage& /*image*/, int session_id)
-{
-    if (session_id != current_scan_session_id_ || loaded_paths_.contains(path))
-    {
-        return;
-    }
-
-    loaded_paths_.insert(path);
-    loaded_count_ = loaded_paths_.size();
-    update_status_bar();
-}
-
 void main_window::update_status_bar()
 {
-    QString status = QString("Scan+Layout: %1 ms | Loaded: %2 / %3").arg(scan_duration_).arg(loaded_count_).arg(total_count_);
-
-    if (loaded_count_ == total_count_ && total_count_ > 0)
-    {
-        status += " [All Done]";
-    }
-    else if (total_count_ == 0 && scan_duration_ > 0)
-    {
-        status = "No images found in selected folder.";
-    }
-
-    status_label_->setText(status);
+    status_label_->setText(QString("已索引 %1 张图片 · 扫描 %2 ms").arg(total_count_).arg(scan_duration_));
 }
 
 void main_window::on_selection_changed()
