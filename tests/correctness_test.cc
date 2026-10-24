@@ -133,6 +133,7 @@ class correctness_test : public QObject
     void catalog_snapshot_is_shared();
     void thumbnail_budget_and_bound();
     void visible_requests_first();
+    void disk_cache_budget();
 };
 
 void correctness_test::large_visible_batch()
@@ -976,6 +977,23 @@ void correctness_test::visible_requests_first()
     const int first = tasks.first().path.toInt();
     QVERIFY(first >= 8 && first <= 13);
     QVERIFY(tasks.size() <= 64);
+}
+
+void correctness_test::disk_cache_budget()
+{
+    image_loader prepare;
+    prepare.clear_cache();
+    const QString directory = QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + "/thumbnails";
+    QImage image(2, 2, QImage::Format_RGB32);
+    image.fill(Qt::red);
+    for (int i = 0; i < 1001; ++i)
+    {
+        QVERIFY(image.save(directory + QString("/seed-%1.png").arg(i)));
+    }
+    image_loader loader;
+    QVERIFY(QDir(directory).entryList({"*.png"}, QDir::Files).size() <= 1000);
+    loader.clear_cache();
+    QVERIFY(QDir(directory).entryList({"*.png"}, QDir::Files).isEmpty());
 }
 
 int main(int argc, char** argv)

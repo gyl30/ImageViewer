@@ -41,6 +41,8 @@ class image_loader : public QObject
     QCache<QString, QImage> cache_;
     QList<load_task> task_queue_;
     QString disk_cache_dir_;
+    qint64 disk_cache_bytes_ = 0;
+    qsizetype disk_cache_files_ = 0;
 
     QMutex mutex_;
     bool is_loading_ = false;

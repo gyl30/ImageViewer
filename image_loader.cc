@@ -12,6 +12,9 @@
 namespace
 {
 constexpr int kThumbnailCacheVersion = 2;
+constexpr qint64 kMaxDiskCacheBytes = 128LL * 1024 * 1024;
+constexpr int kMaxDiskCacheFiles = 1000;
+constexpr int kCacheRetainPercent = 80;
 }
 
 image_loader::image_loader(QObject* parent) : QObject(parent), abort_(false)
@@ -46,9 +49,6 @@ QString image_loader::disk_cache_path(const load_task& task) const
 
 void image_loader::cleanup_disk_cache()
 {
-    constexpr qint64 kMaxDiskCacheBytes = 512LL * 1024 * 1024;
-    constexpr int kMaxDiskCacheFiles = 2000;
-
     QDir cache_dir(disk_cache_dir_);
     QFileInfoList files =
         cache_dir.entryInfoList(QStringList() << "*.png", QDir::Files, QDir::Time | QDir::Reversed);
@@ -59,12 +59,17 @@ void image_loader::cleanup_disk_cache()
         total_size += file_info.size();
     }
 
-    while ((total_size > kMaxDiskCacheBytes || files.size() > kMaxDiskCacheFiles) && !files.isEmpty())
+    const bool exceeds_budget = total_size > kMaxDiskCacheBytes || files.size() > kMaxDiskCacheFiles;
+    while (exceeds_budget && !files.isEmpty() &&
+           (total_size > kMaxDiskCacheBytes * kCacheRetainPercent / 100 ||
+            files.size() > kMaxDiskCacheFiles * kCacheRetainPercent / 100))
     {
         QFileInfo file_info = files.takeFirst();
         total_size -= file_info.size();
         QFile::remove(file_info.absoluteFilePath());
     }
+    disk_cache_bytes_ = total_size;
+    disk_cache_files_ = files.size();
 }
 
 void image_loader::request_thumbnails(const QList<load_task>& tasks)
@@ -118,6 +123,8 @@ void image_loader::clear_cache()
     {
         QFile::remove(file_info.absoluteFilePath());
     }
+    disk_cache_bytes_ = 0;
+    disk_cache_files_ = 0;
 }
 
 void image_loader::load_next()
@@ -218,9 +225,20 @@ void image_loader::load_image_internal(const load_task& current_task)
             cache_.insert(cache_key, new QImage(image), cost);
         }
 
-        image.save(cache_key, "PNG");
-        cleanup_disk_cache();
-
+        emit thumbnail_loaded(current_task.id, current_task.path, image, current_task.session_id);
+        const QFileInfo previous(cache_key);
+        const bool existed = previous.exists();
+        const qint64 previous_size = previous.size();
+        if (image.save(cache_key, "PNG"))
+        {
+            disk_cache_bytes_ += QFileInfo(cache_key).size() - previous_size;
+            disk_cache_files_ += existed ? 0 : 1;
+            if (disk_cache_bytes_ > kMaxDiskCacheBytes || disk_cache_files_ > kMaxDiskCacheFiles)
+            {
+                cleanup_disk_cache();
+            }
+        }
+        return;
     }
     emit thumbnail_loaded(current_task.id, current_task.path, image, current_task.session_id);
 }
