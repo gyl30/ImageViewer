@@ -24,13 +24,16 @@ struct scanned_image
 };
 }
 
-file_scanner::file_scanner(QObject* parent) : QObject(parent), stop_flag_(false) {}
+file_scanner::file_scanner(QObject* parent) : QObject(parent) {}
 
 file_scanner::~file_scanner() { stop_scan(); }
 
 void file_scanner::start_scan(const QString& dir_path, int session_id, int sort_mode, bool descending)
 {
-    stop_flag_ = false;
+    if (session_id != scan_generation_)
+    {
+        return;
+    }
     QElapsedTimer timer;
     timer.start();
 
@@ -42,7 +45,7 @@ void file_scanner::start_scan(const QString& dir_path, int session_id, int sort_
 
     while (it.hasNext())
     {
-        if (stop_flag_)
+        if (session_id != scan_generation_)
         {
             break;
         }
@@ -53,7 +56,7 @@ void file_scanner::start_scan(const QString& dir_path, int session_id, int sort_
             {file_path, file_info.fileName(), file_info.lastModified().toMSecsSinceEpoch(), file_info.size()});
     }
 
-    if (stop_flag_)
+    if (session_id != scan_generation_)
     {
         return;
     }
@@ -100,7 +103,7 @@ void file_scanner::start_scan(const QString& dir_path, int session_id, int sort_
 
     for (qsizetype i = 0; i < scanned_images.size(); i += kEmitBatchSize)
     {
-        if (stop_flag_)
+        if (session_id != scan_generation_)
         {
             return;
         }
@@ -108,6 +111,11 @@ void file_scanner::start_scan(const QString& dir_path, int session_id, int sort_
         qsizetype end = std::min(i + kEmitBatchSize, scanned_images.size());
         for (qsizetype j = i; j < end; ++j)
         {
+            if (session_id != scan_generation_)
+            {
+                return;
+            }
+
             QImageReader reader(scanned_images[j].path);
             QSize size = reader.size();
             if (!size.isValid())
@@ -119,17 +127,17 @@ void file_scanner::start_scan(const QString& dir_path, int session_id, int sort_
             total_count++;
         }
 
-        if (!batch.isEmpty())
+        if (!batch.isEmpty() && session_id == scan_generation_)
         {
             emit images_scanned_batch(batch, session_id);
             batch.clear();
         }
     }
 
-    if (!stop_flag_)
+    if (session_id == scan_generation_)
     {
         emit scan_finished(total_count, timer.elapsed(), session_id);
     }
 }
 
-void file_scanner::stop_scan() { stop_flag_ = true; }
+int file_scanner::stop_scan() { return ++scan_generation_; }

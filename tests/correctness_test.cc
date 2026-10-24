@@ -11,6 +11,7 @@
 #include <QtTest>
 #include <QtConcurrent>
 #include "common_types.h"
+#include "file_scanner.h"
 #include "image_loader.h"
 #include "image_viewer_window.h"
 #include "waterfall_item.h"
@@ -92,6 +93,7 @@ class correctness_test : public QObject
     void latest_layout_width_data();
     void latest_layout_width();
     void preloads_after_reopen();
+    void stale_queued_scans();
 };
 
 void correctness_test::large_visible_batch()
@@ -295,6 +297,31 @@ void correctness_test::preloads_after_reopen()
         return false;
     };
     QTRY_VERIFY_WITH_TIMEOUT(both_neighbors_loaded(), 500);
+}
+
+void correctness_test::stale_queued_scans()
+{
+    QTemporaryDir dir;
+    QImage image(100, 50, QImage::Format_RGB32);
+    image.fill(Qt::red);
+    QVERIFY(image.save(dir.filePath("image.png")));
+
+    file_scanner scanner;
+    QSignalSpy finished(&scanner, &file_scanner::scan_finished);
+    QSignalSpy batches(&scanner, &file_scanner::images_scanned_batch);
+    for (int session = 1; session <= 3; ++session)
+    {
+        scanner.stop_scan();
+        QMetaObject::invokeMethod(&scanner, [&, session]()
+        {
+            scanner.start_scan(dir.path(), session, 0, false);
+        }, Qt::QueuedConnection);
+    }
+    QTRY_VERIFY(!finished.isEmpty());
+    QCOMPARE(finished.size(), 1);
+    QCOMPARE(finished.first()[2].toInt(), 3);
+    QCOMPARE(batches.size(), 1);
+    QCOMPARE(batches.first()[1].toInt(), 3);
 }
 
 int main(int argc, char** argv)

@@ -2,8 +2,6 @@
 #define FILE_SCANNER_H
 
 #include <QObject>
-#include <QMutex>
-#include <QWaitCondition>
 #include <QList>
 #include <atomic>
 #include "common_types.h"
@@ -19,14 +17,14 @@ class file_scanner : public QObject
 
    public slots:
     void start_scan(const QString& dir_path, int session_id, int sort_mode, bool descending);
-    void stop_scan();
+    int stop_scan();
 
    signals:
     void images_scanned_batch(QList<image_meta> batch, int session_id);
     void scan_finished(int total_count, qint64 duration_ms, int session_id);
 
    private:
-    std::atomic<bool> stop_flag_;
+    std::atomic<int> scan_generation_{0};
 };
 
 #endif

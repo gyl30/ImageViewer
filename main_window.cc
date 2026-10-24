@@ -411,10 +411,7 @@ void main_window::open_path(const QString& path, bool add_to_recent)
     last_open_dir_ = path;
     current_root_path_ = path;
 
-    if (file_scanner_ != nullptr)
-    {
-        file_scanner_->stop_scan();
-    }
+    current_scan_session_id_ = file_scanner_->stop_scan();
 
     scene_->clear_items();
     total_count_ = 0;
@@ -422,8 +419,6 @@ void main_window::open_path(const QString& path, bool add_to_recent)
     loaded_paths_.clear();
     scan_duration_ = 0;
     info_label_->clear();
-
-    current_scan_session_id_++;
 
     status_label_->setText(QString("Scanning: %1").arg(path));
 
