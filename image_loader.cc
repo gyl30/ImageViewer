@@ -10,6 +10,9 @@
 #include <QImageWriter>
 #include <QStandardPaths>
 #include "image_loader.h"
+#ifdef __GLIBC__
+#include <malloc.h>
+#endif
 
 namespace
 {
@@ -135,6 +138,9 @@ void image_loader::clear_cache()
     }
     disk_cache_bytes_ = 0;
     disk_cache_files_ = 0;
+#ifdef __GLIBC__
+    malloc_trim(0);
+#endif
 }
 
 void image_loader::load_next()

@@ -16,6 +16,9 @@
 #include "common_types.h"
 #include "waterfall_scene.h"
 #include "waterfall_item.h"
+#ifdef __GLIBC__
+#include <malloc.h>
+#endif
 
 static layout_result calculate_layout_job(const std::vector<QSize>& sizes, int view_width, int generation, int kItemMargin, int kColumnMargin, int kMinColWidth)
 {
@@ -108,6 +111,9 @@ void waterfall_scene::clear_items()
 
     // 空矩形会恢复自动范围，把对象池的旧位置也算进去。
     setSceneRect(0, 0, 1, 1);
+#ifdef __GLIBC__
+    malloc_trim(0);
+#endif
 }
 
 void waterfall_scene::reserve_images(qsizetype count)
