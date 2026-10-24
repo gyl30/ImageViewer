@@ -17,6 +17,7 @@
 #include <QWheelEvent>
 #include <QApplication>
 #include <QFileInfo>
+#include <QDateTime>
 #include <QFont>
 #include <QLabel>
 #include <QGuiApplication>
@@ -306,18 +307,23 @@ void image_viewer_window::set_image_path(const QString& path)
 void image_viewer_window::load_image(const QString& path)
 {
     loading_path_ = path;
+    const QFileInfo source(path);
+    const QDateTime modified = source.lastModified();
+    const qint64 file_size = source.size();
 
     disconnect(image_watcher_, &QFutureWatcher<std::pair<QImage, QString>>::finished, this, nullptr);
 
     connect(image_watcher_,
             &QFutureWatcher<std::pair<QImage, QString>>::finished,
             this,
-            [this, path]()
+            [this, path, modified, file_size]()
             {
                 loading_path_.clear();
                 auto result = image_watcher_->future().takeResult();
-                if (current_path_ != path)
+                const QFileInfo current(path);
+                if (current_path_ != path || current.lastModified() != modified || current.size() != file_size)
                 {
+                    result.first = QImage();
                     if (!current_path_.isEmpty() && image_item_ == nullptr && movie_ == nullptr)
                     {
                         load_image(current_path_);

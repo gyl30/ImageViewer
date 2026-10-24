@@ -147,6 +147,7 @@ class correctness_test : public QObject
     void scanner_sort_modes();
     void clear_resets_scroll_range();
     void reprioritize_after_scroll();
+    void same_path_replaced_inflight();
 };
 
 void correctness_test::large_visible_batch()
@@ -1168,6 +1169,31 @@ void correctness_test::reprioritize_after_scroll()
     QVERIFY(!worker.loader->task_queue_.isEmpty());
     const int first = worker.loader->task_queue_.first().path.toInt();
     QVERIFY2(first >= 4 && first <= 7, qPrintable(QString("first queued index: %1").arg(first)));
+}
+
+void correctness_test::same_path_replaced_inflight()
+{
+    QTemporaryDir dir;
+    const QString path = dir.filePath("image.png");
+    QImage image(100, 50, QImage::Format_RGB32);
+    image.fill(Qt::red);
+    QVERIFY(image.save(path));
+    const QDateTime modified = QFileInfo(path).lastModified();
+    image_viewer_window viewer;
+    viewer.set_image_path(path);
+    QVERIFY(QThreadPool::globalInstance()->waitForDone(5000));
+    image.fill(Qt::blue);
+    QVERIFY(image.save(path));
+    QFile file(path);
+    QVERIFY(file.open(QIODevice::ReadWrite));
+    QVERIFY(file.setFileTime(modified.addSecs(2), QFileDevice::FileModificationTime));
+    file.close();
+    viewer.set_image_path(path);
+    QTRY_VERIFY(viewer.windowTitle().startsWith("Viewer -"));
+    auto* scene = viewer.findChild<QGraphicsView*>()->scene();
+    auto* item = dynamic_cast<QGraphicsPixmapItem*>(scene->items().first());
+    QVERIFY(item != nullptr);
+    QCOMPARE(item->pixmap().toImage().pixelColor(0, 0), QColor(Qt::blue));
 }
 
 int main(int argc, char** argv)
