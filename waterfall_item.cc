@@ -76,17 +76,17 @@ void waterfall_item::update_scale()
         return;
     }
 
-    base_scale_ = static_cast<qreal>(target_width_) / pixmap().width();
-
-    setTransformOriginPoint(pixmap().rect().center());
+    const qreal base_scale = static_cast<qreal>(target_width_) / pixmap().width();
+    setTransform(QTransform::fromScale(base_scale, base_scale));
+    setTransformOriginPoint(QRectF(pixmap().rect()).center());
 
     if (is_hovered_)
     {
-        setScale(base_scale_ * 1.08);
+        setScale(1.08);
     }
     else
     {
-        setScale(base_scale_);
+        setScale(1.0);
     }
 }
 
@@ -94,7 +94,7 @@ void waterfall_item::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
 {
     setZValue(1.0);
 
-    setScale(base_scale_ * 1.08);
+    setScale(1.08);
 
     is_hovered_ = true;
 
@@ -107,7 +107,7 @@ void waterfall_item::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
 {
     setZValue(0.0);
 
-    setScale(base_scale_);
+    setScale(1.0);
 
     is_hovered_ = false;
 

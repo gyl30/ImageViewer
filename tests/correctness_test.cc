@@ -106,6 +106,8 @@ class correctness_test : public QObject
     void viewer_file_replaced();
     void movie_stops_on_close();
     void tall_image_stays_visible();
+    void item_geometry_data();
+    void item_geometry();
 };
 
 void correctness_test::large_visible_batch()
@@ -201,7 +203,7 @@ void correctness_test::relayout_preserves_image()
     blocker.unblock();
     QTRY_COMPARE(scene.sceneRect().width(), 640);
     QCOMPARE(item->pixmap().toImage().pixelColor(0, 0), QColor(Qt::red));
-    QCOMPARE(item->scale() * item->pixmap().width(), 305);
+    QCOMPARE(item->mapRectToScene(QRectF(item->pixmap().rect())).width(), 305);
 }
 
 void correctness_test::item_reuse_resets_image()
@@ -566,6 +568,37 @@ void correctness_test::tall_image_stays_visible()
     }
     QVERIFY(tall_visible);
     QVERIFY(!first_short_visible);
+}
+
+void correctness_test::item_geometry_data()
+{
+    QTest::addColumn<QSize>("pixel_size");
+    QTest::newRow("upscale") << QSize(100, 50);
+    QTest::newRow("downscale") << QSize(400, 200);
+}
+
+void correctness_test::item_geometry()
+{
+    QFETCH(QSize, pixel_size);
+    QGraphicsScene scene;
+    waterfall_item item;
+    scene.addItem(&item);
+    const QRectF expected(10, 20, 200, 100);
+    item.bind_model({0, "image.png", QSize(100, 50), expected}, 200, 1);
+    QPixmap image(pixel_size);
+    image.fill(Qt::red);
+    item.set_pixmap_safe(image);
+    const QRectF pixels(item.pixmap().rect());
+    QCOMPARE(item.mapRectToScene(pixels), expected);
+
+    QGraphicsSceneHoverEvent enter(QEvent::GraphicsSceneHoverEnter);
+    QVERIFY(scene.sendEvent(&item, &enter));
+    const QRectF hovered = item.mapRectToScene(pixels);
+    QCOMPARE(hovered.center(), expected.center());
+    QCOMPARE(hovered.width(), expected.width() * 1.08);
+    QGraphicsSceneHoverEvent leave(QEvent::GraphicsSceneHoverLeave);
+    QVERIFY(scene.sendEvent(&item, &leave));
+    QCOMPARE(item.mapRectToScene(pixels), expected);
 }
 
 int main(int argc, char** argv)

@@ -34,7 +34,6 @@ class waterfall_item : public QGraphicsPixmapItem
     QSize original_size_;
     int target_width_ = 0;
     quint64 current_request_id_ = 0;
-    qreal base_scale_ = 1.0;
     bool is_hovered_ = false;
 };
 

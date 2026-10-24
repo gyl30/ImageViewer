@@ -15,3 +15,4 @@
 | C8b | `viewer_file_replaced`：主加载缓存和预加载缓存两条路径覆盖后均仍显示旧图 | 两条路径重新打开均显示新像素，关闭重开预加载回归仍通过；累计 CTest 通过 |
 | C9 | `movie_stops_on_close`：close 后 QMovie 仍为 Running | 关闭后停止并销毁，重开恢复播放，切换静态图后旧 movie 销毁；累计 CTest 通过 |
 | C10 | `tall_image_stays_visible`：长图覆盖当前视口却不可见 | 使用既有索引空间保存前缀最大底边，二分只查询已布局部分；滚动后长图保留、离屏短图回收，累计 CTest 通过 |
+| C11 | `item_geometry`：放大后左上角为 (-39,-4)，缩小后为 (109.5,69.5)，预期均为 (10,20) | 基础缩放使用 item transform，hover 保持原有居中放大；放大/缩小的像素边界及 hover 恢复均通过，删除冗余 base_scale_；累计 CTest 通过 |
