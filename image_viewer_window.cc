@@ -36,6 +36,15 @@ namespace
 {
 constexpr qint64 kAnimatedCacheAllMaxBytes = 20LL * 1024 * 1024;
 
+QString image_cache_key(const QString& path)
+{
+    const QFileInfo file_info(path);
+    return QString("%1|%2|%3")
+        .arg(file_info.absoluteFilePath())
+        .arg(file_info.lastModified().toMSecsSinceEpoch())
+        .arg(file_info.size());
+}
+
 bool is_animated_image(const QString& path)
 {
     QImageReader reader(path);
@@ -306,9 +315,10 @@ void image_viewer_window::set_image_path(const QString& path)
         return;
     }
 
-    if (image_cache_.contains(path))
+    const QString cache_key = image_cache_key(path);
+    if (image_cache_.contains(cache_key))
     {
-        display_image(*image_cache_.object(path), path);
+        display_image(*image_cache_.object(cache_key), path);
         return;
     }
 
@@ -317,7 +327,7 @@ void image_viewer_window::set_image_path(const QString& path)
     connect(image_watcher_,
             &QFutureWatcher<std::pair<QImage, QString>>::finished,
             this,
-            [this, path]()
+            [this, path, cache_key]()
             {
                 if (current_path_ != path)
                 {
@@ -346,7 +356,7 @@ void image_viewer_window::set_image_path(const QString& path)
 
                     return;
                 }
-                image_cache_.insert(path, new QImage(image), image.sizeInBytes());
+                image_cache_.insert(cache_key, new QImage(image), image.sizeInBytes());
                 display_image(image, path);
             });
 
@@ -575,7 +585,7 @@ void image_viewer_window::queue_adjacent_preloads()
         }
 
         const QString& path = image_list_[idx];
-        if (image_cache_.contains(path))
+        if (image_cache_.contains(image_cache_key(path)))
         {
             continue;
         }
@@ -612,16 +622,17 @@ void image_viewer_window::start_next_preload()
     while (!pending_preload_paths_.isEmpty())
     {
         QString preload_path = pending_preload_paths_.takeFirst();
-        if (image_cache_.contains(preload_path))
+        const QString cache_key = image_cache_key(preload_path);
+        if (image_cache_.contains(cache_key))
         {
             continue;
         }
 
         preload_watcher_->setFuture(QtConcurrent::run(
-            [preload_path]()
+            [preload_path, cache_key]()
             {
                 auto result = load_image_file(preload_path);
-                return std::make_pair(preload_path, result.first);
+                return std::make_pair(cache_key, result.first);
             }));
         return;
     }

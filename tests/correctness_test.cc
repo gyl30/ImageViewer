@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <QBuffer>
 #include <QGraphicsView>
+#include <QGraphicsPixmapItem>
 #include <QImageReader>
 #include <QFile>
 #include <QFileInfo>
@@ -99,6 +100,8 @@ class correctness_test : public QObject
     void exif_orientation_data();
     void exif_orientation();
     void thumbnail_file_replaced();
+    void viewer_file_replaced_data();
+    void viewer_file_replaced();
 };
 
 void correctness_test::large_visible_batch()
@@ -431,6 +434,68 @@ void correctness_test::thumbnail_file_replaced()
     worker.loader->request_thumbnails({{3, path, QSize(50, 25), 1}});
     QTRY_COMPARE(loaded.size(), 1);
     QCOMPARE(qvariant_cast<QImage>(loaded.first()[2]).pixelColor(0, 0), QColor(Qt::blue));
+}
+
+void correctness_test::viewer_file_replaced_data()
+{
+    QTest::addColumn<bool>("preloaded");
+    QTest::newRow("foreground-cache") << false;
+    QTest::newRow("preload-cache") << true;
+}
+
+void correctness_test::viewer_file_replaced()
+{
+    QFETCH(bool, preloaded);
+    QTemporaryDir dir;
+    const QString path = dir.filePath("image.png");
+    const QString neighbor = dir.filePath("neighbor.png");
+    QImage image(100, 50, QImage::Format_RGB32);
+    image.fill(Qt::red);
+    QVERIFY(image.save(path));
+    image.fill(Qt::green);
+    QVERIFY(image.save(neighbor));
+    const QDateTime modified = QFileInfo(path).lastModified();
+    image_viewer_window viewer;
+    viewer.set_image_list({neighbor, path});
+    viewer.set_image_path(preloaded ? neighbor : path);
+    QTRY_VERIFY(viewer.windowTitle().startsWith("Viewer -"));
+    if (preloaded)
+    {
+        const auto cached_neighbor = [&viewer]()
+        {
+            for (auto* watcher : viewer.findChildren<QFutureWatcherBase*>())
+            {
+                auto* preload = dynamic_cast<QFutureWatcher<std::pair<QString, QImage>>*>(watcher);
+                if (preload != nullptr && preload->isFinished())
+                {
+                    const QImage result = preload->result().second;
+                    return !result.isNull() && result.pixelColor(0, 0) == QColor(Qt::red);
+                }
+            }
+            return false;
+        };
+        QTRY_VERIFY(cached_neighbor());
+        QCoreApplication::sendPostedEvents();
+    }
+
+    image.fill(Qt::blue);
+    QVERIFY(image.save(path));
+    QFile file(path);
+    QVERIFY(file.open(QIODevice::ReadWrite));
+    QVERIFY(file.setFileTime(modified.addSecs(2), QFileDevice::FileModificationTime));
+    file.close();
+    viewer.set_image_path(path);
+    auto* scene = viewer.findChild<QGraphicsView*>()->scene();
+    const auto shows_new_image = [scene]()
+    {
+        if (scene->items().size() != 1)
+        {
+            return false;
+        }
+        auto* item = dynamic_cast<QGraphicsPixmapItem*>(scene->items().first());
+        return item != nullptr && item->pixmap().toImage().pixelColor(0, 0) == QColor(Qt::blue);
+    };
+    QTRY_VERIFY_WITH_TIMEOUT(shows_new_image(), 500);
 }
 
 int main(int argc, char** argv)
