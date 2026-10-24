@@ -154,6 +154,7 @@ class correctness_test : public QObject
     void viewer_snapshot_is_shared();
     void scanner_formats_data();
     void scanner_formats();
+    void jpeg_cache_roundtrip();
 };
 
 void correctness_test::large_visible_batch()
@@ -990,12 +991,13 @@ void correctness_test::disk_cache_budget()
     image.fill(Qt::red);
     for (int i = 0; i < 1001; ++i)
     {
-        QVERIFY(image.save(directory + QString("/seed-%1.png").arg(i)));
+        const QString suffix = i % 2 == 0 ? "png" : "thumb";
+        QVERIFY(image.save(directory + QString("/seed-%1.%2").arg(i).arg(suffix), "PNG"));
     }
     image_loader loader;
-    QVERIFY(QDir(directory).entryList({"*.png"}, QDir::Files).size() <= 1000);
+    QVERIFY(QDir(directory).entryList(QDir::Files).size() <= 1000);
     loader.clear_cache();
-    QVERIFY(QDir(directory).entryList({"*.png"}, QDir::Files).isEmpty());
+    QVERIFY(QDir(directory).entryList(QDir::Files).isEmpty());
 }
 
 void correctness_test::thumbnail_alpha_roundtrip()
@@ -1288,6 +1290,52 @@ void correctness_test::scanner_formats()
     QCOMPARE(batches.size(), 1);
     const auto images = qvariant_cast<QList<image_meta>>(batches.first().first());
     QCOMPARE(images.first().original_size, expected);
+}
+
+void correctness_test::jpeg_cache_roundtrip()
+{
+    QTemporaryDir dir;
+    const QString path = dir.filePath("gradient.jpg");
+    QImage image(200, 100, QImage::Format_RGB32);
+    for (int y = 0; y < image.height(); ++y)
+    {
+        for (int x = 0; x < image.width(); ++x)
+        {
+            image.setPixelColor(x, y, QColor(x, y * 2, (x + y) / 2));
+        }
+    }
+    QVERIFY(image.save(path, "JPEG", 95));
+    const load_task task{1, path, image.size(), 1};
+    QImage first;
+    for (int pass = 0; pass < 2; ++pass)
+    {
+        loader_worker worker;
+        QSignalSpy loaded(worker.loader, &image_loader::thumbnail_loaded);
+        worker.loader->request_thumbnails({task});
+        worker.thread.start();
+        QTRY_COMPARE(loaded.size(), 1);
+        const QImage decoded = qvariant_cast<QImage>(loaded.first()[2]);
+        QCOMPARE(decoded.size(), image.size());
+        QMetaObject::invokeMethod(worker.loader, []() {}, Qt::BlockingQueuedConnection);
+        if (pass == 0)
+        {
+            first = decoded;
+            const QByteArray format = QImageReader(worker.loader->disk_cache_path(task)).format();
+            QVERIFY(format == "jpeg" || format == "jpg");
+            continue;
+        }
+        qint64 error = 0;
+        for (int y = 0; y < decoded.height(); ++y)
+        {
+            for (int x = 0; x < decoded.width(); ++x)
+            {
+                const QColor a = first.pixelColor(x, y);
+                const QColor b = decoded.pixelColor(x, y);
+                error += std::abs(a.red() - b.red()) + std::abs(a.green() - b.green()) + std::abs(a.blue() - b.blue());
+            }
+        }
+        QVERIFY(error / (3.0 * decoded.width() * decoded.height()) < 2.0);
+    }
 }
 
 int main(int argc, char** argv)

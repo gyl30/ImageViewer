@@ -16,11 +16,12 @@
 
 namespace
 {
-constexpr int kThumbnailCacheVersion = 2;
+constexpr int kThumbnailCacheVersion = 3;
 constexpr qint64 kMaxDiskCacheBytes = 128LL * 1024 * 1024;
 constexpr int kMaxDiskCacheFiles = 1000;
 constexpr int kCacheRetainPercent = 80;
 constexpr int kPngCompression = 15;
+constexpr int kJpegQuality = 95;
 }
 
 image_loader::image_loader(QObject* parent) : QObject(parent), abort_(false)
@@ -50,14 +51,14 @@ QString image_loader::disk_cache_path(const load_task& task) const
             .arg(task.target_size.width())
             .arg(task.target_size.height());
     const QByteArray hash = QCryptographicHash::hash(cache_seed.toUtf8(), QCryptographicHash::Sha1).toHex();
-    return disk_cache_dir_ + "/" + QString::fromLatin1(hash) + ".png";
+    return disk_cache_dir_ + "/" + QString::fromLatin1(hash) + ".thumb";
 }
 
 void image_loader::cleanup_disk_cache()
 {
     QDir cache_dir(disk_cache_dir_);
     QFileInfoList files =
-        cache_dir.entryInfoList(QStringList() << "*.png", QDir::Files, QDir::Time | QDir::Reversed);
+        cache_dir.entryInfoList(QDir::Files, QDir::Time | QDir::Reversed);
 
     qint64 total_size = 0;
     for (const QFileInfo& file_info : files)
@@ -131,7 +132,7 @@ void image_loader::clear_cache()
     }
 
     QDir cache_dir(disk_cache_dir_);
-    const QFileInfoList files = cache_dir.entryInfoList(QStringList() << "*.png", QDir::Files);
+    const QFileInfoList files = cache_dir.entryInfoList(QDir::Files);
     for (const QFileInfo& file_info : files)
     {
         QFile::remove(file_info.absoluteFilePath());
@@ -224,6 +225,8 @@ void image_loader::load_image_internal(const load_task& current_task)
         }
     }
 
+    // 解码完成后，自动探测到的格式可能已被清空。
+    const QByteArray source_format = reader.format();
     image = reader.read();
     if (!image.isNull())
     {
@@ -247,8 +250,16 @@ void image_loader::load_image_internal(const load_task& current_task)
         const QFileInfo previous(cache_key);
         const bool existed = previous.exists();
         const qint64 previous_size = previous.size();
-        QImageWriter writer(cache_key, "PNG");
-        writer.setCompression(kPngCompression);
+        const bool jpeg = (source_format == "jpeg" || source_format == "jpg") && !image.hasAlphaChannel();
+        QImageWriter writer(cache_key, jpeg ? "JPEG" : "PNG");
+        if (jpeg)
+        {
+            writer.setQuality(kJpegQuality);
+        }
+        else
+        {
+            writer.setCompression(kPngCompression);
+        }
         if (writer.write(image))
         {
             disk_cache_bytes_ += QFileInfo(cache_key).size() - previous_size;
