@@ -148,6 +148,7 @@ class correctness_test : public QObject
     void clear_resets_scroll_range();
     void reprioritize_after_scroll();
     void same_path_replaced_inflight();
+    void layout_result_is_consumed();
 };
 
 void correctness_test::large_visible_batch()
@@ -1194,6 +1195,16 @@ void correctness_test::same_path_replaced_inflight()
     auto* item = dynamic_cast<QGraphicsPixmapItem*>(scene->items().first());
     QVERIFY(item != nullptr);
     QCOMPARE(item->pixmap().toImage().pixelColor(0, 0), QColor(Qt::blue));
+}
+
+void correctness_test::layout_result_is_consumed()
+{
+    waterfall_scene scene;
+    scene.add_images({{"first.png", QSize(100, 50)}});
+    scene.layout_models(440);
+    QTRY_COMPARE(scene.sceneRect().width(), 440);
+    const auto future = scene.layout_watcher_.future();
+    QVERIFY(!future.isValid() || future.result().rects.empty());
 }
 
 int main(int argc, char** argv)

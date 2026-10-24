@@ -257,7 +257,7 @@ void waterfall_scene::layout_models(int view_width)
     }
 
     QFuture<layout_result> future =
-        QtConcurrent::run(calculate_layout_job, sizes, view_width, layout_generation_, kItemMargin, kColumnMargin, kMinColWidth);
+        QtConcurrent::run(calculate_layout_job, std::move(sizes), view_width, layout_generation_, kItemMargin, kColumnMargin, kMinColWidth);
 
     is_laying_out_ = true;
     layout_watcher_.setFuture(future);
@@ -265,7 +265,7 @@ void waterfall_scene::layout_models(int view_width)
 
 void waterfall_scene::on_layout_finished()
 {
-    layout_result result = layout_watcher_.result();
+    layout_result result = layout_watcher_.future().takeResult();
     is_laying_out_ = false;
     const int next_width = std::exchange(pending_view_width_, 0);
 
