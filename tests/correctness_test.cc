@@ -146,6 +146,7 @@ class correctness_test : public QObject
     void scanner_sort_modes_data();
     void scanner_sort_modes();
     void clear_resets_scroll_range();
+    void reprioritize_after_scroll();
 };
 
 void correctness_test::large_visible_batch()
@@ -1145,6 +1146,28 @@ void correctness_test::clear_resets_scroll_range()
     QTRY_VERIFY(view.verticalScrollBar()->maximum() > 0);
     scene.clear_items();
     QTRY_COMPARE_WITH_TIMEOUT(view.verticalScrollBar()->maximum(), 0, 300);
+}
+
+void correctness_test::reprioritize_after_scroll()
+{
+    loader_worker worker;
+    waterfall_scene scene;
+    connect(&scene, &waterfall_scene::request_load_batch, worker.loader, &image_loader::request_thumbnails, Qt::DirectConnection);
+    connect(&scene, &waterfall_scene::request_cancel_batch, worker.loader, &image_loader::cancel_thumbnails, Qt::DirectConnection);
+    connect(&scene, &waterfall_scene::request_prioritize_batch, worker.loader, &image_loader::prioritize_thumbnails, Qt::DirectConnection);
+    QList<image_meta> images;
+    for (int index = 0; index < 100; ++index)
+    {
+        images.append({QString::number(index), QSize(100, 100)});
+    }
+    scene.add_images(images);
+    scene.layout_models(440);
+    QTRY_COMPARE(scene.sceneRect().width(), 440);
+    scene.update_viewport(QRectF(0, 0, 440, 300));
+    scene.update_viewport(QRectF(0, 500, 440, 300));
+    QVERIFY(!worker.loader->task_queue_.isEmpty());
+    const int first = worker.loader->task_queue_.first().path.toInt();
+    QVERIFY2(first >= 4 && first <= 7, qPrintable(QString("first queued index: %1").arg(first)));
 }
 
 int main(int argc, char** argv)

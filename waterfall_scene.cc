@@ -385,10 +385,10 @@ void waterfall_scene::update_viewport(const QRectF& visible_rect)
     {
         emit request_cancel_batch(paths_to_cancel);
     }
-    request_visible_images(visible_rect);
+    request_visible_images(visible_rect, request_mode::viewport_changed);
 }
 
-void waterfall_scene::request_visible_images(const QRectF& visible_rect)
+void waterfall_scene::request_visible_images(const QRectF& visible_rect, request_mode mode)
 {
     int available = kMaxThumbnailTasks;
     std::vector<int> pending;
@@ -397,13 +397,17 @@ void waterfall_scene::request_visible_images(const QRectF& visible_rect)
         if (it.value()->state() == waterfall_item::load_state::loading)
         {
             --available;
+            if (mode == request_mode::viewport_changed)
+            {
+                pending.push_back(it.key());
+            }
         }
         else if (it.value()->state() == waterfall_item::load_state::empty)
         {
             pending.push_back(it.key());
         }
     }
-    if (available <= 0 || pending.empty())
+    if (pending.empty() || (available <= 0 && mode == request_mode::replenish))
     {
         return;
     }
@@ -422,21 +426,36 @@ void waterfall_scene::request_visible_images(const QRectF& visible_rect)
     });
     const qreal dpr = views().isEmpty() ? 1.0 : views().first()->devicePixelRatioF();
     QList<load_task> tasks;
+    QList<quint64> priority;
     for (int index : pending)
     {
-        if (available-- <= 0)
-        {
-            break;
-        }
         auto* item = active_items_[index];
+        if (item->state() == waterfall_item::load_state::loading)
+        {
+            priority.append(item->get_request_id());
+            continue;
+        }
+        if (available <= 0)
+        {
+            continue;
+        }
+        --available;
         const auto& model = all_models_[index];
         const quint64 id = ++request_counter_;
         item->bind_model(model, index, image_paths_[index], current_col_width_, id);
         const QSize size(std::max(1, qRound(model.layout_rect.width() * dpr)),
                          std::max(1, qRound(model.layout_rect.height() * dpr)));
         tasks.append({id, image_paths_[index], size, current_session_id_});
+        priority.append(id);
     }
-    emit request_load_batch(tasks);
+    if (!tasks.isEmpty())
+    {
+        emit request_load_batch(tasks);
+    }
+    if (mode == request_mode::viewport_changed && !priority.isEmpty())
+    {
+        emit request_prioritize_batch(priority);
+    }
 }
 
 waterfall_item* waterfall_scene::obtain_item()
@@ -478,7 +497,7 @@ void waterfall_scene::on_image_loaded(quint64 id, const QString& /*path*/, const
             if (!views().isEmpty())
             {
                 auto* view = views().first();
-                request_visible_images(view->mapToScene(view->viewport()->rect()).boundingRect());
+                request_visible_images(view->mapToScene(view->viewport()->rect()).boundingRect(), request_mode::replenish);
             }
             return;
         }

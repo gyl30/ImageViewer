@@ -1,4 +1,5 @@
 #include <cmath>
+#include <algorithm>
 #include <QCryptographicHash>
 #include <QDebug>
 #include <QDir>
@@ -83,13 +84,6 @@ void image_loader::request_thumbnails(const QList<load_task>& tasks)
         {
             break;
         }
-        const QString cache_key = disk_cache_path(task);
-        if (cache_.contains(cache_key))
-        {
-            emit thumbnail_loaded(task.id, task.path, *cache_.object(cache_key), task.session_id);
-            continue;
-        }
-
         task_queue_.append(task);
     }
 
@@ -104,6 +98,20 @@ void image_loader::cancel_thumbnails(const QList<QString>& paths)
 {
     QMutexLocker locker(&mutex_);
     task_queue_.removeIf([&paths](const load_task& task) { return paths.contains(task.path); });
+}
+
+void image_loader::prioritize_thumbnails(const QList<quint64>& ids)
+{
+    QMutexLocker locker(&mutex_);
+    const auto rank = [&ids](quint64 id)
+    {
+        const qsizetype index = ids.indexOf(id);
+        return index < 0 ? ids.size() : index;
+    };
+    std::sort(task_queue_.begin(), task_queue_.end(), [&](const load_task& left, const load_task& right)
+    {
+        return rank(left.id) < rank(right.id);
+    });
 }
 
 void image_loader::clear_all()

@@ -38,6 +38,7 @@ class waterfall_scene : public QGraphicsScene
     void request_cancel_all();
     void request_load_batch(const QList<load_task>& tasks);
     void request_cancel_batch(const QList<QString>& paths);
+    void request_prioritize_batch(const QList<quint64>& ids);
     void image_double_clicked(QString path);
     void request_open_folder();
     void request_open_recent(QString path);
@@ -57,9 +58,10 @@ class waterfall_scene : public QGraphicsScene
     void drawForeground(QPainter* painter, const QRectF& rect) override;
 
    private:
+    enum class request_mode { replenish, viewport_changed };
     waterfall_item* obtain_item();
     void recycle_item(waterfall_item* item);
-    void request_visible_images(const QRectF& visible_rect);
+    void request_visible_images(const QRectF& visible_rect, request_mode mode);
 
    private:
     std::vector<layout_model> all_models_;

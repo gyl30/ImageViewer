@@ -311,6 +311,7 @@ void main_window::setup_connections()
 {
     connect(scene_, &waterfall_scene::request_load_batch, image_loader_, &image_loader::request_thumbnails, Qt::DirectConnection);
     connect(scene_, &waterfall_scene::request_cancel_batch, image_loader_, &image_loader::cancel_thumbnails, Qt::DirectConnection);
+    connect(scene_, &waterfall_scene::request_prioritize_batch, image_loader_, &image_loader::prioritize_thumbnails, Qt::DirectConnection);
     connect(scene_, &waterfall_scene::request_cancel_all, image_loader_, &image_loader::clear_all, Qt::DirectConnection);
     connect(image_loader_, &image_loader::thumbnail_loaded, scene_, &waterfall_scene::on_image_loaded, Qt::QueuedConnection);
 
