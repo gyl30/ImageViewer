@@ -88,12 +88,24 @@ class performance_probe
             loader_cpu_ms_ = thread_cpu_ms();
         }, Qt::DirectConnection);
         QObject::connect(window_.image_loader_, &image_loader::thumbnail_loaded, &window_,
-                         [this](quint64, const QString&, const QImage& image)
+                         [this](quint64 id, const QString&, const QImage& image)
         {
             ++decoded_count_;
             if (!image.isNull() && first_thumbnail_ms_ < 0)
             {
                 first_thumbnail_ms_ = timer_.elapsed();
+            }
+            if (!image.isNull() && first_visible_ms_ < 0)
+            {
+                const QRectF visible = window_.view_->mapToScene(window_.view_->viewport()->rect()).boundingRect();
+                for (auto* item : window_.scene_->active_items_)
+                {
+                    if (item->get_request_id() == id && item->sceneBoundingRect().intersects(visible))
+                    {
+                        first_visible_ms_ = timer_.elapsed();
+                        break;
+                    }
+                }
             }
         });
     }
@@ -241,6 +253,7 @@ class performance_probe
         sample("cleared");
         QJsonObject result{{"qt", qVersion()}, {"dataset", directory}, {"viewport", "1280x800 window"},
                            {"first_batch_ms", first_batch_ms_}, {"first_thumbnail_ms", first_thumbnail_ms_},
+                           {"first_visible_ms", first_visible_ms_},
                            {"scan_ms", scan_ms_}, {"idle_cpu_ms_500ms", idle_cpu_ms_},
                            {"max_queue_sampled", max_queue_}, {"max_active_items", max_active_},
                            {"clear_disk_at_end", clear_disk},
@@ -260,6 +273,7 @@ class performance_probe
     bool scan_done_ = false;
     qint64 first_batch_ms_ = -1;
     qint64 first_thumbnail_ms_ = -1;
+    qint64 first_visible_ms_ = -1;
     qint64 scan_ms_ = 0;
     int decoded_count_ = 0;
     double idle_cpu_ms_ = 0;
