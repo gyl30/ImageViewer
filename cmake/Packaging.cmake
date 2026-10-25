@@ -25,6 +25,7 @@ set(CPACK_RPM_PACKAGE_GROUP "Applications/Multimedia")
 set(CPACK_RPM_PACKAGE_REQUIRES "qt6-qtbase-gui >= 6.4.2, qt6-qtsvg >= 6.4.2, qt6-qtimageformats, hicolor-icon-theme")
 set(CPACK_RPM_PACKAGE_DESCRIPTION "${CPACK_PACKAGE_DESCRIPTION}")
 set(CPACK_PACKAGE_RELOCATABLE OFF)
+set(CPACK_RPM_USER_FILELIST "%license /usr/share/doc/imageviewer/copyright")
 set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
     "/usr/share/applications" "/usr/share/icons" "/usr/share/icons/hicolor"
     "/usr/share/icons/hicolor/scalable" "/usr/share/icons/hicolor/scalable/apps")
