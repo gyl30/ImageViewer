@@ -55,8 +55,13 @@ fi
 test_user=$(getent passwd 1000 | cut -d: -f1)
 mkdir -p "$output/gui"
 chown 1000 "$output/gui"
+mkdir -p "$output/user-pictures"
+cp "$source_dir/tools/release/fixtures/"* "$output/user-pictures/"
+chown -R 1000 "$output/user-pictures"
 runuser -u "$test_user" -- dbus-run-session -- xvfb-run -a sh "$source_dir/tools/release/gui-smoke.sh" \
-    "$source_dir/tools/release/fixtures" "$output/gui"
+    "$output/user-pictures" "$output/gui"
+find "$output/gui/config" "$output/gui/cache" "$output/user-pictures" -type f -print0 \
+    | LC_ALL=C sort -z | xargs -0 sha256sum > "$output/user-data-before.sha256"
 
 case "$package" in
     *.deb) apt-get purge -y imageviewer ;;
@@ -65,4 +70,5 @@ esac
 while IFS= read -r path; do
     test ! -e "$path"
 done < "$output/expected-files.txt"
+sha256sum -c "$output/user-data-before.sha256" > "$output/user-data-check.txt"
 printf 'install, desktop launch, five formats, gallery and uninstall: PASS\n' > "$output/result.txt"

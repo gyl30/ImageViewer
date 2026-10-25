@@ -43,3 +43,7 @@ printf '%s\n' "$SOURCE_DATE_EPOCH" > "$output/source-date-epoch.txt"
     cd "$output"
     sha256sum *."$extension" stage/usr/bin/ImageViewer
 ) > "$output/SHA256SUMS"
+(
+    cd "$output"
+    stat -c '%s %n' *."$extension" stage/usr/bin/ImageViewer
+) > "$output/file-sizes.txt"
