@@ -32,6 +32,8 @@
 #include <QScopeGuard>
 #include <QWheelEvent>
 #include <QScreen>
+#include <QMessageBox>
+#include <QAbstractButton>
 
 namespace
 {
@@ -185,6 +187,7 @@ class correctness_test : public QObject
     void scrolled_result_skips_old();
     void viewer_status_tracks_loading();
     void desktop_interactions();
+    void trash_fresh_data_home();
 };
 
 void correctness_test::large_visible_batch()
@@ -1597,6 +1600,83 @@ void correctness_test::viewer_snapshot_is_shared()
     QVERIFY(!paths.isDetached());
     QMetaObject::invokeMethod(&viewer, "load_next_image");
     QVERIFY(!paths.isDetached());
+}
+
+void correctness_test::trash_fresh_data_home()
+{
+#ifndef Q_OS_LINUX
+    QSKIP("验证 Linux XDG 回收站首次创建");
+#else
+    QTemporaryDir root;
+    const QString data_home = root.filePath("new-data");
+    const QByteArray previous = qgetenv("XDG_DATA_HOME");
+    qputenv("XDG_DATA_HOME", data_home.toUtf8());
+    const auto restore = qScopeGuard([previous]()
+    {
+        if (previous.isNull()) { qunsetenv("XDG_DATA_HOME"); }
+        else { qputenv("XDG_DATA_HOME", previous); }
+    });
+    const QString original = root.filePath("original.png");
+    const QString copies = root.filePath("copies");
+    QVERIFY(QDir().mkpath(copies));
+    QImage image(80, 60, QImage::Format_RGB32);
+    image.fill(Qt::blue);
+    QVERIFY(image.save(original));
+    const QString copy = copies + "/delete-copy.png";
+    QVERIFY(QFile::copy(original, copy));
+    QFile source(original);
+    QVERIFY(source.open(QIODevice::ReadOnly));
+    const QByteArray original_bytes = source.readAll();
+    source.close();
+    main_window window;
+    window.show();
+    auto* scene = window.findChild<waterfall_scene*>();
+    QMimeData mime;
+    mime.setUrls({QUrl::fromLocalFile(copies)});
+    QDragEnterEvent enter(QPoint(1, 1), Qt::CopyAction, &mime, Qt::LeftButton, Qt::NoModifier);
+    QApplication::sendEvent(&window, &enter);
+    QDropEvent drop(QPointF(1, 1), Qt::CopyAction, &mime, Qt::LeftButton, Qt::NoModifier);
+    QApplication::sendEvent(&window, &drop);
+    QVERIFY(drop.isAccepted());
+    QTRY_COMPARE(scene->get_all_paths().size(), 1);
+    QVERIFY(!QFileInfo::exists(data_home));
+    bool failed_dialog = false;
+    QTimer confirm;
+    confirm.setInterval(10);
+    connect(&confirm, &QTimer::timeout, &window, [&failed_dialog]()
+    {
+        auto* box = qobject_cast<QMessageBox*>(QApplication::activeModalWidget());
+        if (box == nullptr) { return; }
+        if (box->windowTitle() == "移到回收站" && box->text().contains("delete-copy.png"))
+        {
+            box->button(QMessageBox::Yes)->click();
+        }
+        else if (box->windowTitle() == "移到回收站失败")
+        {
+            failed_dialog = true;
+            box->button(QMessageBox::Ok)->click();
+        }
+    });
+    confirm.start();
+    scene->request_move_to_trash(copy);
+    confirm.stop();
+    QVERIFY(!failed_dialog);
+    QVERIFY(!QFileInfo::exists(copy));
+    const auto permissions = QFile::permissions(data_home);
+    QVERIFY(permissions.testFlag(QFile::ReadOwner));
+    QVERIFY(permissions.testFlag(QFile::WriteOwner));
+    QVERIFY(permissions.testFlag(QFile::ExeOwner));
+    QVERIFY(!(permissions & (QFile::ReadGroup | QFile::WriteGroup | QFile::ExeGroup |
+                             QFile::ReadOther | QFile::WriteOther | QFile::ExeOther)));
+    QTRY_VERIFY(scene->get_all_paths().isEmpty());
+    const QStringList trashed = QDir(data_home + "/Trash/files").entryList(QDir::Files);
+    QCOMPARE(trashed.size(), 1);
+    QFile recovered(data_home + "/Trash/files/" + trashed.first());
+    QVERIFY(recovered.open(QIODevice::ReadOnly));
+    QCOMPARE(recovered.readAll(), original_bytes);
+    QVERIFY(source.open(QIODevice::ReadOnly));
+    QCOMPARE(source.readAll(), original_bytes);
+#endif
 }
 
 void correctness_test::scanner_formats_data()

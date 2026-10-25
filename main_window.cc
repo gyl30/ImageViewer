@@ -5,6 +5,7 @@
 #include <QKeySequence>
 #include <QFileDialog>
 #include <QDirIterator>
+#include <QDir>
 #include <QImageReader>
 #include <QStatusBar>
 #include <QCoreApplication>
@@ -733,6 +734,12 @@ void main_window::on_move_path_to_trash(const QString& path)
         return;
     }
 
+#ifdef Q_OS_LINUX
+    // Qt 的回收站实现要求 XDG 数据根已存在。
+    const QString data_home = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation);
+    QDir().mkpath(QFileInfo(data_home).absolutePath());
+    QDir().mkdir(data_home, QFile::ReadOwner | QFile::WriteOwner | QFile::ExeOwner);
+#endif
     if (!QFile::moveToTrash(path))
     {
         QMessageBox::warning(this, "移到回收站失败", QString("无法将 \"%1\" 移到回收站。").arg(file_info.fileName()));
