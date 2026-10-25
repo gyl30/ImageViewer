@@ -1,0 +1,70 @@
+name: Linux 安装包
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: debian12
+            generator: DEB
+            extension: deb
+            dockerfile: debian.Dockerfile
+            runtime: debian@sha256:7ff6ba31527b9e336162fa061746c366c4b2032f4d2cff2078bea43f78efe3f8
+          - target: fedora43
+            generator: RPM
+            extension: rpm
+            dockerfile: fedora.Dockerfile
+            runtime: fedora@sha256:a651ddf48ea28a06ed4e1e6519f51c9f47e7a5a138722ade87369b8fbb7e5b42
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: 准备构建环境
+        run: |
+          echo "SOURCE_DATE_EPOCH=$(git show -s --format=%ct HEAD)" >> "$GITHUB_ENV"
+          docker build -t imageviewer-builder -f tools/release/${{ matrix.dockerfile }} tools/release
+      - name: 两次独立构建、测试及打包
+        run: |
+          for attempt in 1 2; do
+            mkdir -p "dist/${{ matrix.target }}-$attempt"
+            git rev-parse HEAD > "dist/${{ matrix.target }}-$attempt/source-revision.txt"
+            docker run --rm --init --user "$(id -u):$(id -g)" \
+              -e SOURCE_DATE_EPOCH \
+              -v "$PWD:/src:ro" -v "$PWD/dist/${{ matrix.target }}-$attempt:/out" \
+              imageviewer-builder sh /src/tools/release/build.sh ${{ matrix.generator }} /out
+          done
+          first=$(find dist/${{ matrix.target }}-1 -maxdepth 1 -name '*.${{ matrix.extension }}')
+          second=$(find dist/${{ matrix.target }}-2 -maxdepth 1 -name '*.${{ matrix.extension }}')
+          cmp "$first" "$second"
+          cmp dist/${{ matrix.target }}-1/stage/usr/bin/ImageViewer dist/${{ matrix.target }}-2/stage/usr/bin/ImageViewer
+      - name: 干净系统安装、桌面启动、打开图片及卸载
+        run: |
+          mkdir -p dist/runtime
+          package=$(find dist/${{ matrix.target }}-1 -maxdepth 1 -name '*.${{ matrix.extension }}' -printf '%f\n')
+          docker run --rm --init \
+            -v "$PWD:/src:ro" -v "$PWD/dist/${{ matrix.target }}-1:/packages:ro" \
+            -v "$PWD/dist/runtime:/out" \
+            ${{ matrix.runtime }} sh /src/tools/release/verify.sh "/packages/$package" /out
+      - name: 验证同一DEB在Ubuntu 24.04上运行
+        if: matrix.generator == 'DEB'
+        run: |
+          mkdir -p dist/runtime-ubuntu
+          package=$(find dist/debian12-1 -maxdepth 1 -name '*.deb' -printf '%f\n')
+          docker run --rm --init \
+            -v "$PWD:/src:ro" -v "$PWD/dist/debian12-1:/packages:ro" \
+            -v "$PWD/dist/runtime-ubuntu:/out" \
+            ubuntu@sha256:68ee22004a9109b44973313b02ff7b1de250f1de0f5ecb628d73f579aaff33ac \
+            sh /src/tools/release/verify.sh "/packages/$package" /out
+      # 许可证未确定，不上传二进制、不打标签、不创建Release。
