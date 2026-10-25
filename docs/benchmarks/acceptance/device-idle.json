@@ -1,0 +1,23 @@
+{
+  "seconds": 20,
+  "stat_delta": [
+    1,
+    0,
+    8,
+    9,
+    180,
+    201,
+    6328,
+    1290,
+    0,
+    261,
+    1299,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "scope": "whole partition background, not attributable to app"
+}

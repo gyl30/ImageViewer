@@ -1,0 +1,182 @@
+--------------------------------------------------------------------------------
+Profile data file '/tmp/iv-callgrind.out' (creator: callgrind-3.18.1)
+--------------------------------------------------------------------------------
+I1 cache: 
+D1 cache: 
+LL cache: 
+Timerange: Basic block 0 - 830114055
+Trigger: Program termination
+Profiled target:  /tmp/iv-release/imageviewer_benchmark /tmp/iv-accept-mixed/1000 /home/gyl/example/ImageViewer/docs/benchmarks/acceptance/callgrind-probe.json profile (PID 580901, part 1)
+Events recorded:  Ir
+Events shown:     Ir
+Event sort order: Ir
+Thresholds:       90
+Include dirs:     
+User annotated:   
+Auto-annotation:  off
+
+--------------------------------------------------------------------------------
+Ir                     
+--------------------------------------------------------------------------------
+5,291,729,986 (100.0%)  PROGRAM TOTALS
+
+--------------------------------------------------------------------------------
+Ir                    file:function
+--------------------------------------------------------------------------------
+477,962,849 ( 9.03%)  /home/qt/work/qt/qtbase/src/3rdparty/libpng/pngwutil.c:png_write_find_filter [/home/gyl/data/qt/6.9.3/gcc_64/lib/libQt6Gui.so.6.9.3]
+351,134,576 ( 6.64%)  /home/qt/work/qt/qtbase/src/3rdparty/libpng/pngrutil.c:png_read_filter_row_paeth_multibyte_pixel [/home/gyl/data/qt/6.9.3/gcc_64/lib/libQt6Gui.so.6.9.3]
+242,481,949 ( 4.58%)  ???:0x000000000000ad90 [/usr/lib/x86_64-linux-gnu/libharfbuzz.so.0.20704.0]
+208,737,691 ( 3.94%)  ???:0x0000000000002c10 [/usr/lib/x86_64-linux-gnu/libz.so.1.2.11]
+194,053,526 ( 3.67%)  ???:0x0000000000051c20 [/usr/lib/x86_64-linux-gnu/libfreetype.so.6.18.1]
+162,069,630 ( 3.06%)  ???:FT_Get_Next_Char [/usr/lib/x86_64-linux-gnu/libfreetype.so.6.18.1]
+150,814,787 ( 2.85%)  ???:0x00000000000079f0 [/usr/lib/x86_64-linux-gnu/libz.so.1.2.11]
+134,145,213 ( 2.53%)  ???:0x0000000000002a70 [/usr/lib/x86_64-linux-gnu/libz.so.1.2.11]
+100,964,677 ( 1.91%)  /home/qt/work/qt/qtbase_build/src/3rdparty/libjpeg/jdhuff.c:decode_mcu [/home/gyl/data/qt/6.9.3/gcc_64/plugins/imageformats/libqjpeg.so]
+ 99,966,834 ( 1.89%)  ???:0x0000000000004fb0 [/usr/lib/x86_64-linux-gnu/libz.so.1.2.11]
+ 90,088,553 ( 1.70%)  ???:0x000000000000adf0 [/usr/lib/x86_64-linux-gnu/libpangoft2-1.0.so.0.5000.6]
+ 82,327,664 ( 1.56%)  ???:FcFreeTypeCharSet [/usr/lib/x86_64-linux-gnu/libfontconfig.so.1.12.0]
+ 74,787,608 ( 1.41%)  ???:0x000000000003c030 [/usr/lib/x86_64-linux-gnu/libfreetype.so.6.18.1]
+ 68,594,632 ( 1.30%)  ???:0x0000000000051ea0 [/usr/lib/x86_64-linux-gnu/libfreetype.so.6.18.1]
+ 68,396,560 ( 1.29%)  ???:FcCharSetAddChar [/usr/lib/x86_64-linux-gnu/libfontconfig.so.1.12.0]
+ 68,250,071 ( 1.29%)  /home/qt/work/qt/qtbase/src/plugins/imageformats/gif/qgifhandler.cpp:QGIFFormat::decode(QImage*, unsigned char const*, int, int*, int*) [/home/gyl/data/qt/6.9.3/gcc_64/plugins/imageformats/libqgif.so]
+ 66,260,913 ( 1.25%)  ???:inflate [/usr/lib/x86_64-linux-gnu/libz.so.1.2.11]
+ 60,324,792 ( 1.14%)  ???:adler32_z [/usr/lib/x86_64-linux-gnu/libz.so.1.2.11]
+ 56,105,199 ( 1.06%)  /home/qt/work/qt/qtbase/src/gui/painting/qimagescale_sse4.cpp:QRunnable::QGenericRunnable::Helper<multithread_pixels_function<qt_qimageScaleAARGBA_down_xy_sse4<true>(QImageScale::QImageScaleInfo*, unsigned int*, int, int, int, int)::{lambda(int, int)#1}>(QImageScale::QImageScaleInfo*, int, qt_qimageScaleAARGBA_down_xy_sse4<true>(QImageScale::QImageScaleInfo*, unsigned int*, int, int, int, int)::{lambda(int, int)#1} const&)::{lambda()#1}>::impl(QRunnable::QGenericRunnable::HelperBase::Op, QRunnable::QGenericRunnable::HelperBase*, void*)
+ 52,577,518 ( 0.99%)  ???:0x0000000000007600 [/usr/lib/x86_64-linux-gnu/libz.so.1.2.11]
+ 51,319,045 ( 0.97%)  /home/qt/work/qt/qtbase_build/src/3rdparty/libjpeg/jfdctint.c:jpeg_fdct_islow [/home/gyl/data/qt/6.9.3/gcc_64/plugins/imageformats/libqjpeg.so]
+ 50,165,148 ( 0.95%)  /home/qt/work/qt/qtbase/src/gui/painting/qdrawhelper.cpp:void fetchTransformed_fetcher<(TextureBlendType)2, (QPixelLayout::BPP)6, unsigned int>(unsigned int*, QSpanData const*, int, int, int) [/home/gyl/data/qt/6.9.3/gcc_64/lib/libQt6Gui.so.6.9.3]
+ 49,399,221 ( 0.93%)  ./elf/./elf/dl-lookup.c:do_lookup_x [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+ 49,050,662 ( 0.93%)  /home/qt/work/qt/qtimageformats/src/plugins/imageformats/webp/../../../3rdparty/libwebp/src/utils/bit_reader_inl_utils.h:GetCoeffsFast
+ 48,125,768 ( 0.91%)  ./malloc/./malloc/malloc.c:_int_malloc [/usr/lib/x86_64-linux-gnu/libc.so.6]
+ 47,261,104 ( 0.89%)  ./malloc/./malloc/malloc.c:_int_free [/usr/lib/x86_64-linux-gnu/libc.so.6]
+ 47,089,087 ( 0.89%)  ???:0x0000000000025190 [/usr/lib/x86_64-linux-gnu/libfontconfig.so.1.12.0]
+ 41,824,341 ( 0.79%)  /home/qt/work/qt/qtbase/src/gui/painting/qpaintengine_raster.cpp:qt_intersect_spans(QClipData const*, int*, QT_FT_Span_ const*, QT_FT_Span_ const*, QT_FT_Span_**, int) [/home/gyl/data/qt/6.9.3/gcc_64/lib/libQt6Gui.so.6.9.3]
+ 41,341,776 ( 0.78%)  ???:0x000000000002fac0 [/usr/lib/x86_64-linux-gnu/libfontconfig.so.1.12.0]
+ 41,178,009 ( 0.78%)  /home/qt/work/qt/qtbase_build/src/3rdparty/libjpeg/jchuff.c:encode_mcu_huff [/home/gyl/data/qt/6.9.3/gcc_64/plugins/imageformats/libqjpeg.so]
+ 39,852,212 ( 0.75%)  /home/qt/work/qt/qtbase/src/3rdparty/libjpeg/src/jccolext.c:rgb_ycc_convert
+ 38,366,237 ( 0.73%)  /home/qt/work/qt/qtbase/src/3rdparty/libpng/pngtrans.c:png_do_bgr [/home/gyl/data/qt/6.9.3/gcc_64/lib/libQt6Gui.so.6.9.3]
+ 37,170,720 ( 0.70%)  /home/qt/work/qt/qtbase_build/src/3rdparty/libjpeg/jcdctmgr.c:quantize [/home/gyl/data/qt/6.9.3/gcc_64/plugins/imageformats/libqjpeg.so]
+ 36,361,634 ( 0.69%)  ???:0x0000000000057890 [/usr/lib/x86_64-linux-gnu/libfreetype.so.6.18.1]
+ 35,532,870 ( 0.67%)  /home/qt/work/qt/qtbase_build/src/3rdparty/libjpeg/jidctred.c:jpeg_idct_4x4 [/home/gyl/data/qt/6.9.3/gcc_64/plugins/imageformats/libqjpeg.so]
+ 35,494,188 ( 0.67%)  /opt/rh/gcc-toolset-10/root/usr/lib/gcc/x86_64-redhat-linux/10/include/emmintrin.h:QRunnable::QGenericRunnable::Helper<multithread_pixels_function<qt_qimageScaleAARGBA_down_xy_sse4<true>(QImageScale::QImageScaleInfo*, unsigned int*, int, int, int, int)::{lambda(int, int)#1}>(QImageScale::QImageScaleInfo*, int, qt_qimageScaleAARGBA_down_xy_sse4<true>(QImageScale::QImageScaleInfo*, unsigned int*, int, int, int, int)::{lambda(int, int)#1} const&)::{lambda()#1}>::impl(QRunnable::QGenericRunnable::HelperBase::Op, QRunnable::QGenericRunnable::HelperBase*, void*)
+ 35,184,047 ( 0.66%)  ???:0x000000000001e980 [/usr/lib/x86_64-linux-gnu/libfontconfig.so.1.12.0]
+ 33,918,819 ( 0.64%)  /home/qt/work/qt/qtbase/src/3rdparty/libpng/pngrtran.c:png_do_read_transformations [/home/gyl/data/qt/6.9.3/gcc_64/lib/libQt6Gui.so.6.9.3]
+ 33,688,816 ( 0.64%)  ???:0x000000000001efc0 [/usr/lib/x86_64-linux-gnu/libfontconfig.so.1.12.0]
+ 33,117,096 ( 0.63%)  /home/qt/work/qt/qtbase/src/3rdparty/libjpeg/src/jdcolext.c:ycc_rgb_convert
+ 30,817,614 ( 0.58%)  /opt/rh/gcc-toolset-10/root/usr/lib/gcc/x86_64-redhat-linux/10/include/smmintrin.h:QRunnable::QGenericRunnable::Helper<multithread_pixels_function<qt_qimageScaleAARGBA_down_xy_sse4<true>(QImageScale::QImageScaleInfo*, unsigned int*, int, int, int, int)::{lambda(int, int)#1}>(QImageScale::QImageScaleInfo*, int, qt_qimageScaleAARGBA_down_xy_sse4<true>(QImageScale::QImageScaleInfo*, unsigned int*, int, int, int, int)::{lambda(int, int)#1} const&)::{lambda()#1}>::impl(QRunnable::QGenericRunnable::HelperBase::Op, QRunnable::QGenericRunnable::HelperBase*, void*)
+ 30,198,069 ( 0.57%)  ???:0x0000000000041810 [/usr/lib/x86_64-linux-gnu/libfreetype.so.6.18.1]
+ 26,524,895 ( 0.50%)  /home/qt/work/qt/qtbase/src/gui/painting/qimagescale_sse4.cpp:void qt_qimageScaleAARGBA_down_xy_sse4<true>(QImageScale::QImageScaleInfo*, unsigned int*, int, int, int, int) [/home/gyl/data/qt/6.9.3/gcc_64/lib/libQt6Gui.so.6.9.3]
+ 25,664,242 ( 0.48%)  ???:0x00000000000023f0 [/usr/lib/x86_64-linux-gnu/libz.so.1.2.11]
+ 25,130,193 ( 0.47%)  ./malloc/./malloc/malloc.c:malloc [/usr/lib/x86_64-linux-gnu/libc.so.6]
+ 24,394,483 ( 0.46%)  ./string/../sysdeps/x86_64/multiarch/memset-vec-unaligned-erms.S:__memset_avx2_unaligned_erms [/usr/lib/x86_64-linux-gnu/libc.so.6]
+ 22,420,785 ( 0.42%)  ./string/../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:__memcpy_avx_unaligned_erms [/usr/lib/x86_64-linux-gnu/libc.so.6]
+ 22,246,400 ( 0.42%)  /home/qt/work/qt/qtbase_build/src/3rdparty/libjpeg/jidctint.c:jpeg_idct_6x6 [/home/gyl/data/qt/6.9.3/gcc_64/plugins/imageformats/libqjpeg.so]
+ 21,780,501 ( 0.41%)  /home/qt/work/qt/qtbase_build/src/3rdparty/libjpeg/jidctint.c:jpeg_idct_islow [/home/gyl/data/qt/6.9.3/gcc_64/plugins/imageformats/libqjpeg.so]
+ 20,163,493 ( 0.38%)  /home/qt/work/qt/qtbase/src/gui/painting/qcosmeticstroker.cpp:bool drawLineAA<&(drawPixel(QCosmeticStroker*, int, int, int)), (anonymous namespace)::NoDasher>(QCosmeticStroker*, double, double, double, double, int) [/home/gyl/data/qt/6.9.3/gcc_64/lib/libQt6Gui.so.6.9.3]
+ 19,540,062 ( 0.37%)  ???:0x000000000005f7b0 [/usr/lib/x86_64-linux-gnu/libfreetype.so.6.18.1]
+ 19,298,710 ( 0.36%)  ./string/../sysdeps/x86_64/multiarch/strchr-avx2.S:__strchr_avx2 [/usr/lib/x86_64-linux-gnu/libc.so.6]
+ 18,606,703 ( 0.35%)  /home/qt/work/qt/qtimageformats/src/3rdparty/libwebp/src/dec/vp8_dec.c:GetCoeffsFast [/home/gyl/data/qt/6.9.3/gcc_64/plugins/imageformats/libqwebp.so]
+ 17,572,502 ( 0.33%)  /opt/rh/gcc-toolset-10/root/usr/lib/gcc/x86_64-redhat-linux/10/include/emmintrin.h:void qt_qimageScaleAARGBA_down_xy_sse4<true>(QImageScale::QImageScaleInfo*, unsigned int*, int, int, int, int)
+ 17,078,746 ( 0.32%)  /home/qt/work/qt/qtbase_build/src/3rdparty/libjpeg/jdhuff.c:jpeg_fill_bit_buffer [/home/gyl/data/qt/6.9.3/gcc_64/plugins/imageformats/libqjpeg.so]
+ 17,024,011 ( 0.32%)  /opt/rh/gcc-toolset-10/root/usr/lib/gcc/x86_64-redhat-linux/10/include/emmintrin.h:qt_qimageScaleAARGBA_up_xy(QImageScale::QImageScaleInfo*, unsigned int*, int, int, int, int)
+ 16,273,872 ( 0.31%)  /home/qt/work/qt/qtbase/src/gui/painting/qdrawhelper.cpp:blend_color_argb(int, QT_FT_Span_ const*, void*) [/home/gyl/data/qt/6.9.3/gcc_64/lib/libQt6Gui.so.6.9.3]
+ 15,907,104 ( 0.30%)  /opt/rh/gcc-toolset-10/root/usr/lib/gcc/x86_64-redhat-linux/10/include/emmintrin.h:VP8YuvToBgra32_SSE2
+ 15,711,290 ( 0.30%)  ???:0x000000000001eee0 [/usr/lib/x86_64-linux-gnu/libfontconfig.so.1.12.0]
+ 15,401,214 ( 0.29%)  /home/qt/work/qt/qtimageformats/src/3rdparty/libwebp/src/dec/vp8_dec.c:VP8DecodeMB [/home/gyl/data/qt/6.9.3/gcc_64/plugins/imageformats/libqwebp.so]
+ 14,675,302 ( 0.28%)  ???:FcCharSetIsSubset [/usr/lib/x86_64-linux-gnu/libfontconfig.so.1.12.0]
+ 13,725,140 ( 0.26%)  /opt/rh/gcc-toolset-10/root/usr/lib/gcc/x86_64-redhat-linux/10/include/smmintrin.h:void qt_qimageScaleAARGBA_down_xy_sse4<true>(QImageScale::QImageScaleInfo*, unsigned int*, int, int, int, int)
+ 13,301,907 ( 0.25%)  ???:0x0000000000015380 [/usr/lib/x86_64-linux-gnu/libfreetype.so.6.18.1]
+ 13,277,988 ( 0.25%)  /home/qt/work/qt/qtbase_build/src/3rdparty/libjpeg/jidctred.c:jpeg_idct_2x2 [/home/gyl/data/qt/6.9.3/gcc_64/plugins/imageformats/libqjpeg.so]
+ 12,736,005 ( 0.24%)  /home/qt/work/qt/qtbase/src/gui/painting/qdrawhelper_p.h:blend_color_argb(int, QT_FT_Span_ const*, void*)
+ 12,618,134 ( 0.24%)  /home/qt/work/qt/qtimageformats/src/plugins/imageformats/webp/../../../3rdparty/libwebp/src/utils/bit_reader_inl_utils.h:VP8ParseIntraModeRow
+ 12,599,672 ( 0.24%)  ./string/../sysdeps/x86_64/multiarch/strcmp-avx2.S:__strcmp_avx2 [/usr/lib/x86_64-linux-gnu/libc.so.6]
+ 12,564,187 ( 0.24%)  ???:g_hash_table_lookup [/usr/lib/x86_64-linux-gnu/libglib-2.0.so.0.7200.4]
+ 12,531,530 ( 0.24%)  ./malloc/./malloc/malloc.c:free [/usr/lib/x86_64-linux-gnu/libc.so.6]
+ 12,476,882 ( 0.24%)  ???:0x000000000000cd40 [/usr/lib/x86_64-linux-gnu/libfontconfig.so.1.12.0]
+ 12,272,186 ( 0.23%)  /home/qt/work/qt/qtbase_build/src/3rdparty/libjpeg/jcsample.c:h2v2_downsample [/home/gyl/data/qt/6.9.3/gcc_64/plugins/imageformats/libqjpeg.so]
+ 12,261,897 ( 0.23%)  /home/qt/work/qt/qtimageformats/src/3rdparty/libwebp/src/dsp/dec.c:TransformDC_C [/home/gyl/data/qt/6.9.3/gcc_64/plugins/imageformats/libqwebp.so]
+ 11,971,146 ( 0.23%)  /home/qt/work/qt/qtbase_build/src/3rdparty/libjpeg/jdcoefct.c:decompress_onepass [/home/gyl/data/qt/6.9.3/gcc_64/plugins/imageformats/libqjpeg.so]
+ 11,967,519 ( 0.23%)  ./malloc/./malloc/malloc.c:malloc_consolidate [/usr/lib/x86_64-linux-gnu/libc.so.6]
+ 11,818,324 ( 0.22%)  ./string/../sysdeps/x86_64/strcmp.S:strcmp [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+ 11,760,977 ( 0.22%)  /home/qt/work/qt/qtbase/src/plugins/imageformats/jpeg/qjpeghandler.cpp:do_write_jpeg_image(jpeg_compress_struct&, unsigned char**, QImage const&, QIODevice*, int, QString const&, bool, bool, bool) [clone .constprop.0] [/home/gyl/data/qt/6.9.3/gcc_64/plugins/imageformats/libqjpeg.so]
+ 11,401,280 ( 0.22%)  /home/qt/work/qt/qtbase_build/src/3rdparty/libjpeg/jidctint.c:jpeg_idct_3x3 [/home/gyl/data/qt/6.9.3/gcc_64/plugins/imageformats/libqjpeg.so]
+ 10,922,678 ( 0.21%)  ???:0x00000000000435e0 [/usr/lib/x86_64-linux-gnu/libglib-2.0.so.0.7200.4]
+ 10,707,707 ( 0.20%)  /home/qt/work/qt/qtbase/src/3rdparty/libpng/pngrutil.c:png_read_filter_row_sub [/home/gyl/data/qt/6.9.3/gcc_64/lib/libQt6Gui.so.6.9.3]
+ 10,670,276 ( 0.20%)  /home/qt/work/qt/qtbase/src/3rdparty/libpng/pngtrans.c:png_do_strip_channel [/home/gyl/data/qt/6.9.3/gcc_64/lib/libQt6Gui.so.6.9.3]
+ 10,602,050 ( 0.20%)  /home/qt/work/qt/qtbase/src/gui/painting/qpaintengine_raster.cpp:qt_intersect_spans(QT_FT_Span_*&, int, QRect const&) [clone .isra.0] [/home/gyl/data/qt/6.9.3/gcc_64/lib/libQt6Gui.so.6.9.3]
+ 10,490,639 ( 0.20%)  ???:g_hash_table_replace [/usr/lib/x86_64-linux-gnu/libglib-2.0.so.0.7200.4]
+ 10,321,026 ( 0.20%)  ./elf/./elf/dl-lookup.c:_dl_lookup_symbol_x [/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2]
+ 10,127,115 ( 0.19%)  ???:0x000000000000b700 [/usr/lib/x86_64-linux-gnu/libxcb.so.1.1.0]
+ 10,011,032 ( 0.19%)  /opt/rh/gcc-toolset-10/root/usr/lib/gcc/x86_64-redhat-linux/10/include/emmintrin.h:Transform_SSE2
+  9,784,565 ( 0.18%)  /home/qt/work/qt/qtbase_build/src/3rdparty/libjpeg/jcdctmgr.c:convsamp [/home/gyl/data/qt/6.9.3/gcc_64/plugins/imageformats/libqjpeg.so]
+  9,721,804 ( 0.18%)  /home/qt/work/qt/qtimageformats/src/3rdparty/libwebp/src/dec/frame_dec.c:ReconstructRow [/home/gyl/data/qt/6.9.3/gcc_64/plugins/imageformats/libqwebp.so]
+  9,581,706 ( 0.18%)  ???:0x000000000001b4e0 [/usr/lib/x86_64-linux-gnu/libfreetype.so.6.18.1]
+  9,469,412 ( 0.18%)  ???:0x000000000002de40 [/usr/lib/x86_64-linux-gnu/libfontconfig.so.1.12.0]
+  9,221,250 ( 0.17%)  /home/qt/work/qt/qtbase/src/gui/painting/qimagescale.cpp:qt_qimageScaleAARGBA_up_xy(QImageScale::QImageScaleInfo*, unsigned int*, int, int, int, int) [/home/gyl/data/qt/6.9.3/gcc_64/lib/libQt6Gui.so.6.9.3]
+  9,178,771 ( 0.17%)  ???:g_ascii_strncasecmp [/usr/lib/x86_64-linux-gnu/libglib-2.0.so.0.7200.4]
+  9,003,869 ( 0.17%)  ???:0x000000000002f310 [/usr/lib/x86_64-linux-gnu/libdbus-1.so.3.19.13]
+  8,991,464 ( 0.17%)  ???:g_str_hash [/usr/lib/x86_64-linux-gnu/libglib-2.0.so.0.7200.4]
+  8,458,443 ( 0.16%)  /opt/rh/gcc-toolset-10/root/usr/lib/gcc/x86_64-redhat-linux/10/include/emmintrin.h:HFilter16i_SSE2
+  8,176,898 ( 0.15%)  ???:0x0000000000014ca0 [/usr/lib/x86_64-linux-gnu/libfontconfig.so.1.12.0]
+  8,006,594 ( 0.15%)  ???:0x0000000000051060 [/usr/lib/x86_64-linux-gnu/libfreetype.so.6.18.1]
+  7,610,560 ( 0.14%)  ???:icu_73::CollationIterator::appendNumericCEs(unsigned int, signed char, UErrorCode&) [/home/gyl/data/qt/6.9.3/gcc_64/lib/libicui18n.so.73.2]
+  7,516,369 ( 0.14%)  /home/qt/work/qt/qtbase/src/gui/painting/qimagescale_sse4.cpp:QRunnable::QGenericRunnable::Helper<multithread_pixels_function<qt_qimageScaleAARGBA_down_xy_sse4<false>(QImageScale::QImageScaleInfo*, unsigned int*, int, int, int, int)::{lambda(int, int)#1}>(QImageScale::QImageScaleInfo*, int, qt_qimageScaleAARGBA_down_xy_sse4<false>(QImageScale::QImageScaleInfo*, unsigned int*, int, int, int, int)::{lambda(int, int)#1} const&)::{lambda()#1}>::impl(QRunnable::QGenericRunnable::HelperBase::Op, QRunnable::QGenericRunnable::HelperBase*, void*)
+  7,406,733 ( 0.14%)  /home/qt/work/qt/qtbase/src/gui/painting/qgrayraster.c:gray_render_line [/home/gyl/data/qt/6.9.3/gcc_64/lib/libQt6Gui.so.6.9.3]
+  7,320,099 ( 0.14%)  ???:FT_Get_Advance [/usr/lib/x86_64-linux-gnu/libfreetype.so.6.18.1]
+  7,303,030 ( 0.14%)  ???:0x000000000019fe50'2 [/usr/lib/x86_64-linux-gnu/libgtk-3.so.0.2404.29]
+  7,295,966 ( 0.14%)  ???:0x000000000000e000 [/usr/lib/x86_64-linux-gnu/libfontconfig.so.1.12.0]
+  7,196,785 ( 0.14%)  ???:0x0000000006ac2e60 [???]
+  7,186,934 ( 0.14%)  ???:0x0000000000021880 [/usr/lib/x86_64-linux-gnu/libfontconfig.so.1.12.0]
+  6,975,928 ( 0.13%)  ./malloc/./malloc/malloc.c:calloc [/usr/lib/x86_64-linux-gnu/libc.so.6]
+  6,886,665 ( 0.13%)  ???:0x000000000001ec70 [/usr/lib/x86_64-linux-gnu/libfontconfig.so.1.12.0]
+  6,666,086 ( 0.13%)  ???:FcStrSetMember [/usr/lib/x86_64-linux-gnu/libfontconfig.so.1.12.0]
+  6,611,572 ( 0.12%)  /home/qt/work/qt/qtbase/src/gui/painting/qrgb.h:do_write_jpeg_image(jpeg_compress_struct&, unsigned char**, QImage const&, QIODevice*, int, QString const&, bool, bool, bool) [clone .constprop.0]
+  6,381,583 ( 0.12%)  ???:icu_73::RuleBasedCollator::doCompare(char16_t const*, int, char16_t const*, int, UErrorCode&) const [/home/gyl/data/qt/6.9.3/gcc_64/lib/libicui18n.so.73.2]
+  6,356,514 ( 0.12%)  ???:g_slice_alloc [/usr/lib/x86_64-linux-gnu/libglib-2.0.so.0.7200.4]
+  6,285,459 ( 0.12%)  ./string/../sysdeps/x86_64/multiarch/strlen-avx2.S:__strlen_avx2 [/usr/lib/x86_64-linux-gnu/libc.so.6]
+  6,190,797 ( 0.12%)  /home/qt/work/qt/qtbase/src/gui/painting/qdrawhelper.cpp:handleSpans<BlendSrcGeneric>(int, QT_FT_Span_ const*, QSpanData const*, Operator const&)::{lambda(int, int)#1}::operator()(int, int) const [/home/gyl/data/qt/6.9.3/gcc_64/lib/libQt6Gui.so.6.9.3]
+  6,168,011 ( 0.12%)  /home/qt/work/qt/qtimageformats/src/3rdparty/libwebp/src/dec/tree_dec.c:VP8ParseIntraModeRow [/home/gyl/data/qt/6.9.3/gcc_64/plugins/imageformats/libqwebp.so]
+  6,085,995 ( 0.12%)  /home/qt/work/qt/qtbase/src/gui/painting/qgrayraster.c:gray_hline [/home/gyl/data/qt/6.9.3/gcc_64/lib/libQt6Gui.so.6.9.3]
+  6,075,800 ( 0.11%)  /home/qt/work/qt/qtbase/src/corelib/text/qstring.cpp:QtPrivate::compareStrings(QStringView, QStringView, Qt::CaseSensitivity) [/home/gyl/data/qt/6.9.3/gcc_64/lib/libQt6Core.so.6.9.3]
+  5,968,395 ( 0.11%)  ???:0x000000000018f470 [/usr/lib/x86_64-linux-gnu/libgtk-3.so.0.2404.29]
+  5,816,508 ( 0.11%)  /opt/rh/gcc-toolset-10/root/usr/lib/gcc/x86_64-redhat-linux/10/include/emmintrin.h:DoFilter6_SSE2 [/home/gyl/data/qt/6.9.3/gcc_64/plugins/imageformats/libqwebp.so]
+  5,781,408 ( 0.11%)  ???:0x00000000000168c0 [/usr/lib/x86_64-linux-gnu/libfontconfig.so.1.12.0]
+  5,769,916 ( 0.11%)  ???:0x000000000001f6e0 [/usr/lib/x86_64-linux-gnu/libfontconfig.so.1.12.0]
+  5,758,395 ( 0.11%)  /home/qt/work/qt/qtbase/src/gui/painting/qdrawhelper_avx2.cpp:qt_memfillXX_avx2(unsigned char*, long long __vector(4), long long) [/home/gyl/data/qt/6.9.3/gcc_64/lib/libQt6Gui.so.6.9.3]
+  5,673,129 ( 0.11%)  ./malloc/./malloc/malloc.c:unlink_chunk.constprop.0 [/usr/lib/x86_64-linux-gnu/libc.so.6]
+  5,245,012 ( 0.10%)  ???:0x0000000000057110 [/usr/lib/x86_64-linux-gnu/libfreetype.so.6.18.1]
+  5,093,829 ( 0.10%)  /home/qt/work/qt/qtimageformats/src/3rdparty/libwebp/src/dsp/dec.c:TransformAC3_C [/home/gyl/data/qt/6.9.3/gcc_64/plugins/imageformats/libqwebp.so]
+  5,012,200 ( 0.09%)  /opt/rh/gcc-toolset-10/root/usr/lib/gcc/x86_64-redhat-linux/10/include/emmintrin.h:UpsampleBgraLinePair_SSE2
+  4,756,346 ( 0.09%)  /home/qt/work/qt/qtbase/src/gui/painting/qcosmeticstroker.cpp:bool drawLine<&(drawPixel(QCosmeticStroker*, int, int, int)), (anonymous namespace)::NoDasher>(QCosmeticStroker*, double, double, double, double, int) [/home/gyl/data/qt/6.9.3/gcc_64/lib/libQt6Gui.so.6.9.3]
+  4,685,809 ( 0.09%)  ???:0x000000000001dee0 [/usr/lib/x86_64-linux-gnu/libfontconfig.so.1.12.0]
+  4,653,440 ( 0.09%)  /home/qt/work/qt/qtimageformats/src/3rdparty/libwebp/src/dsp/dec.c:DC4_C [/home/gyl/data/qt/6.9.3/gcc_64/plugins/imageformats/libqwebp.so]
+  4,651,494 ( 0.09%)  /opt/rh/gcc-toolset-10/root/usr/lib/gcc/x86_64-redhat-linux/10/include/emmintrin.h:VFilter16i_SSE2
+  4,636,041 ( 0.09%)  /opt/rh/gcc-toolset-10/root/usr/lib/gcc/x86_64-redhat-linux/10/include/avxintrin.h:qt_memfillXX_avx2(unsigned char*, long long __vector(4), long long)
+  4,521,551 ( 0.09%)  ???:0x00000000000241f0 [/usr/lib/x86_64-linux-gnu/libfontconfig.so.1.12.0]
+  4,510,899 ( 0.09%)  ./malloc/./malloc/malloc.c:realloc [/usr/lib/x86_64-linux-gnu/libc.so.6]
+  4,506,045 ( 0.09%)  /opt/rh/gcc-toolset-10/root/usr/lib/gcc/x86_64-redhat-linux/10/include/emmintrin.h:QRunnable::QGenericRunnable::Helper<multithread_pixels_function<qt_qimageScaleAARGBA_down_xy_sse4<false>(QImageScale::QImageScaleInfo*, unsigned int*, int, int, int, int)::{lambda(int, int)#1}>(QImageScale::QImageScaleInfo*, int, qt_qimageScaleAARGBA_down_xy_sse4<false>(QImageScale::QImageScaleInfo*, unsigned int*, int, int, int, int)::{lambda(int, int)#1} const&)::{lambda()#1}>::impl(QRunnable::QGenericRunnable::HelperBase::Op, QRunnable::QGenericRunnable::HelperBase*, void*)
+  4,480,250 ( 0.08%)  /home/qt/work/qt/qtbase/src/gui/painting/qdrawhelper.cpp:void fetchTransformedBilinear_fetcher<(TextureBlendType)4, (QPixelLayout::BPP)6, unsigned int>(unsigned int*, unsigned int*, int, QTextureData const&, int, int, int, int) [/home/gyl/data/qt/6.9.3/gcc_64/lib/libQt6Gui.so.6.9.3]
+  4,322,460 ( 0.08%)  /home/qt/work/qt/qtbase/src/gui/painting/qdrawhelper_avx2.cpp:comp_func_solid_SourceOver_avx2(unsigned int*, int, unsigned int, unsigned int) [/home/gyl/data/qt/6.9.3/gcc_64/lib/libQt6Gui.so.6.9.3]
+  4,305,975 ( 0.08%)  ???:0x000000000000cc80 [/usr/lib/x86_64-linux-gnu/libfontconfig.so.1.12.0]
+  4,293,076 ( 0.08%)  /home/qt/work/qt/qtbase/src/gui/painting/qdrawhelper.cpp:qt_fetch_linear_gradient(unsigned int*, Operator const*, QSpanData const*, int, int, int) [/home/gyl/data/qt/6.9.3/gcc_64/lib/libQt6Gui.so.6.9.3]
+  4,166,099 ( 0.08%)  ???:0x0000000000009030 [/usr/lib/x86_64-linux-gnu/libfontconfig.so.1.12.0]
+  4,089,624 ( 0.08%)  /opt/rh/gcc-toolset-10/root/usr/lib/gcc/x86_64-redhat-linux/10/include/emmintrin.h:QRgba64 const* fetchTransformedBilinear64_uint32<(TextureBlendType)4>(QRgba64*, QSpanData const*, int, int, int)
+  4,056,555 ( 0.08%)  /opt/rh/gcc-toolset-10/root/usr/lib/gcc/x86_64-redhat-linux/10/include/smmintrin.h:QRunnable::QGenericRunnable::Helper<multithread_pixels_function<qt_qimageScaleAARGBA_down_xy_sse4<false>(QImageScale::QImageScaleInfo*, unsigned int*, int, int, int, int)::{lambda(int, int)#1}>(QImageScale::QImageScaleInfo*, int, qt_qimageScaleAARGBA_down_xy_sse4<false>(QImageScale::QImageScaleInfo*, unsigned int*, int, int, int, int)::{lambda(int, int)#1} const&)::{lambda()#1}>::impl(QRunnable::QGenericRunnable::HelperBase::Op, QRunnable::QGenericRunnable::HelperBase*, void*)
+  4,005,166 ( 0.08%)  ???:0x0000000000011d20 [/usr/lib/x86_64-linux-gnu/libz.so.1.2.11]
+  3,986,798 ( 0.08%)  /home/qt/work/qt/qtbase/src/gui/painting/qmemrotate.cpp:qt_memrotate270(unsigned int const*, int, int, int, unsigned int*, int) [/home/gyl/data/qt/6.9.3/gcc_64/lib/libQt6Gui.so.6.9.3]
+  3,984,194 ( 0.08%)  ./elf/../sysdeps/x86_64/dl-machine.h:_dl_relocate_object
+  3,951,390 ( 0.07%)  ???:0x0000000000193f30 [/usr/lib/x86_64-linux-gnu/libgtk-3.so.0.2404.29]
+  3,826,592 ( 0.07%)  /opt/rh/gcc-toolset-10/root/usr/lib/gcc/x86_64-redhat-linux/10/include/emmintrin.h:storeARGB32FromARGB32PM_sse4(unsigned char*, unsigned int const*, int, int, QList<unsigned int> const*, QDitherInfo*)
+  3,767,244 ( 0.07%)  ???:icu_73::CharString::ensureCapacity(int, int, UErrorCode&) [/home/gyl/data/qt/6.9.3/gcc_64/lib/libicuuc.so.73.2]
+  3,749,076 ( 0.07%)  ???:0x0000000000005670 [/usr/lib/x86_64-linux-gnu/libz.so.1.2.11]
+  3,698,772 ( 0.07%)  ???:0x0000000000017540 [/usr/lib/x86_64-linux-gnu/libexpat.so.1.8.7]
+  3,676,928 ( 0.07%)  ???:0x000000000000afa0 [/usr/lib/x86_64-linux-gnu/libfontconfig.so.1.12.0]
+  3,671,687 ( 0.07%)  ???:FcFontSetList [/usr/lib/x86_64-linux-gnu/libfontconfig.so.1.12.0]
+  3,659,009 ( 0.07%)  ???:0x000000000003b120 [/usr/lib/x86_64-linux-gnu/libfreetype.so.6.18.1]
+  3,651,583 ( 0.07%)  ???:0x0000000000003850 [/usr/lib/x86_64-linux-gnu/libz.so.1.2.11]
+  3,628,025 ( 0.07%)  ???:0x0000000000040400 [/usr/lib/x86_64-linux-gnu/libglib-2.0.so.0.7200.4]
+  3,619,950 ( 0.07%)  ???:icu_73::CharString::append(char, UErrorCode&) [/home/gyl/data/qt/6.9.3/gcc_64/lib/libicuuc.so.73.2]
+  3,617,100 ( 0.07%)  ???:icu_73::FCDUTF16CollationIterator::nextCodePoint(UErrorCode&) [/home/gyl/data/qt/6.9.3/gcc_64/lib/libicui18n.so.73.2]
+  3,583,508 ( 0.07%)  ???:0x000000000001a750 [/usr/lib/x86_64-linux-gnu/libX11.so.6.4.0]
+  3,552,098 ( 0.07%)  /opt/rh/gcc-toolset-10/root/usr/lib/gcc/x86_64-redhat-linux/10/include/emmintrin.h:qt_alphargbblit_argb32(QRasterBuffer*, int, int, QRgba64 const&, unsigned int const*, int, int, int, QClipData const*, bool)
+

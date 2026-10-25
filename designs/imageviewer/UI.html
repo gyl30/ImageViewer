@@ -28,25 +28,30 @@
   <main>
     <header>
       <div><h1>ImageViewer</h1><p>实际 Qt 界面截图 · 原生工具栏、轻量卡片与明确的状态反馈</p></div>
+      <label>桌面缩放 <select id="scale"><option value="1">100%</option><option value="1.5">150%</option><option value="2">200%</option></select></label>
       <nav aria-label="查看场景">
         <button type="button" data-image="light.png" aria-pressed="true">浅色</button>
         <button type="button" data-image="dark.png" aria-pressed="false">深色</button>
         <button type="button" data-image="preview.png" aria-pressed="false">大图预览</button>
         <button type="button" data-image="empty.png" aria-pressed="false">空文件夹</button>
+        <button type="button" data-image="failed.png" aria-pressed="false">读取失败</button>
       </nav>
     </header>
-    <figure><img id="screen" src="light.png" alt="ImageViewer 浅色界面实际截图" width="1280" height="800"></figure>
-    <footer>使用系统字体与 SVG 图标；无阴影、模糊或逐卡片子控件。高 DPI 已通过 DPR=2 截图核验。</footer>
+    <figure><img id="screen" src="native/1/light.png" alt="ImageViewer 浅色界面实际截图" width="1000" height="600"></figure>
+    <footer>Xorg/GNOME 真实 Qt 窗口截图，1000×600 逻辑窗口，预览自动适配；100%/150%/200% 分进程验证。失败场景使用 800×500 窗口。仅连接一台显示器，跨屏迁移待验。<a href="../../docs/acceptance-results-2026-10-25.md">验收记录</a>。</footer>
   </main>
   <script>
     const buttons = [...document.querySelectorAll("button")];
+    document.getElementById("scale").addEventListener("change", () => {
+      document.querySelector('button[aria-pressed="true"]').click();
+    });
     for (const button of buttons) {
       button.addEventListener("click", () => {
         for (const item of buttons) {
           item.setAttribute("aria-pressed", String(item === button));
         }
         const image = document.getElementById("screen");
-        image.src = button.dataset.image;
+        image.src = `native/${document.getElementById("scale").value}/${button.dataset.image}`;
         image.alt = `ImageViewer ${button.textContent}实际截图`;
       });
     }

@@ -1,0 +1,12 @@
+{
+  "application_revision": "9fb6fd5f759bb6e106982cd8488090d0e32aba0d",
+  "qt": "6.9.3",
+  "release": "/tmp/iv-release",
+  "release_executable_sha256": "9a9c35011827946cd155e208b6d5f404ba7ab7d1664448e3d5d5374ba9b4e1b3",
+  "release_tests_sha256": "a61b2b14535c4c46d35f6b93e87fbf4a154141da54b5231e3d23c4b91cdab7d9",
+  "sanitizer_tests_sha256": "3e18905f92df7437bcd68972df577e951cd77dabfe107b02ff9ac34bf845a746",
+  "release_tests": "77 passed,0 failed,0 skipped",
+  "sanitizers": "ASan/UBSan/Leak detection:77 passed,0 failed,0 skipped; Qt SDK shared libraries not rebuilt with sanitizers",
+  "native_final": "DPR1,1.5,2:11 passed each (including init/cleanup and 5 format data rows)",
+  "performance_provenance": "见baseline-build.json/diagnostic-build.json；最后DPR像素充足判断不经过DPR1性能轨迹，未将新二进制冒称为旧矩阵受测版本"
+}

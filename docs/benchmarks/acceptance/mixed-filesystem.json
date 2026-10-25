@@ -1,0 +1,16 @@
+{
+  "files": 300000,
+  "unique_inodes": 300000,
+  "formats": {
+    ".jpg": 150330,
+    ".gif": 29970,
+    ".bmp": 30300,
+    ".png": 59430,
+    ".webp": 29970
+  },
+  "unreadable_mode": 300,
+  "logical_bytes": 42673122660,
+  "allocated_bytes": 43287289856,
+  "source": "/tmp/iv-accept-mixed/300000",
+  "cross_size_sharing": "smaller sizes hardlink this set, no sharing within this set"
+}

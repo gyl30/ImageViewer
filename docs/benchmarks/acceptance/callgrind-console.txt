@@ -1,0 +1,14 @@
+==580901== Callgrind, a call-graph generating cache profiler
+==580901== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==580901== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==580901== Command: /tmp/iv-release/imageviewer_benchmark /tmp/iv-accept-mixed/1000 /home/gyl/example/ImageViewer/docs/benchmarks/acceptance/callgrind-probe.json profile
+==580901== 
+==580901== For interactive control, run 'callgrind_control -h'.
+==580901== brk segment overflow in thread #1: can't grow to 0x48d6000
+==580901== (see section Limitations in user manual)
+==580901== NOTE: further instances of this message will not be shown
+==580901== 
+==580901== Events    : Ir
+==580901== Collected : 5291729986
+==580901== 
+==580901== I   refs:      5,291,729,986

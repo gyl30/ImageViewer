@@ -1,0 +1,1919 @@
+{
+  "clear_disk_at_end": false,
+  "dataset": "/tmp/iv-accept-mixed/300000",
+  "dpr": 1,
+  "explicit_render_ms_0_frames": 0,
+  "first_batch_ms": 1037,
+  "first_thumbnail_ms": 1046,
+  "first_visible_ms": 1046,
+  "idle_cpu_ms_500ms": 0.9710000000000036,
+  "latency": {
+    "callback_to_paint": {
+      "count": 1735,
+      "max_ms": 35.727391,
+      "mean_ms": 0.30712513602305475,
+      "over_1000ms": 0,
+      "p50_ms_upper": 1,
+      "p95_ms_upper": 1,
+      "p99_ms_upper": 5
+    },
+    "gui_timer_delay": {
+      "count": 1461,
+      "max_ms": 41.343543,
+      "mean_ms": 2.3296068316221765,
+      "over_1000ms": 0,
+      "p50_ms_upper": 2,
+      "p95_ms_upper": 6,
+      "p99_ms_upper": 9
+    },
+    "pending_paint": 0,
+    "pending_tasks": 0,
+    "queue": {
+      "count": 3069,
+      "max_ms": 204.597734,
+      "mean_ms": 16.510831573476704,
+      "over_1000ms": 0,
+      "p50_ms_upper": 9,
+      "p95_ms_upper": 40,
+      "p99_ms_upper": 112
+    },
+    "submit_to_callback": {
+      "count": 3069,
+      "max_ms": 359.152152,
+      "mean_ms": 23.278154214727923,
+      "over_1000ms": 0,
+      "p50_ms_upper": 16,
+      "p95_ms_upper": 46,
+      "p99_ms_upper": 121
+    },
+    "submit_to_paint": {
+      "count": 1735,
+      "max_ms": 213.458975,
+      "mean_ms": 15.977776323919308,
+      "over_1000ms": 0,
+      "p50_ms_upper": 11,
+      "p95_ms_upper": 49,
+      "p99_ms_upper": 152
+    },
+    "worker_to_callback": {
+      "count": 3069,
+      "max_ms": 358.651084,
+      "mean_ms": 6.767322641251222,
+      "over_1000ms": 0,
+      "p50_ms_upper": 7,
+      "p95_ms_upper": 15,
+      "p99_ms_upper": 21
+    }
+  },
+  "loader_tid": 503764,
+  "max_active_items": 87,
+  "max_queue_sampled": 56,
+  "pid": 503754,
+  "platform": "xcb",
+  "qt": "6.9.3",
+  "samples": [
+    {
+      "active_items": 0,
+      "active_pixmap_logical_bytes": 0,
+      "cache_budget_bytes": 67108864,
+      "cache_logical_bytes": 0,
+      "cancelled_write_bytes": 32768,
+      "cpu_ms": 130.65,
+      "decoded_count": 0,
+      "disk_cache_bytes": 0,
+      "disk_cache_files": 0,
+      "elapsed_ms": 0,
+      "failed_results": 0,
+      "latency": {
+        "callback_to_paint": {
+          "count": 0,
+          "max_ms": 0,
+          "mean_ms": 0,
+          "over_1000ms": 0,
+          "p50_ms_upper": 0,
+          "p95_ms_upper": 0,
+          "p99_ms_upper": 0
+        },
+        "gui_timer_delay": {
+          "count": 0,
+          "max_ms": 0,
+          "mean_ms": 0,
+          "over_1000ms": 0,
+          "p50_ms_upper": 0,
+          "p95_ms_upper": 0,
+          "p99_ms_upper": 0
+        },
+        "pending_paint": 0,
+        "pending_tasks": 0,
+        "queue": {
+          "count": 0,
+          "max_ms": 0,
+          "mean_ms": 0,
+          "over_1000ms": 0,
+          "p50_ms_upper": 0,
+          "p95_ms_upper": 0,
+          "p99_ms_upper": 0
+        },
+        "submit_to_callback": {
+          "count": 0,
+          "max_ms": 0,
+          "mean_ms": 0,
+          "over_1000ms": 0,
+          "p50_ms_upper": 0,
+          "p95_ms_upper": 0,
+          "p99_ms_upper": 0
+        },
+        "submit_to_paint": {
+          "count": 0,
+          "max_ms": 0,
+          "mean_ms": 0,
+          "over_1000ms": 0,
+          "p50_ms_upper": 0,
+          "p95_ms_upper": 0,
+          "p99_ms_upper": 0
+        },
+        "worker_to_callback": {
+          "count": 0,
+          "max_ms": 0,
+          "mean_ms": 0,
+          "over_1000ms": 0,
+          "p50_ms_upper": 0,
+          "p95_ms_upper": 0,
+          "p99_ms_upper": 0
+        }
+      },
+      "loader_cpu_ms": 0,
+      "major_faults": 0,
+      "metadata_capacity_bytes": 0,
+      "metadata_path_bytes": 0,
+      "minor_faults": 7243,
+      "model_count": 0,
+      "peak_rss_kib": 71188,
+      "phase": "empty",
+      "pool_items": 20,
+      "prefetch_results": 0,
+      "pss_kib": 50961,
+      "queue_tasks": 0,
+      "rchar": 628989,
+      "read_bytes": 0,
+      "rss_kib": 71188,
+      "rusage_peak_rss_kib": 69828,
+      "scan_cpu_ms": 0,
+      "source_counts": {
+        "decoded": 0,
+        "disk": 0,
+        "failed": 0,
+        "memory": 0
+      },
+      "stale_results": 0,
+      "syscr": 698,
+      "syscw": 435,
+      "total_items": 20,
+      "visible_results": 0,
+      "wchar": 377816,
+      "write_bytes": 344064
+    },
+    {
+      "active_items": 11,
+      "active_pixmap_logical_bytes": 2296776,
+      "cache_budget_bytes": 67108864,
+      "cache_logical_bytes": 2296776,
+      "cancelled_write_bytes": 32768,
+      "cpu_ms": 3818.08,
+      "decoded_count": 11,
+      "disk_cache_bytes": 459386,
+      "disk_cache_files": 11,
+      "elapsed_ms": 3688,
+      "failed_results": 0,
+      "latency": {
+        "callback_to_paint": {
+          "count": 11,
+          "max_ms": 1.53273,
+          "mean_ms": 0.2557760909090909,
+          "over_1000ms": 0,
+          "p50_ms_upper": 1,
+          "p95_ms_upper": 2,
+          "p99_ms_upper": 2
+        },
+        "gui_timer_delay": {
+          "count": 228,
+          "max_ms": 5.361796,
+          "mean_ms": 2.4822925745614035,
+          "over_1000ms": 0,
+          "p50_ms_upper": 4,
+          "p95_ms_upper": 5,
+          "p99_ms_upper": 6
+        },
+        "pending_paint": 0,
+        "pending_tasks": 0,
+        "queue": {
+          "count": 11,
+          "max_ms": 41.574789,
+          "mean_ms": 28.78242809090909,
+          "over_1000ms": 0,
+          "p50_ms_upper": 34,
+          "p95_ms_upper": 42,
+          "p99_ms_upper": 42
+        },
+        "submit_to_callback": {
+          "count": 11,
+          "max_ms": 43.196437,
+          "mean_ms": 35.27379981818182,
+          "over_1000ms": 0,
+          "p50_ms_upper": 41,
+          "p95_ms_upper": 44,
+          "p99_ms_upper": 44
+        },
+        "submit_to_paint": {
+          "count": 11,
+          "max_ms": 43.370679,
+          "mean_ms": 35.52957590909091,
+          "over_1000ms": 0,
+          "p50_ms_upper": 41,
+          "p95_ms_upper": 44,
+          "p99_ms_upper": 44
+        },
+        "worker_to_callback": {
+          "count": 11,
+          "max_ms": 10.764854,
+          "mean_ms": 6.491371727272727,
+          "over_1000ms": 0,
+          "p50_ms_upper": 8,
+          "p95_ms_upper": 11,
+          "p99_ms_upper": 11
+        }
+      },
+      "loader_cpu_ms": 42.26553,
+      "major_faults": 0,
+      "metadata_capacity_bytes": 20400000,
+      "metadata_path_bytes": 36068202,
+      "minor_faults": 31786,
+      "model_count": 299400,
+      "peak_rss_kib": 154336,
+      "phase": "ready",
+      "pool_items": 9,
+      "prefetch_results": 0,
+      "pss_kib": 121672,
+      "queue_tasks": 0,
+      "rchar": 6400117479,
+      "read_bytes": 0,
+      "rss_kib": 142592,
+      "rusage_peak_rss_kib": 154336,
+      "scan_cpu_ms": 3464.510167,
+      "source_counts": {
+        "decoded": 11,
+        "disk": 0,
+        "failed": 0,
+        "memory": 0
+      },
+      "stale_results": 0,
+      "syscr": 1773968,
+      "syscw": 5359,
+      "total_items": 20,
+      "visible_results": 11,
+      "wchar": 911054,
+      "write_bytes": 827392
+    },
+    {
+      "active_items": 11,
+      "active_pixmap_logical_bytes": 2487600,
+      "cache_budget_bytes": 67108864,
+      "cache_logical_bytes": 47486260,
+      "cancelled_write_bytes": 32768,
+      "cpu_ms": 4765.254,
+      "decoded_count": 226,
+      "disk_cache_bytes": 10041542,
+      "disk_cache_files": 226,
+      "elapsed_ms": 8579,
+      "failed_results": 0,
+      "latency": {
+        "callback_to_paint": {
+          "count": 226,
+          "max_ms": 1.53273,
+          "mean_ms": 0.12243083185840709,
+          "over_1000ms": 0,
+          "p50_ms_upper": 1,
+          "p95_ms_upper": 1,
+          "p99_ms_upper": 1
+        },
+        "gui_timer_delay": {
+          "count": 534,
+          "max_ms": 8.125921,
+          "mean_ms": 2.4751200711610486,
+          "over_1000ms": 0,
+          "p50_ms_upper": 4,
+          "p95_ms_upper": 5,
+          "p99_ms_upper": 6
+        },
+        "pending_paint": 0,
+        "pending_tasks": 0,
+        "queue": {
+          "count": 226,
+          "max_ms": 41.574789,
+          "mean_ms": 3.701223057522124,
+          "over_1000ms": 0,
+          "p50_ms_upper": 1,
+          "p95_ms_upper": 19,
+          "p99_ms_upper": 38
+        },
+        "submit_to_callback": {
+          "count": 226,
+          "max_ms": 43.196437,
+          "mean_ms": 12.635191876106195,
+          "over_1000ms": 0,
+          "p50_ms_upper": 11,
+          "p95_ms_upper": 21,
+          "p99_ms_upper": 41
+        },
+        "submit_to_paint": {
+          "count": 226,
+          "max_ms": 43.370679,
+          "mean_ms": 12.757622707964602,
+          "over_1000ms": 0,
+          "p50_ms_upper": 11,
+          "p95_ms_upper": 21,
+          "p99_ms_upper": 41
+        },
+        "worker_to_callback": {
+          "count": 226,
+          "max_ms": 20.555571,
+          "mean_ms": 8.93396881858407,
+          "over_1000ms": 0,
+          "p50_ms_upper": 11,
+          "p95_ms_upper": 14,
+          "p99_ms_upper": 21
+        }
+      },
+      "loader_cpu_ms": 814.53248,
+      "major_faults": 0,
+      "metadata_capacity_bytes": 20400000,
+      "metadata_path_bytes": 36068202,
+      "minor_faults": 43839,
+      "model_count": 299400,
+      "peak_rss_kib": 190804,
+      "phase": "scroll_1",
+      "pool_items": 9,
+      "prefetch_results": 0,
+      "pss_kib": 169877,
+      "queue_tasks": 0,
+      "rchar": 6432241791,
+      "read_bytes": 0,
+      "rss_kib": 190800,
+      "rusage_peak_rss_kib": 188324,
+      "scan_cpu_ms": 3464.510167,
+      "source_counts": {
+        "decoded": 226,
+        "disk": 0,
+        "failed": 0,
+        "memory": 0
+      },
+      "stale_results": 0,
+      "syscr": 1777298,
+      "syscw": 8805,
+      "total_items": 20,
+      "visible_results": 226,
+      "wchar": 10596218,
+      "write_bytes": 10850304
+    },
+    {
+      "active_items": 13,
+      "active_pixmap_logical_bytes": 2831196,
+      "cache_budget_bytes": 67108864,
+      "cache_logical_bytes": 67051456,
+      "cancelled_write_bytes": 28594176,
+      "cpu_ms": 9985.037,
+      "decoded_count": 1493,
+      "disk_cache_bytes": 39475883,
+      "disk_cache_files": 889,
+      "elapsed_ms": 13490,
+      "failed_results": 1,
+      "latency": {
+        "callback_to_paint": {
+          "count": 570,
+          "max_ms": 3.206939,
+          "mean_ms": 0.1768908350877193,
+          "over_1000ms": 0,
+          "p50_ms_upper": 1,
+          "p95_ms_upper": 1,
+          "p99_ms_upper": 4
+        },
+        "gui_timer_delay": {
+          "count": 841,
+          "max_ms": 9.970592,
+          "mean_ms": 2.341627813317479,
+          "over_1000ms": 0,
+          "p50_ms_upper": 4,
+          "p95_ms_upper": 6,
+          "p99_ms_upper": 8
+        },
+        "pending_paint": 55,
+        "pending_tasks": 0,
+        "queue": {
+          "count": 1493,
+          "max_ms": 44.316773,
+          "mean_ms": 18.09709337039518,
+          "over_1000ms": 0,
+          "p50_ms_upper": 17,
+          "p95_ms_upper": 39,
+          "p99_ms_upper": 43
+        },
+        "submit_to_callback": {
+          "count": 1493,
+          "max_ms": 359.152152,
+          "mean_ms": 25.266486599464166,
+          "over_1000ms": 0,
+          "p50_ms_upper": 26,
+          "p95_ms_upper": 45,
+          "p99_ms_upper": 52
+        },
+        "submit_to_paint": {
+          "count": 570,
+          "max_ms": 46.837608,
+          "mean_ms": 12.198091171929825,
+          "over_1000ms": 0,
+          "p50_ms_upper": 11,
+          "p95_ms_upper": 21,
+          "p99_ms_upper": 47
+        },
+        "worker_to_callback": {
+          "count": 1493,
+          "max_ms": 358.651084,
+          "mean_ms": 7.169393229068989,
+          "over_1000ms": 0,
+          "p50_ms_upper": 7,
+          "p95_ms_upper": 16,
+          "p99_ms_upper": 21
+        }
+      },
+      "loader_cpu_ms": 5573.5158169999995,
+      "major_faults": 0,
+      "metadata_capacity_bytes": 20400000,
+      "metadata_path_bytes": 36068202,
+      "minor_faults": 73813,
+      "model_count": 299400,
+      "peak_rss_kib": 307748,
+      "phase": "scroll_2",
+      "pool_items": 16,
+      "prefetch_results": 867,
+      "pss_kib": 196014,
+      "queue_tasks": 0,
+      "rchar": 6639108449,
+      "read_bytes": 0,
+      "rss_kib": 216936,
+      "rusage_peak_rss_kib": 307748,
+      "scan_cpu_ms": 3464.510167,
+      "source_counts": {
+        "decoded": 1492,
+        "disk": 0,
+        "failed": 1,
+        "memory": 0
+      },
+      "stale_results": 55,
+      "syscr": 1794329,
+      "syscw": 22653,
+      "total_items": 29,
+      "visible_results": 570,
+      "wchar": 67712251,
+      "write_bytes": 70193152
+    },
+    {
+      "active_items": 13,
+      "active_pixmap_logical_bytes": 2718124,
+      "cache_budget_bytes": 67108864,
+      "cache_logical_bytes": 67079048,
+      "cancelled_write_bytes": 56696832,
+      "cpu_ms": 13227.755000000001,
+      "decoded_count": 2936,
+      "disk_cache_bytes": 42401414,
+      "disk_cache_files": 939,
+      "elapsed_ms": 18399,
+      "failed_results": 2,
+      "latency": {
+        "callback_to_paint": {
+          "count": 1604,
+          "max_ms": 4.763443,
+          "mean_ms": 0.2252234463840399,
+          "over_1000ms": 0,
+          "p50_ms_upper": 1,
+          "p95_ms_upper": 1,
+          "p99_ms_upper": 4
+        },
+        "gui_timer_delay": {
+          "count": 1148,
+          "max_ms": 9.970592,
+          "mean_ms": 2.2240989189895473,
+          "over_1000ms": 0,
+          "p50_ms_upper": 1,
+          "p95_ms_upper": 6,
+          "p99_ms_upper": 8
+        },
+        "pending_paint": 24,
+        "pending_tasks": 0,
+        "queue": {
+          "count": 2936,
+          "max_ms": 45.160906,
+          "mean_ms": 14.349007239100818,
+          "over_1000ms": 0,
+          "p50_ms_upper": 9,
+          "p95_ms_upper": 38,
+          "p99_ms_upper": 42
+        },
+        "submit_to_callback": {
+          "count": 2936,
+          "max_ms": 359.152152,
+          "mean_ms": 21.019344521798367,
+          "over_1000ms": 0,
+          "p50_ms_upper": 15,
+          "p95_ms_upper": 45,
+          "p99_ms_upper": 51
+        },
+        "submit_to_paint": {
+          "count": 1604,
+          "max_ms": 51.070796,
+          "mean_ms": 11.12062179488778,
+          "over_1000ms": 0,
+          "p50_ms_upper": 11,
+          "p95_ms_upper": 16,
+          "p99_ms_upper": 41
+        },
+        "worker_to_callback": {
+          "count": 2936,
+          "max_ms": 358.651084,
+          "mean_ms": 6.670337282697548,
+          "over_1000ms": 0,
+          "p50_ms_upper": 7,
+          "p95_ms_upper": 14,
+          "p99_ms_upper": 20
+        }
+      },
+      "loader_cpu_ms": 8434.969818,
+      "major_faults": 0,
+      "metadata_capacity_bytes": 20400000,
+      "metadata_path_bytes": 36068202,
+      "minor_faults": 74028,
+      "model_count": 299400,
+      "peak_rss_kib": 307748,
+      "phase": "scroll_3",
+      "pool_items": 16,
+      "prefetch_results": 1251,
+      "pss_kib": 196875,
+      "queue_tasks": 0,
+      "rchar": 6811852290,
+      "read_bytes": 86016,
+      "rss_kib": 217796,
+      "rusage_peak_rss_kib": 307748,
+      "scan_cpu_ms": 3464.510167,
+      "source_counts": {
+        "decoded": 2145,
+        "disk": 789,
+        "failed": 2,
+        "memory": 0
+      },
+      "stale_results": 79,
+      "syscr": 1810819,
+      "syscw": 34252,
+      "total_items": 29,
+      "visible_results": 1604,
+      "wchar": 97949509,
+      "write_bytes": 101351424
+    },
+    {
+      "active_items": 21,
+      "active_pixmap_logical_bytes": 4404300,
+      "cache_budget_bytes": 67108864,
+      "cache_logical_bytes": 66953456,
+      "cancelled_write_bytes": 65970176,
+      "cpu_ms": 13622.11,
+      "decoded_count": 3027,
+      "disk_cache_bytes": 36916768,
+      "disk_cache_files": 829,
+      "elapsed_ms": 19729,
+      "failed_results": 2,
+      "latency": {
+        "callback_to_paint": {
+          "count": 1695,
+          "max_ms": 35.727391,
+          "mean_ms": 0.30815039351032447,
+          "over_1000ms": 0,
+          "p50_ms_upper": 1,
+          "p95_ms_upper": 1,
+          "p99_ms_upper": 5
+        },
+        "gui_timer_delay": {
+          "count": 1227,
+          "max_ms": 41.343543,
+          "mean_ms": 2.274620306438468,
+          "over_1000ms": 0,
+          "p50_ms_upper": 1,
+          "p95_ms_upper": 6,
+          "p99_ms_upper": 9
+        },
+        "pending_paint": 24,
+        "pending_tasks": 0,
+        "queue": {
+          "count": 3027,
+          "max_ms": 204.597734,
+          "mean_ms": 16.224287200858935,
+          "over_1000ms": 0,
+          "p50_ms_upper": 9,
+          "p95_ms_upper": 39,
+          "p99_ms_upper": 112
+        },
+        "submit_to_callback": {
+          "count": 3027,
+          "max_ms": 359.152152,
+          "mean_ms": 22.996272726792203,
+          "over_1000ms": 0,
+          "p50_ms_upper": 16,
+          "p95_ms_upper": 45,
+          "p99_ms_upper": 121
+        },
+        "submit_to_paint": {
+          "count": 1695,
+          "max_ms": 213.458975,
+          "mean_ms": 15.277555100884955,
+          "over_1000ms": 0,
+          "p50_ms_upper": 11,
+          "p95_ms_upper": 41,
+          "p99_ms_upper": 152
+        },
+        "worker_to_callback": {
+          "count": 3027,
+          "max_ms": 358.651084,
+          "mean_ms": 6.7719855259332675,
+          "over_1000ms": 0,
+          "p50_ms_upper": 7,
+          "p95_ms_upper": 15,
+          "p99_ms_upper": 21
+        }
+      },
+      "loader_cpu_ms": 8729.155847,
+      "major_faults": 0,
+      "metadata_capacity_bytes": 20400000,
+      "metadata_path_bytes": 36068202,
+      "minor_faults": 83073,
+      "model_count": 299400,
+      "peak_rss_kib": 307748,
+      "phase": "restored",
+      "pool_items": 66,
+      "prefetch_results": 1251,
+      "pss_kib": 208307,
+      "queue_tasks": 0,
+      "rchar": 6824891777,
+      "read_bytes": 8515584,
+      "rss_kib": 230056,
+      "rusage_peak_rss_kib": 307748,
+      "scan_cpu_ms": 3464.510167,
+      "source_counts": {
+        "decoded": 2236,
+        "disk": 789,
+        "failed": 2,
+        "memory": 0
+      },
+      "stale_results": 79,
+      "syscr": 1811997,
+      "syscw": 35336,
+      "total_items": 87,
+      "visible_results": 1695,
+      "wchar": 101354258,
+      "write_bytes": 104931328
+    },
+    {
+      "active_items": 0,
+      "active_pixmap_logical_bytes": 0,
+      "cache_budget_bytes": 67108864,
+      "cache_logical_bytes": 66953456,
+      "cancelled_write_bytes": 65970176,
+      "cpu_ms": 13638.106,
+      "decoded_count": 3027,
+      "disk_cache_bytes": 36916768,
+      "disk_cache_files": 829,
+      "elapsed_ms": 19764,
+      "failed_results": 2,
+      "latency": {
+        "callback_to_paint": {
+          "count": 1695,
+          "max_ms": 35.727391,
+          "mean_ms": 0.30815039351032447,
+          "over_1000ms": 0,
+          "p50_ms_upper": 1,
+          "p95_ms_upper": 1,
+          "p99_ms_upper": 5
+        },
+        "gui_timer_delay": {
+          "count": 1229,
+          "max_ms": 41.343543,
+          "mean_ms": 2.278603109845403,
+          "over_1000ms": 0,
+          "p50_ms_upper": 1,
+          "p95_ms_upper": 6,
+          "p99_ms_upper": 9
+        },
+        "pending_paint": 0,
+        "pending_tasks": 0,
+        "queue": {
+          "count": 3027,
+          "max_ms": 204.597734,
+          "mean_ms": 16.224287200858935,
+          "over_1000ms": 0,
+          "p50_ms_upper": 9,
+          "p95_ms_upper": 39,
+          "p99_ms_upper": 112
+        },
+        "submit_to_callback": {
+          "count": 3027,
+          "max_ms": 359.152152,
+          "mean_ms": 22.996272726792203,
+          "over_1000ms": 0,
+          "p50_ms_upper": 16,
+          "p95_ms_upper": 45,
+          "p99_ms_upper": 121
+        },
+        "submit_to_paint": {
+          "count": 1695,
+          "max_ms": 213.458975,
+          "mean_ms": 15.277555100884955,
+          "over_1000ms": 0,
+          "p50_ms_upper": 11,
+          "p95_ms_upper": 41,
+          "p99_ms_upper": 152
+        },
+        "worker_to_callback": {
+          "count": 3027,
+          "max_ms": 358.651084,
+          "mean_ms": 6.7719855259332675,
+          "over_1000ms": 0,
+          "p50_ms_upper": 7,
+          "p95_ms_upper": 15,
+          "p99_ms_upper": 21
+        }
+      },
+      "loader_cpu_ms": 8729.155847,
+      "major_faults": 0,
+      "metadata_capacity_bytes": 0,
+      "metadata_path_bytes": 0,
+      "minor_faults": 83078,
+      "model_count": 0,
+      "peak_rss_kib": 307748,
+      "phase": "switched_empty",
+      "pool_items": 87,
+      "prefetch_results": 1251,
+      "pss_kib": 137204,
+      "queue_tasks": 0,
+      "rchar": 6824896669,
+      "read_bytes": 8515584,
+      "rss_kib": 158956,
+      "rusage_peak_rss_kib": 307748,
+      "scan_cpu_ms": 3467.549612,
+      "source_counts": {
+        "decoded": 2236,
+        "disk": 789,
+        "failed": 2,
+        "memory": 0
+      },
+      "stale_results": 79,
+      "syscr": 1812032,
+      "syscw": 35371,
+      "total_items": 87,
+      "visible_results": 1695,
+      "wchar": 101354922,
+      "write_bytes": 104931328
+    },
+    {
+      "active_items": 21,
+      "active_pixmap_logical_bytes": 4643840,
+      "cache_budget_bytes": 67108864,
+      "cache_logical_bytes": 66804868,
+      "cancelled_write_bytes": 65970176,
+      "cpu_ms": 17386.899,
+      "decoded_count": 3050,
+      "disk_cache_bytes": 38189598,
+      "disk_cache_files": 852,
+      "elapsed_ms": 23247,
+      "failed_results": 2,
+      "latency": {
+        "callback_to_paint": {
+          "count": 1716,
+          "max_ms": 35.727391,
+          "mean_ms": 0.30615967016317014,
+          "over_1000ms": 0,
+          "p50_ms_upper": 1,
+          "p95_ms_upper": 1,
+          "p99_ms_upper": 5
+        },
+        "gui_timer_delay": {
+          "count": 1447,
+          "max_ms": 41.343543,
+          "mean_ms": 2.3168521278507255,
+          "over_1000ms": 0,
+          "p50_ms_upper": 2,
+          "p95_ms_upper": 6,
+          "p99_ms_upper": 8
+        },
+        "pending_paint": 1,
+        "pending_tasks": 0,
+        "queue": {
+          "count": 3050,
+          "max_ms": 204.597734,
+          "mean_ms": 16.41389332262295,
+          "over_1000ms": 0,
+          "p50_ms_upper": 9,
+          "p95_ms_upper": 40,
+          "p99_ms_upper": 112
+        },
+        "submit_to_callback": {
+          "count": 3050,
+          "max_ms": 359.152152,
+          "mean_ms": 23.180434125245903,
+          "over_1000ms": 0,
+          "p50_ms_upper": 16,
+          "p95_ms_upper": 45,
+          "p99_ms_upper": 121
+        },
+        "submit_to_paint": {
+          "count": 1716,
+          "max_ms": 213.458975,
+          "mean_ms": 15.71889195920746,
+          "over_1000ms": 0,
+          "p50_ms_upper": 11,
+          "p95_ms_upper": 47,
+          "p99_ms_upper": 152
+        },
+        "worker_to_callback": {
+          "count": 3050,
+          "max_ms": 358.651084,
+          "mean_ms": 6.766540802622951,
+          "over_1000ms": 0,
+          "p50_ms_upper": 7,
+          "p95_ms_upper": 15,
+          "p99_ms_upper": 21
+        }
+      },
+      "loader_cpu_ms": 8818.997304,
+      "major_faults": 0,
+      "metadata_capacity_bytes": 20400000,
+      "metadata_path_bytes": 36068202,
+      "minor_faults": 105827,
+      "model_count": 299400,
+      "peak_rss_kib": 307748,
+      "phase": "reopened",
+      "pool_items": 66,
+      "prefetch_results": 1252,
+      "pss_kib": 214065,
+      "queue_tasks": 0,
+      "rchar": 13227118562,
+      "read_bytes": 8515584,
+      "rss_kib": 235812,
+      "rusage_peak_rss_kib": 307748,
+      "scan_cpu_ms": 6932.985804,
+      "source_counts": {
+        "decoded": 2259,
+        "disk": 789,
+        "failed": 2,
+        "memory": 0
+      },
+      "stale_results": 80,
+      "syscr": 3585460,
+      "syscw": 40532,
+      "total_items": 87,
+      "visible_results": 1716,
+      "wchar": 102705036,
+      "write_bytes": 106258432
+    },
+    {
+      "active_items": 19,
+      "active_pixmap_logical_bytes": 4106240,
+      "cache_budget_bytes": 67108864,
+      "cache_logical_bytes": 66984640,
+      "cancelled_write_bytes": 65970176,
+      "cpu_ms": 17465.417,
+      "decoded_count": 3069,
+      "disk_cache_bytes": 39100283,
+      "disk_cache_files": 871,
+      "elapsed_ms": 23451,
+      "failed_results": 2,
+      "latency": {
+        "callback_to_paint": {
+          "count": 1735,
+          "max_ms": 35.727391,
+          "mean_ms": 0.30712513602305475,
+          "over_1000ms": 0,
+          "p50_ms_upper": 1,
+          "p95_ms_upper": 1,
+          "p99_ms_upper": 5
+        },
+        "gui_timer_delay": {
+          "count": 1459,
+          "max_ms": 41.343543,
+          "mean_ms": 2.3189748355037696,
+          "over_1000ms": 0,
+          "p50_ms_upper": 2,
+          "p95_ms_upper": 6,
+          "p99_ms_upper": 8
+        },
+        "pending_paint": 1,
+        "pending_tasks": 0,
+        "queue": {
+          "count": 3069,
+          "max_ms": 204.597734,
+          "mean_ms": 16.510831573476704,
+          "over_1000ms": 0,
+          "p50_ms_upper": 9,
+          "p95_ms_upper": 40,
+          "p99_ms_upper": 112
+        },
+        "submit_to_callback": {
+          "count": 3069,
+          "max_ms": 359.152152,
+          "mean_ms": 23.278154214727923,
+          "over_1000ms": 0,
+          "p50_ms_upper": 16,
+          "p95_ms_upper": 46,
+          "p99_ms_upper": 121
+        },
+        "submit_to_paint": {
+          "count": 1735,
+          "max_ms": 213.458975,
+          "mean_ms": 15.977776323919308,
+          "over_1000ms": 0,
+          "p50_ms_upper": 11,
+          "p95_ms_upper": 49,
+          "p99_ms_upper": 152
+        },
+        "worker_to_callback": {
+          "count": 3069,
+          "max_ms": 358.651084,
+          "mean_ms": 6.767322641251222,
+          "over_1000ms": 0,
+          "p50_ms_upper": 7,
+          "p95_ms_upper": 15,
+          "p99_ms_upper": 21
+        }
+      },
+      "loader_cpu_ms": 8886.603089,
+      "major_faults": 0,
+      "metadata_capacity_bytes": 20400000,
+      "metadata_path_bytes": 36068202,
+      "minor_faults": 106064,
+      "model_count": 299400,
+      "peak_rss_kib": 307748,
+      "phase": "resized",
+      "pool_items": 68,
+      "prefetch_results": 1252,
+      "pss_kib": 215005,
+      "queue_tasks": 0,
+      "rchar": 13230031352,
+      "read_bytes": 8515584,
+      "rss_kib": 236756,
+      "rusage_peak_rss_kib": 307748,
+      "scan_cpu_ms": 6932.985804,
+      "source_counts": {
+        "decoded": 2278,
+        "disk": 789,
+        "failed": 2,
+        "memory": 0
+      },
+      "stale_results": 80,
+      "syscr": 3585736,
+      "syscw": 40745,
+      "total_items": 87,
+      "visible_results": 1735,
+      "wchar": 103623665,
+      "write_bytes": 107216896
+    },
+    {
+      "active_items": 0,
+      "active_pixmap_logical_bytes": 0,
+      "cache_budget_bytes": 67108864,
+      "cache_logical_bytes": 0,
+      "cancelled_write_bytes": 65970176,
+      "cpu_ms": 17481.572,
+      "decoded_count": 3069,
+      "disk_cache_bytes": 39100283,
+      "disk_cache_files": 871,
+      "elapsed_ms": 23487,
+      "failed_results": 2,
+      "latency": {
+        "callback_to_paint": {
+          "count": 1735,
+          "max_ms": 35.727391,
+          "mean_ms": 0.30712513602305475,
+          "over_1000ms": 0,
+          "p50_ms_upper": 1,
+          "p95_ms_upper": 1,
+          "p99_ms_upper": 5
+        },
+        "gui_timer_delay": {
+          "count": 1461,
+          "max_ms": 41.343543,
+          "mean_ms": 2.3296068316221765,
+          "over_1000ms": 0,
+          "p50_ms_upper": 2,
+          "p95_ms_upper": 6,
+          "p99_ms_upper": 9
+        },
+        "pending_paint": 0,
+        "pending_tasks": 0,
+        "queue": {
+          "count": 3069,
+          "max_ms": 204.597734,
+          "mean_ms": 16.510831573476704,
+          "over_1000ms": 0,
+          "p50_ms_upper": 9,
+          "p95_ms_upper": 40,
+          "p99_ms_upper": 112
+        },
+        "submit_to_callback": {
+          "count": 3069,
+          "max_ms": 359.152152,
+          "mean_ms": 23.278154214727923,
+          "over_1000ms": 0,
+          "p50_ms_upper": 16,
+          "p95_ms_upper": 46,
+          "p99_ms_upper": 121
+        },
+        "submit_to_paint": {
+          "count": 1735,
+          "max_ms": 213.458975,
+          "mean_ms": 15.977776323919308,
+          "over_1000ms": 0,
+          "p50_ms_upper": 11,
+          "p95_ms_upper": 49,
+          "p99_ms_upper": 152
+        },
+        "worker_to_callback": {
+          "count": 3069,
+          "max_ms": 358.651084,
+          "mean_ms": 6.767322641251222,
+          "over_1000ms": 0,
+          "p50_ms_upper": 7,
+          "p95_ms_upper": 15,
+          "p99_ms_upper": 21
+        }
+      },
+      "loader_cpu_ms": 8886.603089,
+      "major_faults": 0,
+      "metadata_capacity_bytes": 0,
+      "metadata_path_bytes": 0,
+      "minor_faults": 106064,
+      "model_count": 0,
+      "peak_rss_kib": 307748,
+      "phase": "cleared",
+      "pool_items": 87,
+      "prefetch_results": 1252,
+      "pss_kib": 149673,
+      "queue_tasks": 0,
+      "rchar": 13230036227,
+      "read_bytes": 8515584,
+      "rss_kib": 171424,
+      "rusage_peak_rss_kib": 307748,
+      "scan_cpu_ms": 6932.985804,
+      "source_counts": {
+        "decoded": 2278,
+        "disk": 789,
+        "failed": 2,
+        "memory": 0
+      },
+      "stale_results": 80,
+      "syscr": 3585768,
+      "syscw": 40755,
+      "total_items": 87,
+      "visible_results": 1735,
+      "wchar": 103623873,
+      "write_bytes": 107216896
+    }
+  ],
+  "scan_ms": 3465,
+  "screens": [
+    {
+      "dpr": 1,
+      "geometry": [
+        2560,
+        1440
+      ],
+      "logical_dpi": 96,
+      "name": "HDMI-0"
+    }
+  ],
+  "viewport_logical_px": [
+    1278,
+    731
+  ],
+  "window_logical_px": [
+    1280,
+    800
+  ],
+  "revision": "c14a70f5a22b602361624941c0cf4def7ebb244a",
+  "runner_sha256": "091ca6325f3e9e01db9e1187fc04b1ec3de1c59a3add265daea5fcb5f7faa8cd",
+  "probe_sha256": "2e6b8481d63d01ace6aa3596459afd76732195ff5a1d8705b3b90637c938e4c2",
+  "executable_sha256": "ae7ca1d7cee044f1c1815648bf24246b5793d20db9ec051a17a355ff61b0ece6",
+  "scenario": "usage",
+  "whole_device_delta": {
+    "reads": 281,
+    "reads_merged": 0,
+    "sectors_read": 17504,
+    "read_ms": 125,
+    "writes": 862,
+    "writes_merged": 767,
+    "sectors_written": 53824,
+    "write_ms": 5631,
+    "inflight": 0,
+    "busy_ms": 625,
+    "weighted_ms": 5757
+  },
+  "whole_device_note": "包含桌面及其他进程；不是本进程或SSD介质写入归因",
+  "system_memory_kib": {
+    "before": {
+      "MemAvailable": 22139064,
+      "Cached": 18020120,
+      "Dirty": 1108,
+      "Writeback": 0
+    },
+    "after": {
+      "MemAvailable": 22121572,
+      "Cached": 18070012,
+      "Dirty": 44612,
+      "Writeback": 4
+    }
+  },
+  "source_page_sample": {
+    "before": {
+      "files": 256,
+      "pages": 7998,
+      "resident_pages": 947,
+      "errors": 0,
+      "method": "每127个路径取样，最多256文件，每文件前1MiB；非全库驻留率"
+    },
+    "after": {
+      "files": 256,
+      "pages": 7998,
+      "resident_pages": 947,
+      "errors": 0,
+      "method": "每127个路径取样，最多256文件，每文件前1MiB；非全库驻留率"
+    }
+  },
+  "advised_drop_file_pages": false,
+  "dataset_definition": {
+    "source": "/home/gyl/Pictures/壁纸/Bliss.jpeg",
+    "source_sha256": "bc9892af3972b8275f9a1b71933b8084af7f94995605b2c14fdcda9d7a4d1b7b",
+    "samples": [
+      {
+        "file": "00.jpg",
+        "format": "JPEG",
+        "size": [
+          640,
+          480
+        ],
+        "sha256": "ee590f83ae93b51bd323a8c2bd2a38d4a39ba5a1c64eb545f4cac299133bea26"
+      },
+      {
+        "file": "01.jpg",
+        "format": "JPEG",
+        "size": [
+          480,
+          640
+        ],
+        "sha256": "9db736907e2e4d68fc9059ae2f0182e30ffd91d8730bfa75943f6e6d5a89158b"
+      },
+      {
+        "file": "02.jpg",
+        "format": "JPEG",
+        "size": [
+          1024,
+          683
+        ],
+        "sha256": "e2eaaefedae702b8e95bd1bd4f2431b013f6ef84f869d040815151603d6c1252"
+      },
+      {
+        "file": "03.jpg",
+        "format": "JPEG",
+        "size": [
+          96,
+          96
+        ],
+        "sha256": "345faf9d5ec0467b95ff816c14e48caaedc5a192d8fd89c1cf294f1efd2e3685"
+      },
+      {
+        "file": "04.png",
+        "format": "PNG",
+        "size": [
+          640,
+          480
+        ],
+        "sha256": "1ad257e3a134cc3deb0e1e71a4a7919c1cad47082f974befa4a66d083cd1c37d"
+      },
+      {
+        "file": "05.png",
+        "format": "PNG",
+        "size": [
+          480,
+          640
+        ],
+        "sha256": "58d64f0e6322c91840240e171220b20eb989ce4b6ce6f42ed980c93a7e77296c"
+      },
+      {
+        "file": "06.webp",
+        "format": "WEBP",
+        "size": [
+          1024,
+          683
+        ],
+        "sha256": "8148adc38789c15ed2174ac8c1f8d01b73d8664d31fd75fc04f7e09003c37f5b"
+      },
+      {
+        "file": "07.gif",
+        "format": "GIF",
+        "size": [
+          96,
+          96
+        ],
+        "sha256": "204dcf1fd67a180e4c62f8078232d5412ebec2b2760436f61c8d32a4ae6eadb1"
+      },
+      {
+        "file": "08.bmp",
+        "format": "BMP",
+        "size": [
+          64,
+          48
+        ],
+        "sha256": "60deec1749b946ea5551d82b1eea7389d4b08ea5e05a91e3c56a55cdbc500f42"
+      },
+      {
+        "file": "09.jpg",
+        "format": "JPEG",
+        "size": [
+          480,
+          640
+        ],
+        "sha256": "25e61dd5126c1108583c65ebce78ea7dee297f59d8fa9a8ab43ffa40258da45b"
+      },
+      {
+        "file": "10.jpg",
+        "format": "JPEG",
+        "size": [
+          1024,
+          683
+        ],
+        "sha256": "2a860e64b8943c2529063103a46248b853ddc8e5e12bc293ecc8d26fcd58fc0c"
+      },
+      {
+        "file": "11.jpg",
+        "format": "JPEG",
+        "size": [
+          96,
+          96
+        ],
+        "sha256": "fab8b33525b1e1908877b3f4076258006c660c2a1e8dcf5e018d19afd7d0461b"
+      },
+      {
+        "file": "12.jpg",
+        "format": "JPEG",
+        "size": [
+          640,
+          480
+        ],
+        "sha256": "1aee1fbb15d062906d84912df0a481ffe2a33625fc9f281c49392a30cae292d9"
+      },
+      {
+        "file": "13.jpg",
+        "format": "JPEG",
+        "size": [
+          480,
+          640
+        ],
+        "sha256": "c795330db9ab8189d199b5c16725b7687e4666814ed16a85f8e4e2aa8f5bd538"
+      },
+      {
+        "file": "14.png",
+        "format": "PNG",
+        "size": [
+          1024,
+          683
+        ],
+        "sha256": "caaef68f30379ba51d81f0be88c485dedceec7c2bcc0a0289f7defecf5ea49fa"
+      },
+      {
+        "file": "15.png",
+        "format": "PNG",
+        "size": [
+          96,
+          96
+        ],
+        "sha256": "6dbb36df57893354f7238cbf000dc6a0d95f883b3a978bb2c942110500ece78e"
+      },
+      {
+        "file": "16.webp",
+        "format": "WEBP",
+        "size": [
+          640,
+          480
+        ],
+        "sha256": "6153be1cfdaf4bd6bbcaf3b58c33e62ba8e02c0cadb5ece6cecc3488f1e7d234"
+      },
+      {
+        "file": "17.gif",
+        "format": "GIF",
+        "size": [
+          480,
+          640
+        ],
+        "sha256": "adf06f0e068864ea9ab9e5479b9f98eb3022afd20e45a16a3534797f5b8761fa"
+      },
+      {
+        "file": "18.bmp",
+        "format": "BMP",
+        "size": [
+          64,
+          48
+        ],
+        "sha256": "b1055b57e8fc07161a7b224e6e86acf715d681a46ba2d82c4851c90b912f9758"
+      },
+      {
+        "file": "19.jpg",
+        "format": "JPEG",
+        "size": [
+          96,
+          96
+        ],
+        "sha256": "2d1e35db385b1af6d577617bdf4c7b10c5fc137c1f4bb12605ffc92a16bc3bd6"
+      },
+      {
+        "file": "20.jpg",
+        "format": "JPEG",
+        "size": [
+          640,
+          480
+        ],
+        "sha256": "e2fc3802f87c89560352ed9962cc972d7c1203450f9746038783266f48d9473f"
+      },
+      {
+        "file": "21.jpg",
+        "format": "JPEG",
+        "size": [
+          480,
+          640
+        ],
+        "sha256": "75d65362c6d05c9b5b8b166a47b7d0189cff4357449ca81b19982e6c329dd25c"
+      },
+      {
+        "file": "22.jpg",
+        "format": "JPEG",
+        "size": [
+          1024,
+          683
+        ],
+        "sha256": "32512588ae209691961b92a0868070856a6a7222f66b846d2078744721446407"
+      },
+      {
+        "file": "23.jpg",
+        "format": "JPEG",
+        "size": [
+          96,
+          96
+        ],
+        "sha256": "13f781ee1fabc79803b9453ae5508638be9a5e940bc86483bca90b0784da6e9b"
+      },
+      {
+        "file": "24.png",
+        "format": "PNG",
+        "size": [
+          640,
+          480
+        ],
+        "sha256": "dde936a800dfa0c6ba2380474edf088c64b3633f612d1e986ede150eaccf0fdf"
+      },
+      {
+        "file": "25.png",
+        "format": "PNG",
+        "size": [
+          480,
+          640
+        ],
+        "sha256": "8ea0884404e431d1764207a6b5e78efa1cddaff4dec24fd2e2b8deffe26d72f7"
+      },
+      {
+        "file": "26.webp",
+        "format": "WEBP",
+        "size": [
+          1024,
+          683
+        ],
+        "sha256": "2aa79b4a50ac73f5d35ee918b34dc403d4a925b98074fde9cadd03206e4fa10d"
+      },
+      {
+        "file": "27.gif",
+        "format": "GIF",
+        "size": [
+          96,
+          96
+        ],
+        "sha256": "a3fa96b1dc158527dfd41d3a2b1f66af0fa8d0009bda589d760efc07d2a95749"
+      },
+      {
+        "file": "28.bmp",
+        "format": "BMP",
+        "size": [
+          64,
+          48
+        ],
+        "sha256": "16119a4fecc0526793e373d187f8ef5fc6ade0b181d365380637d8784f642d4c"
+      },
+      {
+        "file": "29.jpg",
+        "format": "JPEG",
+        "size": [
+          480,
+          640
+        ],
+        "sha256": "9276aa564e0463c75e58f5654b0b97f9f8856c84fef8ab38e0c81d7c7843c482"
+      },
+      {
+        "file": "30.jpg",
+        "format": "JPEG",
+        "size": [
+          1024,
+          683
+        ],
+        "sha256": "d943a0e03bc39cf5b76925edaa21f65aaf0e3867d83f0485c39f5875bda3d06b"
+      },
+      {
+        "file": "31.jpg",
+        "format": "JPEG",
+        "size": [
+          96,
+          96
+        ],
+        "sha256": "a9b0f095185f279f20e4ea39afdecb3997c86ef0c3c31d014dfbefb8c692117c"
+      },
+      {
+        "file": "32.jpg",
+        "format": "JPEG",
+        "size": [
+          640,
+          480
+        ],
+        "sha256": "4ae084e545f1be2d92a13694be37949272233f28bf93f188e88e579108df8726"
+      },
+      {
+        "file": "33.jpg",
+        "format": "JPEG",
+        "size": [
+          480,
+          640
+        ],
+        "sha256": "01087b3aa9fdbbfb03d00642b36b888709e5e68878283cd4be1586b9d7100a97"
+      },
+      {
+        "file": "34.png",
+        "format": "PNG",
+        "size": [
+          1024,
+          683
+        ],
+        "sha256": "67280c31f78eddd34296b5ac6b34ef95c5831e4a3f992456572a08908549609f"
+      },
+      {
+        "file": "35.png",
+        "format": "PNG",
+        "size": [
+          96,
+          96
+        ],
+        "sha256": "487f1dc6f45b4a64eaa080ed3f162d73d3ae6c407b0234d8dfd16b63dccc7729"
+      },
+      {
+        "file": "36.webp",
+        "format": "WEBP",
+        "size": [
+          640,
+          480
+        ],
+        "sha256": "54b4b2a0957a3dabec9a7465f358f8ad649a1fb67c96179a8860699ca4e43a9a"
+      },
+      {
+        "file": "37.gif",
+        "format": "GIF",
+        "size": [
+          480,
+          640
+        ],
+        "sha256": "6b9ed5f94764d667c1dd194b91dd79fa491610e18aab3e13585ee07b06294a3b"
+      },
+      {
+        "file": "38.bmp",
+        "format": "BMP",
+        "size": [
+          64,
+          48
+        ],
+        "sha256": "033cc93a6d9c3011e79455fac44f2a59233cdfab612f269c3eed49057f4a352a"
+      },
+      {
+        "file": "39.jpg",
+        "format": "JPEG",
+        "size": [
+          96,
+          96
+        ],
+        "sha256": "af4bd86e4e341f77f0d8bfc314701b0d1769e8d0d74657575bac70bb09eea8bc"
+      },
+      {
+        "file": "40.jpg",
+        "format": "JPEG",
+        "size": [
+          640,
+          480
+        ],
+        "sha256": "f6a5050cff5b7b752da1cd2485c6e447a6d14aa5be4b30e2a2a4b009a42ae94e"
+      },
+      {
+        "file": "41.jpg",
+        "format": "JPEG",
+        "size": [
+          480,
+          640
+        ],
+        "sha256": "33ab149f9e705bf788a19d7c03b1aed4746f9523a499956d8a1d5d8877d16980"
+      },
+      {
+        "file": "42.jpg",
+        "format": "JPEG",
+        "size": [
+          1024,
+          683
+        ],
+        "sha256": "504379f3769e0998d932dc019738a3bccc8c4d71dd03af7391b409c9eec6d4f0"
+      },
+      {
+        "file": "43.jpg",
+        "format": "JPEG",
+        "size": [
+          96,
+          96
+        ],
+        "sha256": "2fc1aefbf1ac6d095e86359d4655d5ba96b6833446a292e98b93754976b5f1ea"
+      },
+      {
+        "file": "44.png",
+        "format": "PNG",
+        "size": [
+          640,
+          480
+        ],
+        "sha256": "4f06ba7ebd35779f94d99d967c004931ea76b38f773e7808bab3cac6f8d8b806"
+      },
+      {
+        "file": "45.png",
+        "format": "PNG",
+        "size": [
+          480,
+          640
+        ],
+        "sha256": "bb9cb901a6d829f85707638de449ee4262df6b63ae2d7427c8eb7478d8d3968d"
+      },
+      {
+        "file": "46.webp",
+        "format": "WEBP",
+        "size": [
+          1024,
+          683
+        ],
+        "sha256": "d68c5e1267056f78207e2728e596516cafd194186883944b5ec8e5d7b7039788"
+      },
+      {
+        "file": "47.gif",
+        "format": "GIF",
+        "size": [
+          96,
+          96
+        ],
+        "sha256": "845fa8cad39150ea4ba00a2c2d0fbd343463e46f18194f257473f02fc8eb090f"
+      },
+      {
+        "file": "48.bmp",
+        "format": "BMP",
+        "size": [
+          64,
+          48
+        ],
+        "sha256": "d2ad516a59f623488568e4dacd2957f0730d4704e5c89db4a6a9a6c025977dcd"
+      },
+      {
+        "file": "49.jpg",
+        "format": "JPEG",
+        "size": [
+          480,
+          640
+        ],
+        "sha256": "0131d3842a0961c94931d76f468231121d29fb4c30af03e9d7a6e9c49eaba432"
+      },
+      {
+        "file": "50.jpg",
+        "format": "JPEG",
+        "size": [
+          1024,
+          683
+        ],
+        "sha256": "bc1a386b172b50dd625547727e470080a0278a2174448a57fbe9fab3fe27b8c1"
+      },
+      {
+        "file": "51.jpg",
+        "format": "JPEG",
+        "size": [
+          96,
+          96
+        ],
+        "sha256": "e1953f020296da6ee5741d0eb8e68cfcefab57bcd8ca9c078301eeedc84e0cfd"
+      },
+      {
+        "file": "52.jpg",
+        "format": "JPEG",
+        "size": [
+          640,
+          480
+        ],
+        "sha256": "42f3a2ca04f13c1aad7164270abdee081f2dbdbceb7cd3de312bea829901b5df"
+      },
+      {
+        "file": "53.jpg",
+        "format": "JPEG",
+        "size": [
+          480,
+          640
+        ],
+        "sha256": "7ad85057edac27338c028e0e324a770c07fa1b97dcac48258fc265574e9fafa6"
+      },
+      {
+        "file": "54.png",
+        "format": "PNG",
+        "size": [
+          1024,
+          683
+        ],
+        "sha256": "b9434f0bd092bd4b8a9b2b70101044d9a283e42827ec3e4bd0e1c2fe52873bfb"
+      },
+      {
+        "file": "55.png",
+        "format": "PNG",
+        "size": [
+          96,
+          96
+        ],
+        "sha256": "4f56d70626b65b582b6f52525e6eefeb3ba8649253d31c855dead88985e19a8d"
+      },
+      {
+        "file": "56.webp",
+        "format": "WEBP",
+        "size": [
+          640,
+          480
+        ],
+        "sha256": "09e5356bb7fe872e694648735bf42d7a96e1c97faeb54dd216dea286ddefd14f"
+      },
+      {
+        "file": "57.gif",
+        "format": "GIF",
+        "size": [
+          480,
+          640
+        ],
+        "sha256": "5a8adea1dcb4d208289e26ed083727e91a045e658a5f66952d7f7bb22c2703c2"
+      },
+      {
+        "file": "58.bmp",
+        "format": "BMP",
+        "size": [
+          64,
+          48
+        ],
+        "sha256": "b8de8b0941be82ca0fc2f78769fadedcff1f43998edf1a504afb6496f4a98b96"
+      },
+      {
+        "file": "59.jpg",
+        "format": "JPEG",
+        "size": [
+          96,
+          96
+        ],
+        "sha256": "3deede1b49920e22062653df4fa8d43a721b189f2176c74c4329222a41cd715d"
+      },
+      {
+        "file": "60.jpg",
+        "format": "JPEG",
+        "size": [
+          640,
+          480
+        ],
+        "sha256": "7dc063621ad282b058bc9e7ef678ade6fe9c0d77f92a6f06a7310b0877575fc4"
+      },
+      {
+        "file": "61.jpg",
+        "format": "JPEG",
+        "size": [
+          480,
+          640
+        ],
+        "sha256": "f26e10fd5a5cbe9af59c374193f5e76c71cb30f5e7a1e466d0ce9a41116dc692"
+      },
+      {
+        "file": "62.jpg",
+        "format": "JPEG",
+        "size": [
+          1024,
+          683
+        ],
+        "sha256": "c13b9524defaf34810a08af739ca31ac12a515913bee34a1e529f1b0dbb40c4d"
+      },
+      {
+        "file": "63.jpg",
+        "format": "JPEG",
+        "size": [
+          96,
+          96
+        ],
+        "sha256": "7308225395a38630b9b188560ed463a7f049c8eda833ce90696ec5c5a40c00d5"
+      },
+      {
+        "file": "64.png",
+        "format": "PNG",
+        "size": [
+          640,
+          480
+        ],
+        "sha256": "821cfb83c677073d07e736edb96ac987dd20dee2c0b6057aa66559608da7be78"
+      },
+      {
+        "file": "65.png",
+        "format": "PNG",
+        "size": [
+          480,
+          640
+        ],
+        "sha256": "56495f84be20d6917e2a3d453325aa9650eb6c4fd55f6a197edd66dff3f78c1a"
+      },
+      {
+        "file": "66.webp",
+        "format": "WEBP",
+        "size": [
+          1024,
+          683
+        ],
+        "sha256": "15ca20ddc7828253740fa35a0008c2bca2dddcc0323fea32f7706b42fda6981b"
+      },
+      {
+        "file": "67.gif",
+        "format": "GIF",
+        "size": [
+          96,
+          96
+        ],
+        "sha256": "dd8df0053f19dbaec519d23542d4754ebcb82f19a98c60d0ca3f21e0df23dc15"
+      },
+      {
+        "file": "68.bmp",
+        "format": "BMP",
+        "size": [
+          64,
+          48
+        ],
+        "sha256": "151412096fbda31a523ef58e1638a3ea1987f74d231e3b7b97c96682e2205b70"
+      },
+      {
+        "file": "69.jpg",
+        "format": "JPEG",
+        "size": [
+          480,
+          640
+        ],
+        "sha256": "08380a4675585544ead31e2605b1137964076e08d0bb95912f9e11ecb8ef5121"
+      },
+      {
+        "file": "70.jpg",
+        "format": "JPEG",
+        "size": [
+          1024,
+          683
+        ],
+        "sha256": "0b583eccfd7302139596b58ea20273670e8ffe8f9e1a12dd4661a4cbf0a30b67"
+      },
+      {
+        "file": "71.jpg",
+        "format": "JPEG",
+        "size": [
+          96,
+          96
+        ],
+        "sha256": "cddffcc1208c93af293acf4a54902a6cd11472a8c84ad0ca1d5156b4f169e017"
+      },
+      {
+        "file": "72.jpg",
+        "format": "JPEG",
+        "size": [
+          640,
+          480
+        ],
+        "sha256": "7d11614921440bc330ef9c46b2bb937940411d42763c45cf120b8f32731495ce"
+      },
+      {
+        "file": "73.jpg",
+        "format": "JPEG",
+        "size": [
+          480,
+          640
+        ],
+        "sha256": "4df4a8aa4c10745a5c717039810aa26f4e23ec429afcaab68e8fe363e9aa7662"
+      },
+      {
+        "file": "74.png",
+        "format": "PNG",
+        "size": [
+          1024,
+          683
+        ],
+        "sha256": "021fced61a085672aeed2a07bbeb673f6b3cfd03cb6f941683d3ed91ed006e5d"
+      },
+      {
+        "file": "75.png",
+        "format": "PNG",
+        "size": [
+          96,
+          96
+        ],
+        "sha256": "6bad70d900d51641e7437215f71e2baf026930b8e4135f858618d4daef38150a"
+      },
+      {
+        "file": "76.webp",
+        "format": "WEBP",
+        "size": [
+          640,
+          480
+        ],
+        "sha256": "968a894bc860447d2831eb5119b86f9d2b9d9272fba47d703e220294b7a749d6"
+      },
+      {
+        "file": "77.gif",
+        "format": "GIF",
+        "size": [
+          480,
+          640
+        ],
+        "sha256": "e8f8fa3446f087e4d3a91d9a92ec6d705c2bb3369656fca220dd254197080d96"
+      },
+      {
+        "file": "78.bmp",
+        "format": "BMP",
+        "size": [
+          64,
+          48
+        ],
+        "sha256": "73fcb08e0c63b5565e882e893d52ae0736e352a7bac631dc8bd2f57ea196260f"
+      },
+      {
+        "file": "79.jpg",
+        "format": "JPEG",
+        "size": [
+          96,
+          96
+        ],
+        "sha256": "1fbfb717b85858773a9e53901433c212dcd1f1208452725e0e19f84bc3b36d70"
+      }
+    ],
+    "sizes": [
+      1000,
+      10000,
+      100000,
+      300000
+    ],
+    "categories": {
+      "300000": {
+        "normal": 299010,
+        "unreadable": 300,
+        "truncated_body": 300,
+        "corrupt_header": 300,
+        "large": 90
+      },
+      "100000": {
+        "normal": 99670,
+        "unreadable": 100,
+        "truncated_body": 100,
+        "corrupt_header": 100,
+        "large": 30
+      },
+      "10000": {
+        "normal": 9967,
+        "unreadable": 10,
+        "truncated_body": 10,
+        "corrupt_header": 10,
+        "large": 3
+      },
+      "1000": {
+        "normal": 997,
+        "unreadable": 1,
+        "truncated_body": 1,
+        "corrupt_header": 1
+      }
+    },
+    "storage": "independent within each library; hardlinks across sizes",
+    "description": "现有真实壁纸派生的五格式场景集，不是独立摄影原片；每万张含3个大文件，每千张含权限/损坏头/截断体各1个"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "application_revision": "a29f790895bd26bcf5cb5bab0c09ec636a1386df",
+  "instrumentation_revision": "7f40bb6",
+  "probe_sha256": "2e6b8481d63d01ace6aa3596459afd76732195ff5a1d8705b3b90637c938e4c2",
+  "loader_cc_sha256": "56f9d0fc366de65e828a7c4637de1222af1c3422d9536ce15d36da42613215f6",
+  "loader_h_sha256": "c6accb751f1751968063ab74b18720a41602e6c4060c8a1b6147d3fcca1da8bb",
+  "executable_sha256": "789e730b886b8a0af5563fe244903e2943958032fea433669ba1b82f41956c0e",
+  "qt": "6.9.3",
+  "build": "Release GCC16.2",
+  "changes": "仅增加 thumbnail_started/来源参数与相同测量驱动，不改变预算/调度/布局/绘制",
+  "after_legacy_application_revision": "886b675",
+  "after_legacy_executable_sha256": "447b6519de500ffd2f53d4e837a339fff5b287217c8be4872b5e8bb9e29b81b4",
+  "after_legacy_probe_sha256": "2e6b8481d63d01ace6aa3596459afd76732195ff5a1d8705b3b90637c938e4c2"
+}
