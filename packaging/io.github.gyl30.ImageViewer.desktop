@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=ImageViewer
+Comment=Browse local images in a waterfall layout
+Comment[zh_CN]=以瀑布流浏览本地图片
+Exec=ImageViewer
+TryExec=ImageViewer
+Icon=io.github.gyl30.ImageViewer
+Terminal=false
+Categories=Graphics;Viewer;Qt;
+StartupNotify=true
+StartupWMClass=ImageViewer

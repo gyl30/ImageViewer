@@ -19,6 +19,7 @@
 *.out
 build
 compile_commands.json
+/dist/
 .cache
 .idea
 .ccls-cache

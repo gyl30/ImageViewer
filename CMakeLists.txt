@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(ImageViewer LANGUAGES CXX)
+project(ImageViewer VERSION 0.1.0 LANGUAGES CXX
+    DESCRIPTION "Lightweight waterfall image viewer"
+    HOMEPAGE_URL "https://github.com/gyl30/ImageViewer")
+
+set(IMAGEVIEWER_VERSION "${PROJECT_VERSION}-rc.1")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -8,13 +12,14 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 endif()
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets Core Gui Concurrent Svg)
+find_package(Qt6 6.4.2 REQUIRED COMPONENTS Widgets Core Gui Concurrent Svg)
 
 set(PROJECT_SOURCES
     main.cc
@@ -31,6 +36,17 @@ set(PROJECT_SOURCES
 add_executable(ImageViewer ${PROJECT_SOURCES})
 
 target_link_libraries(ImageViewer PRIVATE Qt6::Widgets Qt6::Core Qt6::Gui Qt6::Concurrent Qt6::Svg)
+target_compile_definitions(ImageViewer PRIVATE IMAGEVIEWER_VERSION="${IMAGEVIEWER_VERSION}")
+
+include(GNUInstallDirs)
+install(TARGETS ImageViewer RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(FILES packaging/io.github.gyl30.ImageViewer.desktop
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
+install(FILES icons/image.svg
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/scalable/apps
+    RENAME io.github.gyl30.ImageViewer.svg)
+install(FILES packaging/copyright
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/doc/imageviewer)
 
 include(CTest)
 if(BUILD_TESTING)
@@ -61,4 +77,8 @@ if(BUILD_TESTING)
         target_include_directories(imageviewer_benchmark PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
         target_link_libraries(imageviewer_benchmark PRIVATE Qt6::Widgets Qt6::Concurrent Qt6::Test Qt6::Svg)
     endif()
+endif()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    include(cmake/Packaging.cmake)
 endif()

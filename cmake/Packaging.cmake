@@ -1,0 +1,35 @@
+set(CPACK_PACKAGE_NAME "imageviewer")
+set(CPACK_PACKAGE_VENDOR "gyl30")
+set(CPACK_PACKAGE_CONTACT "gyl30 <im.ggyyll@gmail.com>")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Lightweight waterfall image viewer")
+set(CPACK_PACKAGE_DESCRIPTION "Qt Widgets image viewer for local JPEG, PNG, WebP, GIF and BMP files.\nInternal release candidate; project license is not yet determined.")
+set(CPACK_PACKAGE_VERSION "${IMAGEVIEWER_VERSION}")
+set(CPACK_PACKAGE_HOMEPAGE_URL "${PROJECT_HOMEPAGE_URL}")
+set(CPACK_PACKAGING_INSTALL_PREFIX "/usr")
+set(CPACK_STRIP_FILES TRUE)
+set(CPACK_GENERATOR "DEB;RPM")
+
+set(CPACK_DEBIAN_PACKAGE_VERSION "${PROJECT_VERSION}~rc1")
+set(CPACK_DEBIAN_PACKAGE_RELEASE "1")
+set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
+set(CPACK_DEBIAN_PACKAGE_SECTION "graphics")
+set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt6core6 (>= 6.4.2), libqt6svg6 (>= 6.4.2), qt6-qpa-plugins, qt6-image-formats-plugins, hicolor-icon-theme")
+
+set(CPACK_RPM_FILE_NAME RPM-DEFAULT)
+set(CPACK_RPM_PACKAGE_VERSION "${PROJECT_VERSION}")
+set(CPACK_RPM_PACKAGE_RELEASE "0.1.rc1")
+set(CPACK_RPM_PACKAGE_RELEASE_DIST ON)
+set(CPACK_RPM_PACKAGE_LICENSE "Unspecified")
+set(CPACK_RPM_PACKAGE_GROUP "Applications/Multimedia")
+set(CPACK_RPM_PACKAGE_REQUIRES "qt6-qtbase-gui >= 6.4.2, qt6-qtsvg >= 6.4.2, qt6-qtimageformats, hicolor-icon-theme")
+set(CPACK_RPM_PACKAGE_DESCRIPTION "${CPACK_PACKAGE_DESCRIPTION}")
+set(CPACK_PACKAGE_RELOCATABLE OFF)
+set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
+    "/usr/share/applications" "/usr/share/icons" "/usr/share/icons/hicolor"
+    "/usr/share/icons/hicolor/scalable" "/usr/share/icons/hicolor/scalable/apps")
+set(CPACK_RPM_SPEC_MORE_DEFINE "%define _buildhost reproducible
+%define use_source_date_epoch_as_buildtime 1
+%define build_mtime_policy clamp_to_source_date_epoch")
+
+include(CPack)
