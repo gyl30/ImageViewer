@@ -133,6 +133,7 @@ class correctness_test : public QObject
     void relayout_preserves_image();
     void relayout_keeps_anchor();
     void dpr_refresh_keeps_image();
+    void dpr_reuses_existing_pixels();
     void item_reuse_resets_image();
     void latest_layout_width_data();
     void latest_layout_width();
@@ -385,6 +386,39 @@ void correctness_test::dpr_refresh_keeps_image()
     QTest::qWait(50);
     QCOMPARE(requested.size(), previous);
     QCOMPARE(item->state(), waterfall_item::load_state::ready);
+}
+
+void correctness_test::dpr_reuses_existing_pixels()
+{
+    waterfall_scene scene;
+    scaled_view view;
+    view.setScene(&scene);
+    view.resize(400, 400);
+    view.show();
+    scene.add_images({{"photo.jpg", QSize(4000, 3000)}});
+    QSignalSpy requested(&scene, &waterfall_scene::request_load_batch);
+    scene.layout_models(view.viewport()->width());
+    QTRY_COMPARE(requested.size(), 1);
+    auto task = qvariant_cast<QList<load_task>>(requested.last()[0]).first();
+    QImage image(task.target_size, QImage::Format_RGB32);
+    image.fill(Qt::blue);
+    scene.on_image_loaded(task.id, task.path, image, task.session_id);
+    const qint64 key = scene.active_items_[0]->pixmap().cacheKey();
+    view.resize(260, 400);
+    scene.layout_models(view.viewport()->width());
+    QTRY_COMPARE(qRound(scene.sceneRect().width()), view.viewport()->width());
+    view.ratio = 1.5;
+    QEvent changed(QEvent::ScreenChangeInternal);
+    QApplication::sendEvent(&view, &changed);
+    QTest::qWait(40);
+    QVERIFY(image.width() >= qRound(scene.all_models_[0].layout_rect.width() * view.ratio));
+    QCOMPARE(requested.size(), 1);
+    QCOMPARE(scene.active_items_[0]->pixmap().cacheKey(), key);
+    view.ratio = 2;
+    QApplication::sendEvent(&view, &changed);
+    QTRY_COMPARE(requested.size(), 2);
+    task = qvariant_cast<QList<load_task>>(requested.last()[0]).first();
+    QCOMPARE(task.target_size.width(), qRound(scene.all_models_[0].layout_rect.width() * view.ratio));
 }
 
 void correctness_test::item_reuse_resets_image()

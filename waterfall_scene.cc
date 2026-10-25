@@ -452,7 +452,8 @@ void waterfall_scene::request_visible_images(const QRectF& visible_rect, request
                  (it.value()->state() == waterfall_item::load_state::empty ||
                   (it.value()->state() == waterfall_item::load_state::ready &&
                    dpr > it.value()->requested_dpr() &&
-                   it.value()->pixmap().width() < all_models_[it.key()].original_size.width())))
+                   it.value()->pixmap().width() < all_models_[it.key()].original_size.width() &&
+                   it.value()->pixmap().width() < qRound(all_models_[it.key()].layout_rect.width() * dpr))))
         {
             pending.push_back(it.key());
         }
