@@ -1,0 +1,37 @@
+{
+  "controller_returncode": -2,
+  "child_returncode": -15,
+  "child_reaped": true,
+  "monitors": {
+    "iostat": {
+      "command": [
+        "iostat",
+        "-x",
+        "-d",
+        "-y",
+        "-p",
+        "nvme0n1",
+        "30"
+      ],
+      "available": true,
+      "running_when_stopped": true,
+      "returncode": -15
+    },
+    "pidstat": {
+      "command": [
+        "pidstat",
+        "-h",
+        "-u",
+        "-r",
+        "-d",
+        "-p",
+        "988244",
+        "30"
+      ],
+      "available": true,
+      "running_when_stopped": true,
+      "returncode": -15
+    }
+  },
+  "result": "取消不会遗留测试进程；此用例不计为长稳通过"
+}

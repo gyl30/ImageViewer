@@ -1,5 +1,7 @@
 #include <QApplication>
 #include <QDateTime>
+#include <QEventLoop>
+#include <QCollator>
 #include <QDirIterator>
 #include <QFile>
 #include <QGraphicsPixmapItem>
@@ -13,6 +15,9 @@
 #include <QMovie>
 #include <QImageWriter>
 #include <QBuffer>
+#include <QMessageBox>
+#include <QAbstractButton>
+#include <QRandomGenerator>
 #include <QTemporaryDir>
 #include <QAction>
 #include <QScrollBar>
@@ -301,7 +306,7 @@ class performance_probe : public QObject
         return false;
     }
 
-    void sample(const QString& phase)
+    void sample(const QString& phase, QFile* stream = nullptr)
     {
         auto* scene = window_.scene_;
         auto* loader = window_.image_loader_;
@@ -311,6 +316,9 @@ class performance_probe : public QObject
                         {"major_faults", static_cast<qint64>(usage.ru_majflt)},
                         {"rusage_peak_rss_kib", static_cast<qint64>(usage.ru_maxrss)},
                         {"phase", phase}, {"elapsed_ms", timer_.elapsed()}, {"cpu_ms", process_cpu_ms()},
+                        {"timestamp_utc", QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs)},
+                        {"threads", proc_value("/proc/self/status", "Threads")},
+                        {"file_descriptors", QDir("/proc/self/fd").entryList(QDir::AllEntries | QDir::NoDotAndDotDot).size()},
                         {"rss_kib", proc_value("/proc/self/status", "VmRSS")},
                         {"peak_rss_kib", proc_value("/proc/self/status", "VmHWM")},
                         {"pss_kib", proc_value("/proc/self/smaps_rollup", "Pss")},
@@ -361,6 +369,13 @@ class performance_probe : public QObject
         row["source_counts"] = QJsonObject{{"memory", source_counts_[0]}, {"disk", source_counts_[1]},
             {"decoded", source_counts_[2]}, {"failed", source_counts_[3]}};
         row["latency"] = latency_json();
+        row["viewer_visible"] = window_.viewer_window_ != nullptr && window_.viewer_window_->isVisible();
+        if (stream != nullptr)
+        {
+            stream->write(QJsonDocument(row).toJson(QJsonDocument::Compact) + '\n');
+            stream->flush();
+            return;
+        }
         samples_.append(row);
     }
 
@@ -549,6 +564,300 @@ class performance_probe : public QObject
             return 6;
         }
         file.write(QJsonDocument(result).toJson());
+        return 0;
+    }
+
+    int run_photos(const QString& directory, const QString& output)
+    {
+        window_.open_path(directory, false);
+        if (!wait_idle()) { return 2; }
+        QJsonObject checks;
+        checks["model_count"] = static_cast<qint64>(window_.scene_->all_models_.size());
+        QCollator collator(QLocale(QLocale::English));
+        collator.setNumericMode(true);
+        collator.setCaseSensitivity(Qt::CaseInsensitive);
+        const QList<QAction*> sort_actions{window_.sort_name_action_, window_.sort_time_action_, window_.sort_size_action_};
+        for (int mode = 0; mode < sort_actions.size(); ++mode)
+        {
+            for (bool descending : {false, true})
+            {
+                if (!sort_actions[mode]->isChecked())
+                {
+                    scan_done_ = false;
+                    sort_actions[mode]->trigger();
+                    if (!wait_idle()) { return 3; }
+                }
+                if (window_.sort_desc_action_->isChecked() != descending)
+                {
+                    scan_done_ = false;
+                    window_.sort_desc_action_->trigger();
+                    if (!wait_idle()) { return 3; }
+                }
+                const auto paths = window_.scene_->get_all_paths();
+                for (qsizetype index = 1; index < paths.size(); ++index)
+                {
+                    const QFileInfo a(paths.at(index - 1)), b(paths.at(index));
+                    int comparison = collator.compare(a.fileName(), b.fileName());
+                    if (comparison == 0) { comparison = QString::compare(a.filePath(), b.filePath(), Qt::CaseInsensitive); }
+                    if (mode == 1 && a.lastModified() != b.lastModified())
+                    {
+                        comparison = a.lastModified() < b.lastModified() ? -1 : 1;
+                    }
+                    if (mode == 2 && a.size() != b.size()) { comparison = a.size() < b.size() ? -1 : 1; }
+                    if (descending ? comparison < 0 : comparison > 0) { return 4; }
+                }
+            }
+        }
+        checks["sort_cases_passed"] = 6;
+        // 只抽取极值和旋转图；不复制整个图库路径，也不输出私人文件名。
+        QStringList previews;
+        qint64 largest_pixels = 0;
+        QString largest;
+        int rotated = 0;
+        for (size_t index = 0; index < window_.scene_->all_models_.size(); ++index)
+        {
+            const auto size = window_.scene_->all_models_[index].original_size;
+            const qint64 pixels = static_cast<qint64>(size.width()) * size.height();
+            const QString path = window_.scene_->image_paths_.at(index);
+            if (pixels > largest_pixels) { largest_pixels = pixels; largest = path; }
+            QImageReader reader(path);
+            if (reader.transformation().testFlag(QImageIOHandler::TransformationRotate90))
+            {
+                previews.append(path);
+                ++rotated;
+            }
+        }
+        previews.append(largest);
+        for (int step = 0; step < 12 && !window_.scene_->image_paths_.isEmpty(); ++step)
+        {
+            previews.append(window_.scene_->image_paths_.at(static_cast<qint64>(window_.scene_->image_paths_.size() - 1) * step / 11));
+        }
+        previews.removeDuplicates();
+        int preview_count = 0;
+        int preview_failures = 0;
+        for (const auto& path : previews)
+        {
+            window_.show_image_viewer(path, previews);
+            QElapsedTimer decode;
+            decode.start();
+            while (!window_.viewer_window_->windowTitle().startsWith("Viewer -") &&
+                   window_.viewer_window_->windowTitle() != "加载图片失败" && decode.elapsed() < 30000)
+            {
+                QTest::qWait(20);
+            }
+            if (!window_.viewer_window_->windowTitle().startsWith("Viewer -")) { ++preview_failures; }
+            else
+            {
+                auto* view = window_.viewer_window_->findChild<QGraphicsView*>();
+                auto* item = qgraphicsitem_cast<QGraphicsPixmapItem*>(view->scene()->items().first());
+                const qsizetype index = window_.scene_->image_paths_.indexOf(path);
+                const QSize expected = window_.scene_->all_models_[index].original_size;
+                constexpr qreal kAspectTolerance = 0.01;
+                if (item != nullptr && std::abs((item->pixmap().width() * static_cast<qreal>(expected.height())) /
+                                               (item->pixmap().height() * static_cast<qreal>(expected.width())) - 1) < kAspectTolerance)
+                {
+                    ++preview_count;
+                }
+                else { ++preview_failures; }
+            }
+            QMetaObject::invokeMethod(window_.viewer_window_, "rotate_right");
+            QMetaObject::invokeMethod(window_.viewer_window_, "set_fit_width_mode");
+            QTest::qWait(80);
+            sample("photo_preview");
+            window_.viewer_window_->close();
+            QTest::qWait(40);
+        }
+        checks["rotated_metadata_count"] = rotated;
+        checks["largest_pixels"] = largest_pixels;
+        checks["preview_passed"] = preview_count;
+        checks["preview_failed"] = preview_failures;
+        sample("photos_closed");
+        // 删除路径只指向独立临时副本，原照片目录不进入删除调用。
+        QTemporaryDir scratch;
+        const QString copy = scratch.filePath("imageviewer-delete-copy.jpg");
+        if (largest.isEmpty() || !QFile::copy(largest, copy)) { return 5; }
+        window_.open_path(scratch.path(), false);
+        scan_done_ = false;
+        if (!wait_idle()) { return 6; }
+        window_.show_image_viewer(copy, {copy});
+        QTimer confirm;
+        confirm.setInterval(20);
+        bool trash_failed = false;
+        QObject::connect(&confirm, &QTimer::timeout, &window_, [&copy, &trash_failed]()
+        {
+            auto* box = qobject_cast<QMessageBox*>(QApplication::activeModalWidget());
+            if (box != nullptr && box->windowTitle() == "移到回收站" && box->text().contains(QFileInfo(copy).fileName()))
+            {
+                box->button(QMessageBox::Yes)->click();
+            }
+            else if (box != nullptr && box->windowTitle() == "移到回收站失败")
+            {
+                trash_failed = true;
+                box->button(QMessageBox::Ok)->click();
+            }
+        });
+        confirm.start();
+        window_.on_move_path_to_trash(copy);
+        confirm.stop();
+        if (trash_failed || QFileInfo::exists(copy) || !QFileInfo::exists(largest) || !wait_idle()) { return 7; }
+        checks["temporary_copy_deleted"] = true;
+        checks["model_count_after_delete"] = static_cast<qint64>(window_.scene_->all_models_.size());
+        if (!window_.scene_->all_models_.empty()) { return 8; }
+        window_.viewer_window_->close();
+        QMetaObject::invokeMethod(window_.image_loader_, &image_loader::clear_cache, Qt::BlockingQueuedConnection);
+        QTest::qWait(50);
+        sample("deleted_and_cleared");
+        checks["samples"] = samples_;
+        checks["platform"] = QGuiApplication::platformName();
+        checks["dpr"] = window_.devicePixelRatioF();
+        QFile result(output);
+        if (!result.open(QIODevice::WriteOnly)) { return 9; }
+        result.write(QJsonDocument(checks).toJson());
+        return preview_failures == 0 ? 0 : 10;
+    }
+
+    int run_long(const QString& directory, const QString& output)
+    {
+        const int seconds = qEnvironmentVariableIntValue("IV_BENCH_SECONDS");
+        const QString alternate = qEnvironmentVariable("IV_BENCH_ALTERNATE");
+        const QString fixtures = qEnvironmentVariable("IV_BENCH_FIXTURES");
+        if (seconds < 1 || alternate.isEmpty() || fixtures.isEmpty()) { return 1; }
+        QFile stream(output);
+        if (!stream.open(QIODevice::WriteOnly | QIODevice::NewOnly)) { return 2; }
+        timer_.restart();
+        stream.write(QJsonDocument(QJsonObject{{"event", "start"}, {"seconds_requested", seconds},
+            {"started_utc", QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs)},
+            {"source", directory}, {"alternate", alternate}, {"fixtures", fixtures},
+            {"pid", static_cast<qint64>(getpid())}, {"qt", qVersion()},
+            {"platform", QGuiApplication::platformName()}, {"dpr", window_.devicePixelRatioF()}}).toJson(QJsonDocument::Compact) + '\n');
+        stream.flush();
+        QString phase = "opening";
+        QTimer sampler;
+        sampler.setInterval(30000);
+        QObject::connect(&sampler, &QTimer::timeout, this, [&]() { sample(phase, &stream); });
+        sampler.start();
+        window_.open_path(directory, false);
+        if (!wait_idle()) { return 3; }
+        QStringList previews;
+        qint64 largest_pixels = 0;
+        QString largest;
+        for (size_t index = 0; index < window_.scene_->all_models_.size(); ++index)
+        {
+            const QSize size = window_.scene_->all_models_[index].original_size;
+            const qint64 pixels = static_cast<qint64>(size.width()) * size.height();
+            if (pixels > largest_pixels)
+            {
+                largest_pixels = pixels;
+                largest = window_.scene_->image_paths_.at(index);
+            }
+        }
+        if (!largest.isEmpty()) { previews.append(largest); }
+        if (!window_.scene_->image_paths_.isEmpty())
+        {
+            previews.append(window_.scene_->image_paths_.at(window_.scene_->image_paths_.size() / 2));
+        }
+        QDirIterator extra(fixtures, {"*.gif", "*.webp", "*.png"}, QDir::Files, QDirIterator::Subdirectories);
+        while (extra.hasNext())
+        {
+            const QString path = extra.next();
+            if (QImageReader(path).canRead()) { previews.append(path); }
+        }
+        QRandomGenerator random(0x496d6167);
+        int direction = 1;
+        int cycles = 0;
+        qint64 scroll_steps = 0, jumps = 0, preview_count = 0, switches = 0;
+        auto* scroll = window_.view_->verticalScrollBar();
+        const qint64 duration_ms = static_cast<qint64>(seconds) * 1000;
+        while (timer_.elapsed() < duration_ms)
+        {
+            phase = "continuous";
+            for (int step = 0; step < 120 && timer_.elapsed() < duration_ms; ++step)
+            {
+                if (scroll->value() == scroll->maximum()) { direction = -1; }
+                if (scroll->value() == scroll->minimum()) { direction = 1; }
+                scroll->setValue(scroll->value() + direction * window_.view_->viewport()->height() / 3);
+                ++scroll_steps;
+                QTest::qWait(150);
+            }
+            if (timer_.elapsed() >= duration_ms) { break; }
+            phase = "random";
+            for (int step = 0; step < 16 && timer_.elapsed() < duration_ms; ++step)
+            {
+                scroll->setValue(random.bounded(scroll->maximum() + 1));
+                ++jumps;
+                QTest::qWait(350);
+            }
+            if (timer_.elapsed() >= duration_ms) { break; }
+            phase = "resizing";
+            window_.resize(cycles % 2 == 0 ? 1000 : 1400, 800);
+            QTest::qWait(350);
+            if (!wait_idle()) { return 4; }
+            if (timer_.elapsed() >= duration_ms) { break; }
+            phase = "preview";
+            for (int step = 0; step < 3 && !previews.isEmpty() && timer_.elapsed() < duration_ms; ++step)
+            {
+                const QString path = previews.at((cycles * 3 + step) % previews.size());
+                window_.show_image_viewer(path, previews);
+                QElapsedTimer decode;
+                decode.start();
+                while (!window_.viewer_window_->windowTitle().startsWith("Viewer -") &&
+                       window_.viewer_window_->windowTitle() != "加载图片失败" && decode.elapsed() < 30000)
+                {
+                    QTest::qWait(20);
+                }
+                if (!window_.viewer_window_->windowTitle().startsWith("Viewer -")) { return 5; }
+                ++preview_count;
+                QMetaObject::invokeMethod(window_.viewer_window_, "zoom_in");
+                QMetaObject::invokeMethod(window_.viewer_window_, "rotate_right");
+                QTest::qWait(400);
+            }
+            sample("preview_open", &stream);
+            if (window_.viewer_window_ != nullptr) { window_.viewer_window_->close(); }
+            QTest::qWait(60);
+            sample("preview_closed", &stream);
+            if (timer_.elapsed() >= duration_ms) { break; }
+            phase = "switching";
+            scan_done_ = false;
+            window_.open_path(cycles % 2 == 0 ? alternate : directory, false);
+            ++switches;
+            if (!wait_idle()) { return 6; }
+            sample("directory_ready", &stream);
+            phase = "idle";
+            QElapsedTimer idle;
+            idle.start();
+            const double idle_cpu = process_cpu_ms();
+            QEventLoop idle_loop;
+            QTimer::singleShot(std::clamp<qint64>(duration_ms - timer_.elapsed(), 0, 10000), &idle_loop, &QEventLoop::quit);
+            idle_loop.exec();
+            const double idle_cpu_ms = process_cpu_ms() - idle_cpu;
+            const qint64 idle_duration_ms = idle.elapsed();
+            sample("idle_end", &stream);
+            stream.write(QJsonDocument(QJsonObject{{"event", "idle"}, {"elapsed_ms", timer_.elapsed()},
+                {"duration_ms", idle_duration_ms}, {"cpu_ms", idle_cpu_ms}}).toJson(QJsonDocument::Compact) + '\n');
+            stream.flush();
+            ++cycles;
+            if (cycles % 10 == 0)
+            {
+                phase = "clearing";
+                window_.scene_->clear_items();
+                QMetaObject::invokeMethod(window_.image_loader_, &image_loader::clear_cache, Qt::BlockingQueuedConnection);
+                sample("periodic_cleared", &stream);
+                scan_done_ = false;
+                window_.open_path(directory, false);
+                if (!wait_idle()) { return 7; }
+            }
+        }
+        sampler.stop();
+        if (window_.viewer_window_ != nullptr) { window_.viewer_window_->close(); }
+        window_.scene_->clear_items();
+        QMetaObject::invokeMethod(window_.image_loader_, &image_loader::clear_cache, Qt::BlockingQueuedConnection);
+        QTest::qWait(60);
+        sample("final_cleared", &stream);
+        stream.write(QJsonDocument(QJsonObject{{"event", "finished"}, {"elapsed_ms", timer_.elapsed()},
+            {"finished_utc", QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs)}, {"cycles", cycles},
+            {"scroll_steps", scroll_steps}, {"random_jumps", jumps}, {"previews", preview_count},
+            {"directory_switches", switches}, {"max_active_items", max_active_}, {"max_queue_sampled", max_queue_}}).toJson(QJsonDocument::Compact) + '\n');
+        stream.flush();
         return 0;
     }
 
@@ -841,6 +1150,14 @@ int main(int argc, char** argv)
     if (QString::fromLocal8Bit(argv[1]) == "--ui")
     {
         return probe->run(QString::fromLocal8Bit(argv[2]), QString::fromLocal8Bit(argv[3]), performance_probe::run_mode::capture);
+    }
+    if (QString::fromLocal8Bit(argv[3]) == "photos")
+    {
+        return probe->run_photos(QString::fromLocal8Bit(argv[1]), QString::fromLocal8Bit(argv[2]));
+    }
+    if (QString::fromLocal8Bit(argv[3]) == "long")
+    {
+        return probe->run_long(QString::fromLocal8Bit(argv[1]), QString::fromLocal8Bit(argv[2]));
     }
     auto mode = performance_probe::run_mode::cold;
     if (QString::fromLocal8Bit(argv[3]) == "warm")

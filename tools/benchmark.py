@@ -13,6 +13,8 @@ import subprocess
 import tempfile
 import time
 
+IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp"}
+
 
 def generate(args):
     from PIL import Image, ImageEnhance
@@ -79,6 +81,8 @@ def resident_sample(folder):
     for parent, directories, files in os.walk(folder):
         directories.sort()
         for name in sorted(files):
+            if Path(name).suffix.lower() not in IMAGE_SUFFIXES:
+                continue
             if index % 127 == 0 and len(paths) < 256:
                 paths.append(Path(parent) / name)
             index += 1
@@ -191,24 +195,27 @@ def run(args):
     revision = subprocess.check_output(["git", "rev-parse", "--verify", (args.revision or "HEAD") + "^{commit}"], text=True).strip()
     runner_sha = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     probe_sha = hashlib.sha256(args.probe_source.read_bytes()).hexdigest()
-    for count in args.sizes:
+    for count in args.sizes if args.data is not None else [None]:
+        directory = args.data / str(count) if args.data is not None else args.directory
+        label = str(count) if count is not None else "real"
         with tempfile.TemporaryDirectory(prefix="imageviewer-benchmark-") as cache_path:
             cache = Path(cache_path)
             for mode in ("cold", "warm"):
                 if mode == "cold" and args.evict_files:
-                    for path in (args.data / str(count)).rglob("*"):
-                        if path.is_file():
+                    for path in directory.rglob("*"):
+                        if path.is_file() and path.suffix.lower() in IMAGE_SUFFIXES:
                             with path.open("rb") as file:
                                 os.posix_fadvise(file.fileno(), 0, 0, os.POSIX_FADV_DONTNEED)
-                result = args.output.resolve() / f"{count}-{mode}.json"
+                result = args.output.resolve() / f"{label}-{mode}.json"
                 env = dict(os.environ, QT_QPA_PLATFORM=args.backend, QT_SCALE_FACTOR=str(args.scale),
                            IV_BENCH_WINDOW=args.window,
                            XDG_CONFIG_HOME=str(cache / "config"), XDG_CACHE_HOME=str(cache))
-                pages_before = resident_sample(args.data / str(count))
+                pages_before = resident_sample(directory)
                 device_before = device_snapshot(cache)
+                source_device_before = device_snapshot(directory)
                 memory_before = system_memory()
                 start = time.monotonic()
-                subprocess.run([str(args.exe.resolve()), str(args.data.resolve() / str(count)),
+                subprocess.run([str(args.exe.resolve()), str(directory.resolve()),
                                 str(result), mode if args.scenario == "legacy" else args.scenario], env=env, check=True, timeout=600)
                 document = json.loads(result.read_text())
                 document["revision"] = revision
@@ -218,14 +225,84 @@ def run(args):
                 document["scenario"] = args.scenario
                 device_after = device_snapshot(cache)
                 document["whole_device_delta"] = {key: device_after[key] - value for key, value in device_before.items()}
-                document["whole_device_note"] = "包含桌面及其他进程；不是本进程或SSD介质写入归因"
+                document["whole_device_note"] = "缓存分区，包含其他进程；不是进程或SSD介质独占归因"
+                source_device_after = device_snapshot(directory)
+                document["source_device_delta"] = {key: source_device_after[key] - value for key, value in source_device_before.items()}
+                document["source_device"] = {"major": os.major(directory.stat().st_dev), "minor": os.minor(directory.stat().st_dev)}
+                document["cache_device"] = {"major": os.major(cache.stat().st_dev), "minor": os.minor(cache.stat().st_dev)}
                 document["system_memory_kib"] = {"before": memory_before, "after": system_memory()}
-                document["source_page_sample"] = {"before": pages_before, "after": resident_sample(args.data / str(count))}
+                document["source_page_sample"] = {"before": pages_before, "after": resident_sample(directory)}
                 document["advised_drop_file_pages"] = args.evict_files
-                manifest = args.data / "dataset.json"
-                document["dataset_definition"] = json.loads(manifest.read_text()) if manifest.exists() else {}
+                manifest = args.data / "dataset.json" if args.data is not None else None
+                document["dataset_definition"] = json.loads(manifest.read_text()) if manifest is not None and manifest.exists() else {}
                 result.write_text(json.dumps(document, ensure_ascii=False, indent=2))
-                print(f"{count} {mode}: {time.monotonic() - start:.2f}s -> {result}", flush=True)
+                print(f"{label} {mode}: {time.monotonic() - start:.2f}s -> {result}", flush=True)
+
+
+def long_run(args):
+    for directory in [args.directory, args.alternate, args.fixtures]:
+        if not directory.is_dir():
+            raise SystemExit(f"测试目录不存在：{directory}")
+    args.output.mkdir(parents=True, exist_ok=True)
+    timeline = args.output.resolve() / "timeline.jsonl"
+    if timeline.exists():
+        raise SystemExit("长稳输出已存在，请使用新目录")
+    revision = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+    metadata = {"revision": revision, "seconds_requested": args.seconds,
+                "tracked_changes_at_start": subprocess.check_output(["git", "diff", "HEAD", "--name-only"], text=True).splitlines(),
+                "executable_sha256": hashlib.sha256(args.exe.read_bytes()).hexdigest(),
+                "probe_sha256": hashlib.sha256(Path(__file__).with_name("performance_probe.cc").read_bytes()).hexdigest(),
+                "runner_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
+    with tempfile.TemporaryDirectory(prefix="iv-long-") as temp:
+        env = dict(os.environ, QT_QPA_PLATFORM="xcb", QT_SCALE_FACTOR="1", IV_BENCH_WINDOW="1280x800",
+                   XDG_CACHE_HOME=temp + "/cache", XDG_CONFIG_HOME=temp + "/config", XDG_DATA_HOME=temp + "/data",
+                   IV_BENCH_SECONDS=str(args.seconds), IV_BENCH_ALTERNATE=str(args.alternate.resolve()),
+                   IV_BENCH_FIXTURES=str(args.fixtures.resolve()))
+        monitors = []
+        files = []
+        stderr_bytes = 0
+        metadata["monitors"] = {}
+        process = subprocess.Popen([str(args.exe.resolve()), str(args.directory.resolve()), str(timeline), "long"],
+                                   env=env, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+        try:
+            metadata["pid"] = process.pid
+            (args.output / "run.json").write_text(json.dumps(metadata, indent=2))
+            devices = set()
+            for directory in [args.directory, args.alternate, Path(temp)]:
+                device = directory.stat().st_dev
+                node = Path(f"/sys/dev/block/{os.major(device)}:{os.minor(device)}").resolve()
+                if node.exists():
+                    devices.add(node.parent.name if (node / "partition").exists() else node.name)
+            for name, command in [("iostat", ["iostat", "-x", "-d", "-y", "-p", ",".join(sorted(devices)), "30"]),
+                                  ("pidstat", ["pidstat", "-h", "-u", "-r", "-d", "-p", str(process.pid), "30"])]:
+                available = bool(shutil.which(name)) and (name != "iostat" or bool(devices))
+                metadata["monitors"][name] = {"command": command, "available": available}
+                if available:
+                    log = (args.output / f"{name}.txt").open("w")
+                    files.append(log)
+                    monitors.append((name, subprocess.Popen(command, stdout=log, stderr=log)))
+            with (args.output / "stderr.txt").open("wb") as log:
+                for block in iter(lambda: process.stderr.read(65536), b""):
+                    if stderr_bytes < 1024 * 1024:
+                        log.write(block[:1024 * 1024 - stderr_bytes])
+                    stderr_bytes += len(block)
+            code = process.wait()
+        finally:
+            if process.poll() is None:
+                process.terminate()
+                process.wait()
+            process.stderr.close()
+            for name, monitor in monitors:
+                metadata["monitors"][name]["running_when_stopped"] = monitor.poll() is None
+                monitor.terminate()
+                metadata["monitors"][name]["returncode"] = monitor.wait()
+            for log in files:
+                log.close()
+            metadata.update(returncode=process.returncode, stderr_bytes=stderr_bytes, stderr_truncated=stderr_bytes > 1024 * 1024)
+            (args.output / "run.json").write_text(json.dumps(metadata, indent=2))
+        if code != 0:
+            raise SystemExit(f"长稳进程退出：{code}；保留阶段证据")
+        print(f"long run complete: {timeline}", flush=True)
 
 
 def trace_writes(args):
@@ -302,7 +379,9 @@ trace.add_argument("--output", type=Path, required=True)
 trace.set_defaults(action=trace_writes)
 bench = commands.add_parser("run")
 bench.add_argument("--exe", type=Path, required=True)
-bench.add_argument("--data", type=Path, required=True)
+input_group = bench.add_mutually_exclusive_group(required=True)
+input_group.add_argument("--data", type=Path)
+input_group.add_argument("--directory", type=Path)
 bench.add_argument("--output", type=Path, required=True)
 bench.add_argument("--sizes", type=int, nargs="+", default=[10000, 50000, 100000, 300000])
 bench.add_argument("--revision")
@@ -313,6 +392,14 @@ bench.add_argument("--window", default="1280x800")
 bench.add_argument("--scenario", choices=["legacy", "usage", "paced", "soak", "profile"], default="legacy")
 bench.add_argument("--evict-files", action="store_true")
 bench.set_defaults(action=run)
+long_test = commands.add_parser("long")
+long_test.add_argument("--exe", type=Path, required=True)
+long_test.add_argument("--directory", type=Path, required=True)
+long_test.add_argument("--alternate", type=Path, required=True)
+long_test.add_argument("--fixtures", type=Path, required=True)
+long_test.add_argument("--output", type=Path, required=True)
+long_test.add_argument("--seconds", type=int, default=7200)
+long_test.set_defaults(action=long_run)
 arguments = parser.parse_args()
 if hasattr(arguments, "window") and not re.fullmatch(r"[1-9][0-9]{2,3}x[1-9][0-9]{2,3}", arguments.window):
     parser.error("window 格式为 宽x高，范围100至9999")

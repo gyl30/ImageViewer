@@ -1,0 +1,12 @@
+{
+  "duration_ms": 90208,
+  "cycles": 2,
+  "scroll_steps": 348,
+  "random_jumps": 32,
+  "previews": 6,
+  "directory_switches": 2,
+  "rows": 15,
+  "file_bytes": 20603,
+  "final_clean": true,
+  "queue_cache_bounds": true
+}

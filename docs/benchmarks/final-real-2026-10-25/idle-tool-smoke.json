@@ -1,0 +1,33 @@
+{
+  "elapsed_ms": 32151,
+  "idle_samples": [
+    {
+      "cpu_ms": 4.101000000000113,
+      "duration_ms": 3774,
+      "elapsed_ms": 31921,
+      "event": "idle"
+    }
+  ],
+  "monitor_commands": {
+    "iostat": [
+      "iostat",
+      "-x",
+      "-d",
+      "-y",
+      "-p",
+      "nvme0n1",
+      "30"
+    ],
+    "pidstat": [
+      "pidstat",
+      "-h",
+      "-u",
+      "-r",
+      "-d",
+      "-p",
+      "988109",
+      "30"
+    ]
+  },
+  "monitor_started": true
+}
