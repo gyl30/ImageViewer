@@ -1,0 +1,14 @@
+********* Start testing of correctness_test *********
+Config: Using QtTest library 6.9.3, Qt 6.9.3 (x86_64-little_endian-lp64 shared (dynamic) release build; by GCC 10.3.1 20210422 (Red Hat 10.3.1-1)), ubuntu 22.04
+PASS   : correctness_test::initTestCase()
+QWARN  : correctness_test::desktop_interactions() [DEBUG-anchor] capture 798 -1 0 0 QRectF(-398,-214 798x431)
+QWARN  : correctness_test::desktop_interactions() [DEBUG-anchor] restored -1 QRectF(0,0 0x0) QRectF(0,0 798x431)
+QWARN  : correctness_test::desktop_interactions() [DEBUG-anchor] capture 1691 41 0.502646 0.5 QRectF(-453,2331 1691x848)
+QWARN  : correctness_test::desktop_interactions() [DEBUG-anchor] restored 41 QRectF(10,978 230x172) QRectF(-6,640 1691x848)
+QWARN  : correctness_test::desktop_interactions() [DEBUG-anchor] capture 784 37 0.840116 0.5 QRectF(454,849 784x431)
+QWARN  : correctness_test::desktop_interactions() [DEBUG-anchor] restored 37 QRectF(526,2362 248x186) QRectF(-7,2303 784x431)
+FAIL!  : correctness_test::desktop_interactions() 'std::abs(scene->all_models_[index].layout_rect.center().y() - visible.center().y()) < visible.height() / 4' returned FALSE. (maximized=0 imageY=2713 viewY=2518.5 height=431 width=784)
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(1328)]
+PASS   : correctness_test::cleanupTestCase()
+Totals: 2 passed, 1 failed, 0 skipped, 0 blacklisted, 1298ms
+********* Finished testing of correctness_test *********

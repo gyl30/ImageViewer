@@ -30,6 +30,8 @@
 #include <QAction>
 #include <QScrollBar>
 #include <QScopeGuard>
+#include <QWheelEvent>
+#include <QScreen>
 
 namespace
 {
@@ -181,6 +183,7 @@ class correctness_test : public QObject
     void only_visible_requests();
     void scrolled_result_skips_old();
     void viewer_status_tracks_loading();
+    void desktop_interactions();
 };
 
 void correctness_test::large_visible_batch()
@@ -300,6 +303,7 @@ void correctness_test::relayout_keeps_anchor()
     QTRY_COMPARE(scene.last_layout_index_, size_t(2000));
     QTest::qWait(200);
     QVERIFY(scene.focus_path("1000.jpg"));
+    scene.clearSelection();
     QTest::qWait(40);
     for (int width : {1150, 620, 800})
     {
@@ -1277,6 +1281,119 @@ void correctness_test::viewer_error_is_visible()
     QCOMPARE(view->scene()->items().size(), 1);
     const QRectF visible = view->mapToScene(view->viewport()->rect()).boundingRect();
     QVERIFY(visible.contains(view->scene()->items().first()->sceneBoundingRect().center()));
+}
+
+void correctness_test::desktop_interactions()
+{
+    QTemporaryDir dir;
+    QImage image(800, 600, QImage::Format_RGB32);
+    image.fill(Qt::cyan);
+    for (int index = 0; index < 80; ++index)
+    {
+        QVERIFY(image.save(dir.filePath(QString("image-%1.png").arg(index, 3, 10, QChar('0')))));
+    }
+    QFile gif(dir.filePath("animation.gif"));
+    QVERIFY(gif.open(QIODevice::WriteOnly));
+    gif.write(QByteArray::fromBase64(kAnimatedGif));
+    gif.close();
+    QByteArray bmp;
+    QBuffer buffer(&bmp);
+    QVERIFY(buffer.open(QIODevice::WriteOnly));
+    QVERIFY(image.save(&buffer, "BMP"));
+    QFile broken(dir.filePath("z-broken.bmp"));
+    QVERIFY(broken.open(QIODevice::WriteOnly));
+    broken.write(bmp.left(54));
+    broken.close();
+    main_window window;
+    window.resize(800, 500);
+    window.show();
+    if (QGuiApplication::platformName() == "xcb")
+    {
+        QVERIFY(QTest::qWaitForWindowExposed(&window));
+    }
+    QMimeData mime;
+    mime.setUrls({QUrl::fromLocalFile(dir.path())});
+    QDragEnterEvent enter(QPoint(1, 1), Qt::CopyAction, &mime, Qt::LeftButton, Qt::NoModifier);
+    QApplication::sendEvent(&window, &enter);
+    QDropEvent drop(QPointF(1, 1), Qt::CopyAction, &mime, Qt::LeftButton, Qt::NoModifier);
+    QApplication::sendEvent(&window, &drop);
+    QVERIFY(drop.isAccepted());
+    auto* scene = window.findChild<waterfall_scene*>();
+    auto* view = window.findChild<waterfall_view*>();
+    QVERIFY(scene != nullptr && view != nullptr);
+    QTRY_COMPARE(scene->last_layout_index_, size_t(82));
+    qInfo() << "Desktop" << QGuiApplication::platformName() << "DPR" << view->devicePixelRatioF();
+    const QString anchor_path = dir.filePath("image-040.png");
+    QVERIFY(scene->focus_path(anchor_path));
+    QTest::qWait(40);
+    for (bool maximize : {true, false})
+    {
+        if (maximize) { window.showMaximized(); }
+        else { window.showNormal(); }
+        QTest::qWait(300);
+        QTRY_COMPARE(qRound(scene->sceneRect().width()), view->viewport()->width());
+        QTRY_VERIFY(!scene->is_laying_out_);
+        const auto index = scene->image_paths_.indexOf(anchor_path);
+        const QRectF visible = view->mapToScene(view->viewport()->rect()).boundingRect();
+        QVERIFY2(std::abs(scene->all_models_[index].layout_rect.center().y() - visible.center().y()) < visible.height() / 4,
+                 qPrintable(QString("maximized=%1 imageY=%2 viewY=%3 height=%4 width=%5").arg(maximize)
+                    .arg(scene->all_models_[index].layout_rect.center().y()).arg(visible.center().y()).arg(visible.height()).arg(view->viewport()->width())));
+    }
+    const int index = scene->image_paths_.indexOf(anchor_path);
+    QTRY_VERIFY(scene->active_items_.contains(index));
+    QTRY_COMPARE(scene->active_items_[index]->state(), waterfall_item::load_state::ready);
+    const QPoint point = view->mapFromScene(scene->all_models_[index].layout_rect.center());
+    QVERIFY(view->viewport()->rect().contains(point));
+    QTest::mouseClick(view->viewport(), Qt::LeftButton, Qt::NoModifier, point);
+    QVERIFY(scene->active_items_[index]->isSelected());
+    QTest::mouseDClick(view->viewport(), Qt::LeftButton, Qt::NoModifier, point);
+    QTRY_VERIFY(window.findChild<image_viewer_window*>() != nullptr);
+    auto* viewer = window.findChild<image_viewer_window*>();
+    QVERIFY(viewer->isVisible());
+    QTRY_VERIFY(viewer->windowTitle().startsWith("Viewer -"));
+    QCOMPARE(viewer->current_image_path(), anchor_path);
+    auto* preview = viewer->findChild<QGraphicsView*>();
+    const qreal old_scale = preview->transform().m11();
+    const QPointF center = preview->viewport()->rect().center();
+    QWheelEvent wheel(center, preview->viewport()->mapToGlobal(center.toPoint()), QPoint(), QPoint(0, 120),
+                      Qt::NoButton, Qt::ControlModifier, Qt::NoScrollPhase, false);
+    QApplication::sendEvent(preview->viewport(), &wheel);
+    QVERIFY(preview->transform().m11() > old_scale);
+    const QRectF before = preview->scene()->items().first()->sceneBoundingRect();
+    QVERIFY(QMetaObject::invokeMethod(viewer, "rotate_right"));
+    const QRectF after = preview->scene()->items().first()->sceneBoundingRect();
+    QCOMPARE(qRound(after.width()), qRound(before.height()));
+    QTest::keyClick(preview, Qt::Key_Right);
+    QTRY_COMPARE(viewer->current_image_path(), dir.filePath("image-041.png"));
+    QTRY_VERIFY(viewer->windowTitle().contains("image-041.png"));
+    viewer->set_image_path(gif.fileName());
+    QTRY_VERIFY(viewer->findChild<QMovie*>() != nullptr);
+    viewer->close();
+    QTRY_VERIFY(viewer->findChild<QMovie*>() == nullptr);
+    window.raise();
+    window.activateWindow();
+    QVERIFY(scene->focus_path(anchor_path));
+    QTest::qWait(40);
+    const QPoint reopen_point = view->mapFromScene(scene->all_models_[index].layout_rect.center());
+    QVERIFY(view->viewport()->rect().contains(reopen_point));
+    QTest::mouseClick(view->viewport(), Qt::LeftButton, Qt::NoModifier, reopen_point);
+    QTest::mouseDClick(view->viewport(), Qt::LeftButton, Qt::NoModifier, reopen_point);
+    QTRY_VERIFY(viewer->isVisible() && viewer->windowTitle().contains("image-040.png"));
+    viewer->close();
+    QVERIFY(scene->focus_path(broken.fileName()));
+    const int failed_index = scene->image_paths_.indexOf(broken.fileName());
+    QTRY_VERIFY(scene->active_items_.contains(failed_index));
+    QTRY_COMPARE(scene->active_items_[failed_index]->state(), waterfall_item::load_state::failed);
+    const QString capture = qEnvironmentVariable("IV_UI_CAPTURE");
+    if (!capture.isEmpty())
+    {
+        window.raise();
+        window.activateWindow();
+        QTest::qWait(200);
+        QVERIFY(window.screen()->grabWindow(window.winId()).save(capture));
+    }
+    window.close();
+    QVERIFY(!viewer->isVisible());
 }
 
 void correctness_test::viewer_status_tracks_loading()

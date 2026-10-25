@@ -298,16 +298,23 @@ void waterfall_scene::on_layout_finished()
     if (view != nullptr)
     {
         const QRectF visible = view->mapToScene(view->viewport()->rect()).boundingRect();
-        qreal distance = std::numeric_limits<qreal>::max();
+        std::pair<qreal, qreal> distance{std::numeric_limits<qreal>::max(), std::numeric_limits<qreal>::max()};
+        bool anchor_selected = false;
         for (auto it = active_items_.cbegin(); it != active_items_.cend(); ++it)
         {
             const QRectF rect = all_models_[it.key()].layout_rect;
-            const qreal candidate = std::abs(rect.center().y() - visible.center().y()) * 10000 +
-                                    std::abs(rect.center().x() - visible.center().x());
-            if (rect.intersects(visible) && (candidate < distance || (candidate == distance && it.key() < anchor)))
+            const std::pair<qreal, qreal> candidate{std::abs(rect.center().y() - visible.center().y()),
+                                                  std::abs(rect.center().x() - visible.center().x())};
+            const bool selected = it.value()->isSelected();
+            const bool visible_anchor = rect.intersects(visible) ||
+                (selected && rect.bottom() > visible.top() && rect.top() < visible.bottom());
+            if (visible_anchor &&
+                ((selected && !anchor_selected) || (selected == anchor_selected &&
+                 (candidate < distance || (candidate == distance && it.key() < anchor)))))
             {
                 anchor = it.key();
                 distance = candidate;
+                anchor_selected = selected;
                 image_fraction = std::clamp((visible.center().y() - rect.top()) / rect.height(), 0.0, 1.0);
                 viewport_fraction = (rect.top() + image_fraction * rect.height() - visible.top()) / visible.height();
             }
@@ -385,7 +392,12 @@ void waterfall_scene::update_viewport(const QRectF& visible_rect)
     for (int i = start_idx; i < end_idx; ++i)
     {
         const auto& model = all_models_[i];
-        if (!visible_rect.intersects(model.layout_rect))
+        const auto* active = active_items_.value(i, nullptr);
+        // 变窄时旧列可能暂时移出横向视口，保留选中卡片直到重排应用。
+        const bool keep_anchor = sceneRect().width() != visible_rect.width() && active != nullptr &&
+                                 active->isSelected() && model.layout_rect.bottom() > visible_rect.top() &&
+                                 model.layout_rect.top() < visible_rect.bottom();
+        if (!visible_rect.intersects(model.layout_rect) && !keep_anchor)
         {
             continue;
         }
