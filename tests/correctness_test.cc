@@ -1603,6 +1603,14 @@ void correctness_test::scanner_formats()
     QCOMPARE(batches.size(), 1);
     const auto images = qvariant_cast<QList<image_meta>>(batches.first().first());
     QCOMPARE(images.first().original_size, expected);
+    image_viewer_window viewer;
+    viewer.set_image_path(path);
+    viewer.show();
+    QTRY_VERIFY(viewer.windowTitle().startsWith("Viewer -"));
+    auto* view = viewer.findChild<QGraphicsView*>();
+    auto* item = qgraphicsitem_cast<QGraphicsPixmapItem*>(view->scene()->items().first());
+    QVERIFY(item != nullptr);
+    QCOMPARE(item->pixmap().size(), expected);
 }
 
 void correctness_test::jpeg_cache_roundtrip()
