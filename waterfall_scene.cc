@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <utility>
 #include <QPixmap>
 #include <QMenu>
@@ -290,6 +291,29 @@ void waterfall_scene::on_layout_finished()
         return;
     }
 
+    QGraphicsView* view = views().isEmpty() ? nullptr : views().first();
+    int anchor = -1;
+    qreal image_fraction = 0;
+    qreal viewport_fraction = 0;
+    if (view != nullptr)
+    {
+        const QRectF visible = view->mapToScene(view->viewport()->rect()).boundingRect();
+        qreal distance = std::numeric_limits<qreal>::max();
+        for (auto it = active_items_.cbegin(); it != active_items_.cend(); ++it)
+        {
+            const QRectF rect = all_models_[it.key()].layout_rect;
+            const qreal candidate = std::abs(rect.center().y() - visible.center().y()) * 10000 +
+                                    std::abs(rect.center().x() - visible.center().x());
+            if (rect.intersects(visible) && (candidate < distance || (candidate == distance && it.key() < anchor)))
+            {
+                anchor = it.key();
+                distance = candidate;
+                image_fraction = std::clamp((visible.center().y() - rect.top()) / rect.height(), 0.0, 1.0);
+                viewport_fraction = (rect.top() + image_fraction * rect.height() - visible.top()) / visible.height();
+            }
+        }
+    }
+
     size_t count = std::min(result.count, all_models_.size());
 
     for (size_t i = 0; i < count; ++i)
@@ -316,14 +340,18 @@ void waterfall_scene::on_layout_finished()
     else
     {
         setSceneRect(0, 0, result.view_width, result.max_height + 50);
-
-        if (!views().isEmpty())
+    }
+    if (view != nullptr)
+    {
+        if (anchor >= 0 && static_cast<size_t>(anchor) < count)
         {
-            QGraphicsView* v = views().first();
-            QRectF visible_rect = v->mapToScene(v->viewport()->rect()).boundingRect();
-
-            update_viewport(visible_rect);
+            // 同一代图库内索引身份稳定；完成前再取锚点，保留布局期间的新滚动位置。
+            const QRectF rect = all_models_[anchor].layout_rect;
+            const qreal height = view->mapToScene(view->viewport()->rect()).boundingRect().height();
+            view->centerOn(sceneRect().center().x(), rect.top() + image_fraction * rect.height() +
+                           (0.5 - viewport_fraction) * height);
         }
+        update_viewport(view->mapToScene(view->viewport()->rect()).boundingRect());
     }
 }
 

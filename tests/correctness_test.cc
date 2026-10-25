@@ -109,6 +109,7 @@ class correctness_test : public QObject
     void queued_cache_clear();
     void relayout_preserves_image_data();
     void relayout_preserves_image();
+    void relayout_keeps_anchor();
     void item_reuse_resets_image();
     void latest_layout_width_data();
     void latest_layout_width();
@@ -258,6 +259,55 @@ void correctness_test::relayout_preserves_image()
     QTRY_COMPARE(scene.sceneRect().width(), 640);
     QCOMPARE(item->pixmap().toImage().pixelColor(0, 0), QColor(Qt::red));
     QCOMPARE(item->mapRectToScene(QRectF(item->pixmap().rect())).width(), 305);
+}
+
+void correctness_test::relayout_keeps_anchor()
+{
+    waterfall_scene scene;
+    waterfall_view view;
+    view.setScene(&scene);
+    connect(&view, &waterfall_view::view_resized, &scene, &waterfall_scene::layout_models);
+    view.resize(800, 600);
+    view.show();
+    QList<image_meta> images;
+    for (int index = 0; index < 2000; ++index)
+    {
+        images.append({QString::number(index) + ".jpg", QSize(400, 200 + index % 7 * 100)});
+    }
+    scene.add_images(images);
+    scene.layout_models(view.viewport()->width());
+    QTRY_COMPARE(scene.last_layout_index_, size_t(2000));
+    QTest::qWait(200);
+    QVERIFY(scene.focus_path("1000.jpg"));
+    QTest::qWait(40);
+    for (int width : {1150, 620, 800})
+    {
+        const QRectF visible = view.mapToScene(view.viewport()->rect()).boundingRect();
+        int anchor = -1;
+        qreal distance = std::numeric_limits<qreal>::max();
+        for (auto it = scene.active_items_.cbegin(); it != scene.active_items_.cend(); ++it)
+        {
+            const QRectF rect = scene.all_models_[it.key()].layout_rect;
+            const qreal candidate = std::abs(rect.center().y() - visible.center().y()) * 10000 +
+                                    std::abs(rect.center().x() - visible.center().x());
+            if (rect.intersects(visible) && candidate < distance)
+            {
+                anchor = it.key();
+                distance = candidate;
+            }
+        }
+        QVERIFY(anchor >= 0);
+        const QRectF old_rect = scene.all_models_[anchor].layout_rect;
+        const qreal fraction = std::clamp((visible.center().y() - old_rect.top()) / old_rect.height(), 0.0, 1.0);
+        const qreal relative = (old_rect.top() + fraction * old_rect.height() - visible.top()) / visible.height();
+        view.resize(width, 600);
+        QTest::qWait(220);
+        QTRY_VERIFY(!scene.is_laying_out_);
+        const QRectF after = view.mapToScene(view.viewport()->rect()).boundingRect();
+        const QRectF rect = scene.all_models_[anchor].layout_rect;
+        const qreal actual = (rect.top() + fraction * rect.height() - after.top()) / after.height();
+        QVERIFY2(std::abs(actual - relative) < 0.02, qPrintable(QString("image=%1 relative=%2 actual=%3 width=%4").arg(anchor).arg(relative).arg(actual).arg(width)));
+    }
 }
 
 void correctness_test::item_reuse_resets_image()

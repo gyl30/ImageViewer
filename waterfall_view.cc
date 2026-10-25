@@ -8,6 +8,7 @@ waterfall_view::waterfall_view(QWidget* parent) : QGraphicsView(parent)
     setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setDragMode(QGraphicsView::ScrollHandDrag);
+    setResizeAnchor(QGraphicsView::AnchorViewCenter);
 
     debounce_timer_ = new QTimer(this);
     debounce_timer_->setSingleShot(true);
