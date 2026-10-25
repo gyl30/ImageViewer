@@ -12,6 +12,7 @@ from pathlib import Path
 import subprocess
 import tempfile
 import time
+import statistics
 
 IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp"}
 
@@ -305,6 +306,60 @@ def long_run(args):
         print(f"long run complete: {timeline}", flush=True)
 
 
+def analyze_long(args):
+    records = [json.loads(line) for line in args.input.read_text().splitlines()]
+    header = records[0]
+    finished = next((row for row in records if row.get("event") == "finished"), None)
+    samples = [row for row in records if "phase" in row]
+    warmup_ms = 20 * 60 * 1000
+    bin_ms = 20 * 60 * 1000
+    groups = {}
+    for row in samples:
+        if row["elapsed_ms"] < warmup_ms:
+            continue
+        key = (row["phase"], row["model_count"], row["elapsed_ms"] // bin_ms)
+        groups.setdefault(key, []).append(row)
+    bins = []
+    for (phase, models, period), rows in sorted(groups.items()):
+        bins.append({"phase": phase, "models": models, "minute_start": period * 20,
+                     "samples": len(rows),
+                     "rss_median_mib": statistics.median(row["rss_kib"] for row in rows) / 1024,
+                     "rss_min_mib": min(row["rss_kib"] for row in rows) / 1024,
+                     "rss_max_mib": max(row["rss_kib"] for row in rows) / 1024,
+                     "pss_median_mib": statistics.median(row["pss_kib"] for row in rows) / 1024,
+                     "threads_range": [min(row["threads"] for row in rows), max(row["threads"] for row in rows)],
+                     "fd_range": [min(row["file_descriptors"] for row in rows), max(row["file_descriptors"] for row in rows)]})
+    trends = []
+    for phase in ("idle_end", "preview_closed", "periodic_cleared"):
+        for models in sorted({row["model_count"] for row in samples if row["phase"] == phase}):
+            rows = [row for row in samples if row["phase"] == phase and row["model_count"] == models and row["elapsed_ms"] >= warmup_ms]
+            if len(rows) < 2:
+                continue
+            hours = [(row["elapsed_ms"] - rows[0]["elapsed_ms"]) / 3600000 for row in rows]
+            rss = [row["rss_kib"] / 1024 for row in rows]
+            mean_time, mean_rss = statistics.mean(hours), statistics.mean(rss)
+            variance = sum((time - mean_time) ** 2 for time in hours)
+            slope = sum((time - mean_time) * (memory - mean_rss) for time, memory in zip(hours, rss)) / variance if variance else 0
+            trends.append({"phase": phase, "models": models, "samples": len(rows),
+                           "rss_ols_mib_per_hour": slope, "note": "描述趋势，不自动把正斜率判为泄漏"})
+    idle = [row for row in records if row.get("event") == "idle" and row["elapsed_ms"] >= warmup_ms]
+    cleanup = [row for row in samples if row["phase"] in ("periodic_cleared", "final_cleared")]
+    result = {"complete": finished is not None and finished["elapsed_ms"] >= header["seconds_requested"] * 1000,
+              "requested_seconds": header["seconds_requested"], "finished": finished,
+              "warmup_excluded_minutes": 20, "sample_count": len(samples), "timeline_bytes": args.input.stat().st_size,
+              "peak_rss_mib": max(max(row["peak_rss_kib"], row["rusage_peak_rss_kib"]) for row in samples) / 1024,
+              "max_sampled_pss_mib": max(row["pss_kib"] for row in samples) / 1024,
+              "max_threads": max(row["threads"] for row in samples),
+              "max_file_descriptors": max(row["file_descriptors"] for row in samples),
+              "max_sampled_queue": max(row["queue_tasks"] for row in samples),
+              "cache_budget_respected": all(row["cache_logical_bytes"] <= row["cache_budget_bytes"] == 64 * 1024 * 1024 for row in samples),
+              "final_sample": samples[-1], "cleanup_samples": cleanup, "bins": bins, "trends": trends}
+    if idle:
+        result["idle_core_cpu_percent_median"] = statistics.median(row["cpu_ms"] / row["duration_ms"] * 100 for row in idle if row["duration_ms"] > 0)
+    args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2))
+    print(f"complete={result['complete']}, samples={len(samples)}, peak={result['peak_rss_mib']:.1f}MiB")
+
+
 def trace_writes(args):
     args.output.mkdir(parents=True, exist_ok=True)
     for mode in ("usage", "paced"):
@@ -400,6 +455,10 @@ long_test.add_argument("--fixtures", type=Path, required=True)
 long_test.add_argument("--output", type=Path, required=True)
 long_test.add_argument("--seconds", type=int, default=7200)
 long_test.set_defaults(action=long_run)
+analysis = commands.add_parser("analyze-long")
+analysis.add_argument("--input", type=Path, required=True)
+analysis.add_argument("--output", type=Path, required=True)
+analysis.set_defaults(action=analyze_long)
 arguments = parser.parse_args()
 if hasattr(arguments, "window") and not re.fullmatch(r"[1-9][0-9]{2,3}x[1-9][0-9]{2,3}", arguments.window):
     parser.error("window 格式为 宽x高，范围100至9999")
