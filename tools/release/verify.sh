@@ -15,7 +15,7 @@ case "$package" in
         dpkg-query -W -f='${binary:Package}\t${Version}\t${Installed-Size}\n' > "$output/application-packages.tsv"
         ldd /usr/bin/ImageViewer > "$output/ldd.txt"
         apt-get install -y --no-install-recommends \
-            xvfb xauth xdotool openbox libglib2.0-bin dbus-x11 x11-utils passwd util-linux diffutils desktop-file-utils
+            xvfb xauth xdotool wmctrl openbox libglib2.0-bin dbus-x11 x11-utils passwd util-linux diffutils desktop-file-utils
         dpkg-query -L imageviewer > "$output/owned-paths.txt"
         dpkg-query -W > "$output/runtime-packages.txt"
         ;;
@@ -25,7 +25,7 @@ case "$package" in
         rpm -qa --qf '%{NAME}.%{ARCH}\t%{EVR}\t%{SIZE}\n' > "$output/application-packages.tsv"
         ldd /usr/bin/ImageViewer > "$output/ldd.txt"
         dnf install -y --setopt=install_weak_deps=False \
-            xorg-x11-server-Xvfb xauth xdotool openbox glib2 dbus-daemon xprop shadow-utils util-linux diffutils desktop-file-utils
+            xorg-x11-server-Xvfb xauth xdotool wmctrl openbox glib2 dbus-daemon xprop shadow-utils util-linux diffutils desktop-file-utils
         rpm -ql imageviewer > "$output/owned-paths.txt"
         rpm -qa | sort > "$output/runtime-packages.txt"
         ;;
