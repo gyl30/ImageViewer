@@ -188,6 +188,9 @@ class correctness_test : public QObject
     void viewer_status_tracks_loading();
     void desktop_interactions();
     void trash_fresh_data_home();
+    void thumbnail_native_size_data();
+    void thumbnail_native_size();
+    void item_uses_smooth_transform();
 };
 
 void correctness_test::large_visible_batch()
@@ -1600,6 +1603,62 @@ void correctness_test::viewer_snapshot_is_shared()
     QVERIFY(!paths.isDetached());
     QMetaObject::invokeMethod(&viewer, "load_next_image");
     QVERIFY(!paths.isDetached());
+}
+
+void correctness_test::thumbnail_native_size_data()
+{
+    QTest::addColumn<QByteArray>("format");
+    for (const auto* format : {"jpg", "png", "webp", "bmp", "gif"})
+    {
+        QTest::newRow(format) << QByteArray(format);
+    }
+}
+
+void correctness_test::thumbnail_native_size()
+{
+    QFETCH(QByteArray, format);
+    QTemporaryDir dir;
+    const QString path = dir.filePath("small." + QString::fromLatin1(format));
+    QSize expected(64, 32);
+    if (format == "gif")
+    {
+        QFile file(path);
+        QVERIFY(file.open(QIODevice::WriteOnly));
+        file.write(QByteArray::fromBase64(kAnimatedGif));
+        expected = QSize(2, 2);
+    }
+    else
+    {
+        QImage image(expected, QImage::Format_RGB32);
+        image.fill(Qt::blue);
+        QVERIFY(image.save(path));
+    }
+    loader_worker worker;
+    QSignalSpy loaded(worker.loader, &image_loader::thumbnail_loaded);
+    worker.thread.start();
+    worker.loader->request_thumbnails({{1, path, QSize(256, 128), 1}});
+    QTRY_COMPARE(loaded.size(), 1);
+    QCOMPARE(qvariant_cast<QImage>(loaded.first()[2]).size(), expected);
+}
+
+void correctness_test::item_uses_smooth_transform()
+{
+    QGraphicsScene scene;
+    scene.setSceneRect(0, 0, 200, 100);
+    auto* item = new waterfall_item();
+    scene.addItem(item);
+    item->bind_model({QSize(2, 1), QRectF(0, 0, 200, 100)}, 0, "small.png", 200, 1);
+    QImage source(2, 1, QImage::Format_RGB32);
+    source.setPixelColor(0, 0, Qt::red);
+    source.setPixelColor(1, 0, Qt::blue);
+    item->set_pixmap_safe(QPixmap::fromImage(source));
+    QImage output(200, 100, QImage::Format_RGB32);
+    output.fill(Qt::white);
+    QPainter painter(&output);
+    scene.render(&painter);
+    painter.end();
+    const QColor center = output.pixelColor(99, 50);
+    QVERIFY2(center.red() > 0 && center.blue() > 0, qPrintable(center.name()));
 }
 
 void correctness_test::trash_fresh_data_home()

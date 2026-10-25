@@ -16,7 +16,7 @@
 
 namespace
 {
-constexpr int kThumbnailCacheVersion = 3;
+constexpr int kThumbnailCacheVersion = 4;
 constexpr qint64 kMaxDiskCacheBytes = 128LL * 1024 * 1024;
 constexpr int kMaxDiskCacheFiles = 1000;
 constexpr int kCacheRetainPercent = 80;
@@ -210,7 +210,7 @@ void image_loader::load_image_internal(const load_task& current_task)
             {
                 scaled_size.transpose();
             }
-            scaled_size = source_size.scaled(scaled_size, Qt::KeepAspectRatio).expandedTo(QSize(1, 1));
+            scaled_size = source_size.scaled(scaled_size, Qt::KeepAspectRatio).expandedTo(QSize(1, 1)).boundedTo(source_size);
             if (exceeds_allocation_limit)
             {
                 const double scale_factor = std::sqrt(kMaxImageAllocMB / estimated_mb);
@@ -231,7 +231,8 @@ void image_loader::load_image_internal(const load_task& current_task)
     image = reader.read();
     if (!image.isNull())
     {
-        if (!current_task.target_size.isEmpty() && image.size() != current_task.target_size)
+        if (!current_task.target_size.isEmpty() &&
+            (image.width() > current_task.target_size.width() || image.height() > current_task.target_size.height()))
         {
             image = image.scaled(current_task.target_size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }

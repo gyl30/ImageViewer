@@ -1,0 +1,28 @@
+********* Start testing of correctness_test *********
+Config: Using QtTest library 6.9.3, Qt 6.9.3 (x86_64-little_endian-lp64 shared (dynamic) release build; by GCC 10.3.1 20210422 (Red Hat 10.3.1-1)), ubuntu 22.04
+PASS   : correctness_test::initTestCase()
+FAIL!  : correctness_test::thumbnail_native_size(jpg) Compared values are not the same
+   Actual   (qvariant_cast<QImage>(loaded.first()[2]).size()): QSize(256x128)
+   Expected (expected)                                       : QSize(64x32)
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(1641)]
+FAIL!  : correctness_test::thumbnail_native_size(png) Compared values are not the same
+   Actual   (qvariant_cast<QImage>(loaded.first()[2]).size()): QSize(256x128)
+   Expected (expected)                                       : QSize(64x32)
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(1641)]
+FAIL!  : correctness_test::thumbnail_native_size(webp) Compared values are not the same
+   Actual   (qvariant_cast<QImage>(loaded.first()[2]).size()): QSize(256x128)
+   Expected (expected)                                       : QSize(64x32)
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(1641)]
+FAIL!  : correctness_test::thumbnail_native_size(bmp) Compared values are not the same
+   Actual   (qvariant_cast<QImage>(loaded.first()[2]).size()): QSize(256x128)
+   Expected (expected)                                       : QSize(64x32)
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(1641)]
+FAIL!  : correctness_test::thumbnail_native_size(gif) Compared values are not the same
+   Actual   (qvariant_cast<QImage>(loaded.first()[2]).size()): QSize(128x128)
+   Expected (expected)                                       : QSize(2x2)
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(1641)]
+FAIL!  : correctness_test::item_uses_smooth_transform() 'center.red() > 0 && center.blue() > 0' returned FALSE. (#ff0000)
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(1661)]
+PASS   : correctness_test::cleanupTestCase()
+Totals: 2 passed, 6 failed, 0 skipped, 0 blacklisted, 254ms
+********* Finished testing of correctness_test *********

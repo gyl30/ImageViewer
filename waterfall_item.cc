@@ -139,6 +139,7 @@ void waterfall_item::paint(QPainter* painter, const QStyleOptionGraphicsItem* op
     clip.addRoundedRect(bounds, radius, radius);
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing);
+    painter->setRenderHint(QPainter::SmoothPixmapTransform, transformationMode() == Qt::SmoothTransformation);
     painter->setClipPath(clip);
     if (state_ == load_state::ready || state_ == load_state::refreshing)
     {
