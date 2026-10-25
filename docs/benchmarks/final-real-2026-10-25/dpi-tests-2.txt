@@ -1,0 +1,13 @@
+********* Start testing of correctness_test *********
+Config: Using QtTest library 6.9.3, Qt 6.9.3 (x86_64-little_endian-lp64 shared (dynamic) release build; by GCC 10.3.1 20210422 (Red Hat 10.3.1-1)), ubuntu 22.04
+PASS   : correctness_test::initTestCase()
+QINFO  : correctness_test::desktop_interactions() Desktop "xcb" DPR 2
+PASS   : correctness_test::desktop_interactions()
+PASS   : correctness_test::scanner_formats(jpg)
+PASS   : correctness_test::scanner_formats(png)
+PASS   : correctness_test::scanner_formats(bmp)
+PASS   : correctness_test::scanner_formats(gif)
+PASS   : correctness_test::scanner_formats(webp)
+PASS   : correctness_test::cleanupTestCase()
+Totals: 8 passed, 0 failed, 0 skipped, 0 blacklisted, 1483ms
+********* Finished testing of correctness_test *********

@@ -1,0 +1,33 @@
+{
+  "interval_seconds": 30,
+  "readable_process_rows": 315,
+  "available_processes_with_nonzero_io": [
+    {
+      "command": "gnome-shell",
+      "read_kib_per_second": 0.13,
+      "write_kib_per_second": 0.0
+    },
+    {
+      "command": "codex",
+      "read_kib_per_second": 5.33,
+      "write_kib_per_second": 95.3
+    },
+    {
+      "command": "firefox",
+      "read_kib_per_second": 0.27,
+      "write_kib_per_second": 0.13
+    },
+    {
+      "command": "codex",
+      "read_kib_per_second": 2.8,
+      "write_kib_per_second": 0.0
+    },
+    {
+      "command": "codex",
+      "read_kib_per_second": 0.0,
+      "write_kib_per_second": 5.86
+    }
+  ],
+  "unreadable_process_rows": 430,
+  "note": "长测之后、被测程序退出后的独立背景抽样；普通用户对部分进程不可读，不能回推或扣除两小时期间背景I/O。"
+}

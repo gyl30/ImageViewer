@@ -1,0 +1,13 @@
+{
+  "root": "/home/gyl/fk/fs/tmp/download",
+  "verified_files": 1304,
+  "verified_bytes": 1929290568,
+  "changed_content_size_mtime_or_mode": 0,
+  "added_candidates": 0,
+  "removed_candidates": 0,
+  "before_records_sha256": "4fc24eaa9142c98b059539c0167312134427a9078d16489ff549085f6776edc3",
+  "after_records_sha256": "4fc24eaa9142c98b059539c0167312134427a9078d16489ff549085f6776edc3",
+  "records_match": true,
+  "digest_method": "SHA256(json.dumps(records,ensure_ascii=False,sort_keys=True,separators=(comma,colon)))；记录顺序沿用初始私有清单，字段包括相对名/size/mtime_ns/mode/逐文件SHA256；仓库不保存名称明细",
+  "note": "只读逐文件验证；不把正常读取的atime变化当作内容改写"
+}

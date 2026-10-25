@@ -1,0 +1,19 @@
+{
+  "root": "/home/gyl/fk/fs/tmp/download",
+  "candidates": 1304,
+  "valid_header_formats": {
+    "JPEG": 598,
+    "PNG": 705
+  },
+  "invalid_headers": 1,
+  "orientation": {
+    "1": 1285,
+    "6": 2,
+    "0": 16
+  },
+  "source_bytes": 1929290568,
+  "content_inventory_sha256": "4118e41445facbc6c2eb79c79812d7a89ddbd1b60f61d39af0c2e9ccf06f34d8",
+  "method": "原图只读，逐文件SHA256；不保存GPS/照片内容/私人文件名到仓库",
+  "fixtures_bytes": 2739531,
+  "fixtures_note": "独立临时副本2个、派生WebP/GIF各1个、异常和无权限各1个；不作为真实原生WebP/GIF来源"
+}

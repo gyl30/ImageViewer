@@ -1,0 +1,430 @@
+Linux 6.8.0-138-generic (o) 	10/25/26 	_x86_64_	(24 CPU)
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:32:49     1000    995072   30.27    4.00    0.00    0.00   34.27     8  13774.90      0.00 1471300  213860   0.65   1196.80   1588.67      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:33:19     1000    995072    4.33    0.40    0.00    0.00    4.73     4    220.97      0.00 1536836  240356   0.74      0.00    446.00      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:33:49     1000    995072   15.47    1.07    0.00    0.00   16.53     6   5877.63      0.00 1652496  331556   1.01   2151.73    629.20      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:34:19     1000    995072   23.13    2.80    0.00    0.00   25.93     6   6178.03      0.00 1588068  293644   0.90    604.53   1109.47      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:34:49     1000    995072   10.10    0.93    0.00    0.00   11.03    12   4503.73      0.00 1586960  249496   0.76      0.00    459.87      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:35:19     1000    995072   32.37    2.80    0.00    0.00   35.17    17   3888.57      0.00 1594116  230312   0.71   1154.27   1471.07      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:35:49     1000    995072    4.73    0.53    0.00    0.00    5.27     8    337.67      0.00 1594116  270824   0.83      0.00    502.00      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:36:19     1000    995072   15.67    1.03    0.00    0.00   16.70    21   5320.40      0.00 1647084  314900   0.96      0.00    605.73      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:36:49     1000    995072   28.83    3.33    0.00    0.00   32.17     6   9273.23      0.00 1594116  270756   0.83   1418.93   1218.53      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:37:19     1000    995072   13.47    0.77    0.00    0.00   14.23    17   1096.90      0.00 1646448  274996   0.84      0.00    725.47      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:37:49     1000    995072   28.63    3.03    0.00    0.00   31.67     5   6079.27      0.00 1594116  232348   0.71    890.00   1198.93      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:38:19     1000    995072    4.83    0.53    0.00    0.00    5.37     8    337.27      0.00 1594116  265444   0.81      0.00    480.80      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:38:49     1000    995072   17.13    0.77    0.00    0.00   17.90     6   2555.70      0.00 1586960  281512   0.86     80.80    728.27      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:39:19     1000    995072   24.50    2.97    0.00    0.00   27.47     8   6184.30      0.00 1588704  262620   0.80    247.07   1033.47      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:39:49     1000    995072   15.17    1.10    0.00    0.00   16.27     0   5059.70      0.00 1586960  281496   0.86      0.00    703.20      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:40:19     1000    995072   28.23    2.77    0.00    0.00   31.00     8   3745.27      0.00 1588068  218220   0.67    819.73   1390.00      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:40:49     1000    995072    6.97    1.10    0.00    0.00    8.07    12   4850.10      0.00 1586960  208744   0.64      0.00    489.73      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:41:19     1000    995072   18.97    0.67    0.00    0.00   19.63    14   1931.67      0.00 1586960  283784   0.87      0.00    937.07      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:41:49     1000    995072   17.00    2.73    0.00    0.00   19.73     8   3390.13      0.00 1659652  275204   0.84    134.00    759.47      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:42:19     1000    995072    6.40    0.83    0.00    0.00    7.23     8   4578.57      0.00 1647084  226928   0.69     96.40    464.00      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:42:49     1000    995072   31.20    3.13    0.00    0.00   34.33     5   6513.53      0.00 1659652  221704   0.68    889.60   1449.60      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:43:19     1000    995072    6.10    0.60    0.00    0.00    6.70    13    972.40      0.00 1646448  212560   0.65      0.00    383.73      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:43:49     1000    995072   35.17    1.03    0.00    0.00   36.20    14   2661.47      0.00 1646448  340428   1.04   4092.67   1503.20      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:44:19     1000    995072   17.20    2.93    0.00    0.00   20.13    12   5835.17      0.00 1659652  286736   0.88      0.00    625.47      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:44:49     1000    995072    7.40    0.60    0.00    0.00    8.00     4   1454.47      0.00 1652496  208976   0.64    251.87    539.33      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:45:19     1000    995072   30.77    3.37    0.00    0.03   34.13     8   7679.13      0.00 1654240  222204   0.68     89.60   1459.87      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:45:49     1000    995072    8.07    1.07    0.00    0.00    9.13    11   5992.63      0.00 1652496  306916   0.94      0.00    625.47      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:46:19     1000    995072   18.77    0.63    0.00    0.00   19.40     0   1756.57      0.00 1652496  339576   1.04    281.20   1313.07      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:46:49     1000    995072   10.80    2.40    0.00    0.00   13.20     5   1033.70      0.00 1665324  271068   0.83      0.00    325.73      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:47:19     1000    995072   22.87    1.13    0.00    0.00   24.00    22   4854.63      0.00 1652496  261688   0.80      0.00    614.27      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:47:49     1000    995072   27.93    2.70    0.00    0.00   30.63     8   4294.30      0.00 1671372  235296   0.72    170.80   1203.60      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:48:19     1000    995072    8.53    1.00    0.00    0.00    9.53     5   4786.90      0.00 1647084  211748   0.65      0.00    515.07      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:48:49     1000    995072   38.43    0.97    0.00    0.00   39.40     8   3091.17      0.00 1888752  388340   1.19      0.00   1637.73      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:49:19     1000    995072   12.77    2.77    0.00    0.00   15.53     6   4658.83      0.00 1659652  282412   0.86      0.00    387.60      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:49:49     1000    995072   21.60    0.80    0.00    0.00   22.40     2    899.20      0.00 1646448  256664   0.79      0.00    612.27      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:50:19     1000    995072   28.40    3.13    0.00    0.00   31.53     6   7694.97      0.00 1659652  243320   0.74    191.33   1127.47      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:50:49     1000    995072    6.20    0.57    0.00    0.00    6.77     6    741.30      0.00 1652496  213504   0.65      0.00    454.00      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:51:19     1000    995072   36.03    1.70    0.00    0.00   37.73     4   9435.37      0.00 1647084  199648   0.61      0.00   1735.87      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:51:49     1000    995072    8.40    2.07    0.00    0.00   10.47    10    477.33      0.00 1654240  256480   0.79      0.00    360.80      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:52:19     1000    995072   15.00    1.00    0.00    0.00   16.00     8   5375.57      0.00 1652496  320244   0.98      0.00    625.47      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:52:49     1000    995072   27.47    2.57    0.00    0.00   30.03     6   2674.70      0.00 1653604  249152   0.76      0.00   1345.73      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:53:19     1000    995072    8.33    0.90    0.00    0.00    9.23     4   4549.90      0.00 1652496  214612   0.66      0.00    489.87      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:53:49     1000    995072   33.77    2.93    0.00    0.00   36.70    11   2412.93      0.00 1659652  231536   0.71     54.40   1578.27      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:54:19     1000    995072    3.93    0.47    0.00    0.00    4.40    12    362.77      0.00 1659652  274928   0.84      0.00    410.67      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:54:49     1000    995072   15.63    0.93    0.00    0.00   16.57    19   5404.17      0.00 1647084  324004   0.99      0.00    632.53      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:55:19     1000    995072   26.93    3.07    0.00    0.00   30.00     8   6694.03      0.00 1659652  259948   0.80    117.60   1328.67      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:55:49     1000    995072    6.17    0.53    0.00    0.00    6.70     8    637.87      0.00 1646448  208708   0.64      0.00    451.07      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:56:19     1000    995072   37.50    3.20    0.00    0.00   40.70     3   7083.53      0.00 1659652  223964   0.69     70.80   1557.87      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:56:49     1000    995072    4.57    0.43    0.00    0.00    5.00    12    428.07      0.00 1659652  275036   0.84      0.00    476.80      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:57:19     1000    995072    7.10    0.57    0.00    0.00    7.67     6   1716.40      0.00 1652496  231516   0.71      0.00    415.20     75.20       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:57:49     1000    995072   29.20    3.20    0.00    0.00   32.40    16   7342.80      0.00 1654240  264156   0.81     28.67   1424.80      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:58:19     1000    995072    8.80    0.93    0.00    0.00    9.73     9   4584.27      0.00 1652496  214708   0.66      0.00    460.00      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:58:49     1000    995072   44.70    3.00    0.00    0.00   47.70    14   2093.77      0.00 1665324  223052   0.68    284.00   1473.33      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:59:19     1000    995072    4.60    0.47    0.00    0.03    5.07     8    449.93      0.00 1665324  277388   0.85      0.00    504.00      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+11:59:49     1000    995072    7.00    0.77    0.00    0.00    7.77     6   4930.83      0.00 1652496  271940   0.83      0.00    382.13      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:00:19     1000    995072   23.47    2.60    0.00    0.00   26.07    10   1423.20      0.00 1659652  273052   0.84     15.87   1210.80      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:00:49     1000    995072   12.90    1.00    0.00    0.00   13.90     4   4529.33      0.00 1647084  213536   0.65      0.00    495.47      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:01:19     1000    995072   42.27    3.17    0.00    0.00   45.43     8   5995.20      0.00 1659652  226332   0.69    125.87   1598.93      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:01:49     1000    995072    4.73    0.50    0.00    0.00    5.23     9    528.60      0.00 1653604  282648   0.87      0.00    485.87      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:02:19     1000    995072   27.17    0.90    0.00    0.00   28.07     6   1859.03      0.00 1646448  333764   1.02     43.60    834.93      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:02:49     1000    995072   23.67    2.90    0.00    0.00   26.57     4   4963.20      0.00 1671372  262596   0.80    115.47    966.40      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:03:19     1000    995072    6.63    0.67    0.00    0.00    7.30     7   1306.50      0.00 1652496  184568   0.56      0.00    493.73      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:03:49     1000    995072   30.23    3.00    0.00    0.00   33.23     8   6692.57      0.00 1665960  224684   0.69      0.00   1311.07      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:04:19     1000    995072    7.20    1.03    0.00    0.00    8.23    13   4862.80      0.00 1652496  210656   0.64      0.00    538.93      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:04:49     1000    995072   28.87    0.80    0.00    0.00   29.67     4   1784.30      0.00 1652496  341852   1.05     32.93    802.40      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:05:19     1000    995072   17.87    2.70    0.00    0.00   20.57     8   4213.30      0.00 1665324  264208   0.81      5.87    817.20      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:05:49     1000    995072   18.46    1.17    0.00    0.00   19.63     7   4590.67      0.00 1652496  229984   0.70      0.00    548.22      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:06:19     1000    995072   31.53    2.87    0.00    0.00   34.40    13   3284.20      0.00 1659652  233452   0.71     40.53   1359.60      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:06:49     1000    995072    9.03    0.97    0.00    0.00   10.00     6   4780.23      0.00 1647084  210400   0.64      0.00    566.80      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:07:19     1000    995072   31.83    0.87    0.00    0.00   32.70     6   1721.80      0.00 1647084  333604   1.02      0.00   1293.20      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:07:49     1000    995072   19.53    2.87    0.00    0.00   22.40     4   5064.03      0.00 1659652  282256   0.86      0.00    762.00      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:08:19     1000    995072   20.43    0.70    0.00    0.00   21.13     6    928.87      0.00 1646448  258968   0.79      0.00    608.40      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:08:49     1000    995072   33.13    3.20    0.00    0.00   36.33     0   6222.97      0.00 1671372  227544   0.70     89.20   1480.00      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:09:19     1000    995072    7.20    0.63    0.00    0.00    7.83    11    920.20      0.00 1652496  215592   0.66      0.00    570.80      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:09:49     1000    995072   20.93    0.87    0.00    0.03   21.80     2   3104.63      0.00 1652496  325792   1.00      0.00   1424.27      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:10:19     1000    995072   13.23    2.73    0.00    0.00   15.97     5   4913.87      0.00 1665960  264048   0.81      0.00    373.87      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:10:49     1000    995072    8.90    0.83    0.00    0.00    9.73    16   4734.57      0.00 1652496  247940   0.76      0.00    548.27      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:11:19     1000    995072   27.33    2.73    0.00    0.00   30.07    12   2046.80      0.00 1665324  231888   0.71     81.73   1284.93      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:11:49     1000    995072    8.60    1.10    0.00    0.00    9.70     7   4695.50      0.00 1652496  216052   0.66      0.00    546.67      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:12:19     1000    995072   42.23    0.90    0.00    0.00   43.13    12   1827.03      0.00 1652496  344712   1.06      0.00   1936.00      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:12:49     1000    995072   10.00    2.40    0.00    0.00   12.40     4   1066.00      0.00 1671372  282572   0.86      0.00    340.93      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:13:19     1000    995072   23.33    1.10    0.00    0.00   24.43     2   4932.37      0.00 1647084  272464   0.83      0.00    612.40      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:13:49     1000    995072   31.83    3.20    0.00    0.00   35.03    15   8229.40      0.00 1671372  247140   0.76     32.13   1404.13      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:14:19     1000    995072    4.90    0.60    0.00    0.00    5.50     4    584.57      0.00 1646448  180956   0.55      0.00    513.87      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:14:49     1000    995072   27.77    1.63    0.00    0.00   29.40     6   8061.47      0.00 1671372  212272   0.65      0.00   1304.27      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:15:19     1000    995072    7.00    1.93    0.00    0.00    8.93     6    638.33      0.00 1671372  289072   0.88      0.00    379.73      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:15:49     1000    995072   12.87    0.87    0.00    0.00   13.73    17   1600.57      0.00 1652496  221680   0.68    442.00    630.67      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:16:19     1000    995072   28.83    3.07    0.00    0.00   31.90    10   7532.03      0.00 1665960  247640   0.76      8.67   1316.93      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:16:49     1000    995072    7.80    0.90    0.00    0.00    8.70     6   4658.50      0.00 1652496  215832   0.66      0.00    435.07      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:17:19     1000    995072   31.63    2.73    0.00    0.00   34.37    15   1704.43      0.00 1665324  220760   0.68      0.00   1399.73      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:17:49     1000    995072    4.00    0.40    0.00    0.00    4.40     2    465.80      0.00 1665324  276440   0.85      0.00    413.60      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:18:19     1000    995072   15.47    1.03    0.00    0.00   16.50    16   5511.70      0.00 1652496  338944   1.04      0.00    630.40      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:18:49     1000    995072   25.23    2.73    0.00    0.00   27.97     2   1251.83      0.00 1659652  266924   0.82      0.00   1231.47      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:19:19     1000    995072    7.87    0.97    0.00    0.00    8.83     8   4590.23      0.00 1647084  212236   0.65      0.00    446.53      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:19:49     1000    995072   38.47    3.27    0.00    0.00   41.73    10   6628.17      0.00 1659652  231004   0.71      0.00   1582.67      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:20:19     1000    995072    4.53    0.43    0.00    0.03    4.97    14    385.67      0.00 1659652  277468   0.85      0.00    480.53      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:20:49     1000    995072   14.10    0.60    0.00    0.00   14.70    12   1474.43      0.00 1646448  324876   0.99      0.00    624.13      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:21:19     1000    995072   29.27    3.10    0.00    0.00   32.37    14   6036.23      0.00 1659652  269940   0.83     70.53   1337.47      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:21:49     1000    995072    6.53    0.63    0.00    0.00    7.17    10    985.17      0.00 1652496  133776   0.41      0.00    477.87      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:22:19     1000    995072   29.80    3.17    0.00    0.00   32.97     4   7612.13      0.00 1654240  224528   0.69     28.40   1280.27      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:22:49     1000    995072    4.70    0.43    0.00    0.00    5.13    14    339.80      0.00 1654240  265040   0.81      0.00    503.33      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:23:19     1000    995072   26.57    1.30    0.00    0.00   27.87    10   6238.37      0.00 1652496  343208   1.05      0.00    621.87      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:23:49     1000    995072   25.13    2.47    0.00    0.00   27.60    14    989.20      0.00 1653604  265836   0.81      0.00   1147.87      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:24:19     1000    995072   13.30    1.03    0.00    0.00   14.33    13   5124.37      0.00 1652496  286592   0.88      0.00    642.40      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:24:49     1000    995072   21.77    2.83    0.00    0.00   24.60    10   4001.47      0.00 1659652  231492   0.71      0.00    978.40      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:25:19     1000    995072    6.90    0.87    0.00    0.00    7.77    13   4324.07      0.00 1659652  278752   0.85      0.00    533.73      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:25:49     1000    995072   15.87    0.53    0.00    0.00   16.40     4   1569.53      0.00 1647084  317972   0.97     59.73    725.33      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:26:19     1000    995072   25.40    3.03    0.00    0.00   28.43    10   6430.80      0.00 1671372  288336   0.88      0.00   1073.73      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:26:49     1000    995072   13.30    0.63    0.00    0.00   13.93    16   1101.50      0.00 1646448  283948   0.87      0.00    681.87      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:27:19     1000    995072   28.30    3.17    0.00    0.00   31.47    11   6345.07      0.00 1671372  245324   0.75      0.00   1306.93      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:27:49     1000    995072    7.03    0.63    0.00    0.00    7.67     6    910.70      0.00 1652496  216416   0.66      0.00    518.80      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:28:19     1000    995072   21.03    0.73    0.00    0.00   21.77    14   2998.20      0.00 1652496  334828   1.02      0.00   1065.20     98.93       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:28:49     1000    995072   21.13    2.80    0.00    0.00   23.93    12   5031.93      0.00 1665960  274772   0.84      0.00    842.67      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:29:19     1000    995072   14.87    1.03    0.00    0.00   15.90     4   5036.17      0.00 1652496  285372   0.87      0.00    666.40      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:29:49     1000    995072   25.87    2.57    0.00    0.00   28.43     5   1339.07      0.00 1665324  228032   0.70      0.00   1337.60      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:30:19     1000    995072    9.10    1.10    0.00    0.00   10.20     4   4849.13      0.00 1652496  216904   0.66      0.00    572.00      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:30:49     1000    995072   25.20    0.60    0.00    0.00   25.80     8   1775.80      0.00 1652496  347648   1.06      0.00   1324.53      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:31:19     1000    995072   14.93    2.50    0.00    0.00   17.43     9   1253.20      0.00 1671372  300720   0.92      0.00    599.47      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:31:49     1000    995072   14.53    1.03    0.00    0.00   15.57     2   4986.50      0.00 1647084  279300   0.85      0.00    622.13      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:32:19     1000    995072   28.57    3.10    0.00    0.03   31.67     4   7728.70      0.00 1671372  236964   0.73      0.00   1196.80      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:32:49     1000    995072    6.40    0.73    0.00    0.00    7.13     7   2018.97      0.00 1646448  297992   0.91      0.00    623.47      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:33:19     1000    995072   34.17    0.67    0.00    0.00   34.83    12    381.87      0.00 1646448  343880   1.05      0.00   1325.47      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:33:49     1000    995072   13.40    2.97    0.00    0.00   16.37     4   5119.13      0.00 1671372  293948   0.90      0.00    394.67      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:34:19     1000    995072   15.10    0.80    0.00    0.00   15.90    18   2094.20      0.00 1652496  279652   0.86      0.00    662.53      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:34:49     1000    995072   26.67    2.70    0.00    0.00   29.37     5   5133.07      0.00 1665960  229740   0.70      0.00   1181.47      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:35:19     1000    995072    8.83    1.10    0.00    0.00    9.93     6   4832.67      0.00 1652496  217340   0.67      0.00    548.53      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:35:49     1000    995072   28.97    0.77    0.00    0.00   29.73     7   1449.80      0.00 1646448  338896   1.04      0.00   1589.07      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:36:19     1000    995072   10.10    2.47    0.00    0.00   12.57    12    895.00      0.00 1653604  258776   0.79      0.00    343.73      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:36:49     1000    995072    6.63    0.97    0.00    0.00    7.60    15   4725.43      0.00 1652496  246452   0.75      0.00    452.53      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:37:19     1000    995072   24.83    2.60    0.00    0.00   27.43     4   1641.40      0.00 1671372  248448   0.76      0.00   1097.07      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:37:49     1000    995072    6.67    0.87    0.00    0.00    7.53     7   4324.23      0.00 1647084  183628   0.56      0.00    514.93      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:38:19     1000    995072   28.00    1.60    0.00    0.00   29.60    12   7000.27      0.00 1659652  203332   0.62     45.07   1612.67      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:38:49     1000    995072    6.63    2.10    0.00    0.00    8.73    10    418.60      0.00 1659652  253828   0.78      0.00    379.73      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:39:19     1000    995072    4.80    0.50    0.00    0.00    5.30     4   1022.77      0.00 1646448  269060   0.82      0.00    420.80      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:39:49     1000    995072   30.00    3.10    0.00    0.00   33.10     4   5349.13      0.00 1671372  251920   0.77      0.00   1384.93      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:40:19     1000    995072    6.03    0.60    0.00    0.00    6.63     7    736.07      0.00 1652496  212180   0.65      0.00    458.13      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:40:49     1000    995072   33.37    3.23    0.00    0.00   36.60    14   7729.40      0.00 1654240  215848   0.66      5.07   1758.53      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:41:19     1000    995072    3.53    0.30    0.00    0.00    3.83     8    478.17      0.00 1654240  273448   0.84      0.00    357.47      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:41:49     1000    995072   15.43    1.00    0.00    0.00   16.43    17   5409.43      0.00 1652496  327640   1.00      0.00    631.47      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:42:19     1000    995072   25.23    2.53    0.00    0.00   27.77     8   1380.67      0.00 1665324  258740   0.79      0.00   1228.13      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:42:49     1000    995072    7.83    0.93    0.00    0.00    8.77     8   4542.10      0.00 1652496  218488   0.67      0.00    453.07      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:43:19     1000    995072   33.27    2.73    0.00    0.00   36.00     8   3151.73      0.00 1671372  233996   0.72      0.00   1567.60      0.00       0  imageviewer_ben
+
+# Time        UID       PID    %usr %system  %guest   %wait    %CPU   CPU  minflt/s  majflt/s     VSZ     RSS   %MEM   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+12:43:49     1000    995072    4.50    0.50    0.00    0.03    5.00     5    452.50      0.00 1671372  288140   0.88      0.00    477.47      0.00       0  imageviewer_ben

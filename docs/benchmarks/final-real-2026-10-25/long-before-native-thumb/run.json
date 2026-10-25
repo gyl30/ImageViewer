@@ -1,0 +1,43 @@
+{
+  "revision": "3894c8237d45d38b65f2e40d146187954a10340c",
+  "seconds_requested": 7200,
+  "tracked_changes_at_start": [],
+  "executable_sha256": "b988138ee4dc588d73f01c8cbe41d3fd032f8662cc02a57e2a9475f2a84abb76",
+  "probe_sha256": "c4450bf7dbfd86c6b2c128cb935bf48ed815f2f49d78e7573ab26e74f839b429",
+  "runner_sha256": "940942c56e249917ef9d17bc2b66d83a8ec88bdc5ac11d221fb290420214f7b9",
+  "monitors": {
+    "iostat": {
+      "command": [
+        "iostat",
+        "-x",
+        "-d",
+        "-y",
+        "-p",
+        "nvme0n1",
+        "30"
+      ],
+      "available": true,
+      "running_when_stopped": true,
+      "returncode": -15
+    },
+    "pidstat": {
+      "command": [
+        "pidstat",
+        "-h",
+        "-u",
+        "-r",
+        "-d",
+        "-p",
+        "995072",
+        "30"
+      ],
+      "available": true,
+      "running_when_stopped": true,
+      "returncode": -15
+    }
+  },
+  "pid": 995072,
+  "returncode": -15,
+  "stderr_bytes": 0,
+  "stderr_truncated": false
+}
