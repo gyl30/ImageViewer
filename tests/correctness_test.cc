@@ -1617,6 +1617,10 @@ void correctness_test::thumbnail_native_size_data()
 void correctness_test::thumbnail_native_size()
 {
     QFETCH(QByteArray, format);
+    if (!QImageReader::supportedImageFormats().contains(format))
+    {
+        QSKIP("当前 Qt 未安装此图片格式插件");
+    }
     QTemporaryDir dir;
     const QString path = dir.filePath("small." + QString::fromLatin1(format));
     QSize expected(64, 32);

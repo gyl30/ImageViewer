@@ -1,0 +1,16 @@
+********* Start testing of correctness_test *********
+Config: Using QtTest library 6.9.3, Qt 6.9.3 (x86_64-little_endian-lp64 shared (dynamic) release build; by GCC 10.3.1 20210422 (Red Hat 10.3.1-1)), ubuntu 22.04
+PASS   : correctness_test::initTestCase()
+FAIL!  : correctness_test::thumbnail_native_size(jpg) 'image.save(path)' returned FALSE. ()
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(1634)]
+PASS   : correctness_test::thumbnail_native_size(png)
+FAIL!  : correctness_test::thumbnail_native_size(webp) 'image.save(path)' returned FALSE. ()
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(1634)]
+PASS   : correctness_test::thumbnail_native_size(bmp)
+FAIL!  : correctness_test::thumbnail_native_size(gif) Compared values are not the same
+   Actual   (qvariant_cast<QImage>(loaded.first()[2]).size()): QSize(0x0)
+   Expected (expected)                                       : QSize(2x2)
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(1641)]
+PASS   : correctness_test::cleanupTestCase()
+Totals: 4 passed, 3 failed, 0 skipped, 0 blacklisted, 154ms
+********* Finished testing of correctness_test *********
