@@ -126,7 +126,7 @@ struct latency_stats
 class performance_probe : public QObject
 {
    public:
-    enum class run_mode { cold, warm, capture, trim, soak, usage, profile };
+    enum class run_mode { cold, warm, capture, trim, soak, usage, paced, profile };
     explicit performance_probe(main_window& window) : QObject(&window), window_(window)
     {
         timer_.start();
@@ -221,6 +221,12 @@ class performance_probe : public QObject
         {
             const qint64 now = clock_ns();
             ++source_counts_[static_cast<int>(source)];
+            const QRectF visible = window_.view_->mapToScene(window_.view_->viewport()->rect()).boundingRect();
+            const bool paintable = std::any_of(window_.scene_->active_items_.cbegin(), window_.scene_->active_items_.cend(),
+                [id, &visible](const waterfall_item* item)
+                {
+                    return item->get_request_id() == id && item->sceneBoundingRect().intersects(visible);
+                });
             {
                 QMutexLocker lock(&timing_mutex_);
                 auto it = pending_.find({session, id});
@@ -231,7 +237,7 @@ class performance_probe : public QObject
                         ready_latency_.add(now - it->started);
                     }
                     callback_latency_.add(now - it->submitted);
-                    if (!image.isNull() && session == window_.scene_->current_session_id_)
+                    if (!image.isNull() && paintable && session == window_.scene_->current_session_id_)
                     {
                         display_pending_.insert({session, id}, {path, it->submitted, now});
                     }
@@ -245,7 +251,6 @@ class performance_probe : public QObject
             }
             if (!image.isNull())
             {
-                const QRectF visible = window_.view_->mapToScene(window_.view_->viewport()->rect()).boundingRect();
                 bool matched = false;
                 for (auto* item : window_.scene_->active_items_)
                 {
@@ -419,11 +424,12 @@ class performance_probe : public QObject
         QImage surface(window_.view_->size(), QImage::Format_RGB32);
         double render_ms = 0;
         auto* scroll = window_.view_->verticalScrollBar();
-        const bool natural = mode == run_mode::usage || mode == run_mode::profile;
+        const bool natural = mode == run_mode::usage || mode == run_mode::paced || mode == run_mode::profile;
         const int laps = mode == run_mode::soak ? 30 : (mode == run_mode::profile ? 1 : 3);
         for (int lap = 0; lap < laps; ++lap)
         {
-            for (int step = 0; step < 120; ++step)
+            const int steps = mode == run_mode::profile ? 12 : 120;
+            for (int step = 0; step < steps; ++step)
             {
                 if (natural && lap == 0)
                 {
@@ -440,6 +446,10 @@ class performance_probe : public QObject
                     window_.view_->check_visible_area();
                 }
                 QTest::qWait(40);
+                if (mode == run_mode::paced && !wait_idle())
+                {
+                    return 9;
+                }
                 if (natural)
                 {
                     continue;
@@ -465,7 +475,7 @@ class performance_probe : public QObject
                 return 4;
             }
         }
-        if (mode == run_mode::usage)
+        if (mode == run_mode::usage || mode == run_mode::paced)
         {
             window_.showMaximized();
             QTest::qWait(300);
@@ -844,6 +854,10 @@ int main(int argc, char** argv)
     else if (QString::fromLocal8Bit(argv[3]) == "usage")
     {
         mode = performance_probe::run_mode::usage;
+    }
+    else if (QString::fromLocal8Bit(argv[3]) == "paced")
+    {
+        mode = performance_probe::run_mode::paced;
     }
     else if (QString::fromLocal8Bit(argv[3]) == "profile")
     {

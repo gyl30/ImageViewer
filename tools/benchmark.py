@@ -189,6 +189,8 @@ def generate_mixed(args):
 def run(args):
     args.output.mkdir(parents=True, exist_ok=True)
     revision = subprocess.check_output(["git", "rev-parse", "--verify", (args.revision or "HEAD") + "^{commit}"], text=True).strip()
+    runner_sha = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    probe_sha = hashlib.sha256(args.probe_source.read_bytes()).hexdigest()
     for count in args.sizes:
         with tempfile.TemporaryDirectory(prefix="imageviewer-benchmark-") as cache_path:
             cache = Path(cache_path)
@@ -210,8 +212,8 @@ def run(args):
                                 str(result), mode if args.scenario == "legacy" else args.scenario], env=env, check=True, timeout=600)
                 document = json.loads(result.read_text())
                 document["revision"] = revision
-                document["runner_sha256"] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
-                document["probe_sha256"] = hashlib.sha256((Path(__file__).parent / "performance_probe.cc").read_bytes()).hexdigest()
+                document["runner_sha256"] = runner_sha
+                document["probe_sha256"] = probe_sha
                 document["executable_sha256"] = hashlib.sha256(args.exe.read_bytes()).hexdigest()
                 document["scenario"] = args.scenario
                 device_after = device_snapshot(cache)
@@ -224,6 +226,43 @@ def run(args):
                 document["dataset_definition"] = json.loads(manifest.read_text()) if manifest.exists() else {}
                 result.write_text(json.dumps(document, ensure_ascii=False, indent=2))
                 print(f"{count} {mode}: {time.monotonic() - start:.2f}s -> {result}", flush=True)
+
+
+def trace_writes(args):
+    args.output.mkdir(parents=True, exist_ok=True)
+    for mode in ("usage", "paced"):
+        with tempfile.TemporaryDirectory(prefix="iv-write-trace-") as temp:
+            trace = Path(temp) / "writes.txt"
+            result = args.output.resolve() / f"{mode}.json"
+            env = dict(os.environ, QT_QPA_PLATFORM="xcb", QT_SCALE_FACTOR="1", IV_BENCH_WINDOW="1000x600",
+                       XDG_CACHE_HOME=temp + "/cache", XDG_CONFIG_HOME=temp + "/config")
+            subprocess.run(["strace", "-f", "-yy", "-s", "1", "-e", "trace=write,pwrite64,writev,pwritev",
+                            "-o", str(trace), str(args.exe.resolve()), str(args.directory.resolve()), str(result), mode],
+                           env=env, check=True, timeout=600)
+            pending = {}
+            encoded_bytes = calls = unfinished = 0
+            for line in trace.read_text().splitlines():
+                thread = line.split(maxsplit=1)[0]
+                cache_write = ".thumb>" in line
+                if "<unfinished ...>" in line and cache_write:
+                    pending[thread] = True
+                    continue
+                if "resumed>" in line:
+                    cache_write = pending.pop(thread, False)
+                match = re.search(r" = ([0-9]+)$", line)
+                if cache_write and match:
+                    encoded_bytes += int(match[1])
+                    calls += 1
+                elif cache_write:
+                    unfinished += 1
+            document = json.loads(result.read_text())
+            document["cache_write_trace"] = {"encoded_bytes": encoded_bytes, "completed_write_calls": calls,
+                "unmatched_lines": unfinished, "pending_lines": len(pending),
+                "note": "仅 .thumb 文件成功 write/pwrite/writev 字节；非设备落盘，strace 场景不用作正常延迟/CPU对比"}
+            document["executable_sha256"] = hashlib.sha256(args.exe.read_bytes()).hexdigest()
+            document["probe_sha256"] = hashlib.sha256(Path(__file__).with_name("performance_probe.cc").read_bytes()).hexdigest()
+            result.write_text(json.dumps(document, ensure_ascii=False, indent=2))
+            print(f"{mode}: {encoded_bytes} encoded bytes, {calls} writes, {unfinished} unmatched", flush=True)
 
 
 def generate_viewer(args):
@@ -256,16 +295,22 @@ viewer_data = commands.add_parser("generate-viewer")
 viewer_data.add_argument("--root", type=Path, required=True)
 viewer_data.add_argument("--source", type=Path, required=True)
 viewer_data.set_defaults(action=generate_viewer)
+trace = commands.add_parser("trace-writes")
+trace.add_argument("--exe", type=Path, required=True)
+trace.add_argument("--directory", type=Path, required=True)
+trace.add_argument("--output", type=Path, required=True)
+trace.set_defaults(action=trace_writes)
 bench = commands.add_parser("run")
 bench.add_argument("--exe", type=Path, required=True)
 bench.add_argument("--data", type=Path, required=True)
 bench.add_argument("--output", type=Path, required=True)
 bench.add_argument("--sizes", type=int, nargs="+", default=[10000, 50000, 100000, 300000])
 bench.add_argument("--revision")
+bench.add_argument("--probe-source", type=Path, default=Path(__file__).with_name("performance_probe.cc"))
 bench.add_argument("--backend", choices=["offscreen", "xcb"], default="offscreen")
 bench.add_argument("--scale", type=float, choices=[1, 1.5, 2], default=1)
 bench.add_argument("--window", default="1280x800")
-bench.add_argument("--scenario", choices=["legacy", "usage", "soak", "profile"], default="legacy")
+bench.add_argument("--scenario", choices=["legacy", "usage", "paced", "soak", "profile"], default="legacy")
 bench.add_argument("--evict-files", action="store_true")
 bench.set_defaults(action=run)
 arguments = parser.parse_args()

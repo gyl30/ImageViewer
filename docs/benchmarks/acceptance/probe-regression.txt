@@ -1,0 +1,2 @@
+原探针：[('scroll_2', 13, 66), ('scroll_3', 13, 32), ('restored', 20, 31)]（活动项/待绘制），条件失败
+修正探针：相同30万/usage，全部阶段待绘制数不超过活动项；最终 pending_tasks=0，pending_paint=0，条件通过

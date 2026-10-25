@@ -1,0 +1,7 @@
+{
+  "application_revision": "886b675",
+  "probe_instrumentation": "工作区测量修正：不记录过期绘制项，新增 paced 对照与12步 profile",
+  "probe_sha256": "8731301c367773ef513cda773fa43bbf9e9b6e2f61ffed6a612d680cf7718b84",
+  "executable_sha256": "c8ca1f6cc329308d04d2322b3683f852c6b2e4b13dea912aa1a65f23fb4252e3",
+  "runner_sha256": "3aa81f785af580f00a59f15cbdc66b4123c8f252f2efb6d1152b1f77d3293fc6"
+}
