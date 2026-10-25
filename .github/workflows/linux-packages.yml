@@ -34,7 +34,11 @@ jobs:
       - name: 准备构建环境
         run: |
           echo "SOURCE_DATE_EPOCH=$(git show -s --format=%ct HEAD)" >> "$GITHUB_ENV"
-          docker build -t imageviewer-builder -f tools/release/${{ matrix.dockerfile }} tools/release
+          for attempt in 1 2; do
+            mkdir -p "dist/source-$attempt"
+            git archive HEAD | tar -x -C "dist/source-$attempt"
+          done
+          docker build -t imageviewer-builder -f dist/source-1/tools/release/${{ matrix.dockerfile }} dist/source-1/tools/release
       - name: 两次独立构建、测试及打包
         run: |
           for attempt in 1 2; do
@@ -42,7 +46,7 @@ jobs:
             git rev-parse HEAD > "dist/${{ matrix.target }}-$attempt/source-revision.txt"
             docker run --rm --init --user "$(id -u):$(id -g)" \
               -e SOURCE_DATE_EPOCH \
-              -v "$PWD:/src:ro" -v "$PWD/dist/${{ matrix.target }}-$attempt:/out" \
+              -v "$PWD/dist/source-$attempt:/src:ro" -v "$PWD/dist/${{ matrix.target }}-$attempt:/out" \
               imageviewer-builder sh /src/tools/release/build.sh ${{ matrix.generator }} /out
           done
           first=$(find dist/${{ matrix.target }}-1 -maxdepth 1 -name '*.${{ matrix.extension }}')
@@ -54,7 +58,7 @@ jobs:
           mkdir -p dist/runtime
           package=$(find dist/${{ matrix.target }}-1 -maxdepth 1 -name '*.${{ matrix.extension }}' -printf '%f\n')
           docker run --rm --init \
-            -v "$PWD:/src:ro" -v "$PWD/dist/${{ matrix.target }}-1:/packages:ro" \
+            -v "$PWD/dist/source-1:/src:ro" -v "$PWD/dist/${{ matrix.target }}-1:/packages:ro" \
             -v "$PWD/dist/runtime:/out" \
             ${{ matrix.runtime }} sh /src/tools/release/verify.sh "/packages/$package" /out
       - name: 验证同一DEB在Ubuntu 24.04上运行
@@ -63,7 +67,7 @@ jobs:
           mkdir -p dist/runtime-ubuntu
           package=$(find dist/debian12-1 -maxdepth 1 -name '*.deb' -printf '%f\n')
           docker run --rm --init \
-            -v "$PWD:/src:ro" -v "$PWD/dist/debian12-1:/packages:ro" \
+            -v "$PWD/dist/source-1:/src:ro" -v "$PWD/dist/debian12-1:/packages:ro" \
             -v "$PWD/dist/runtime-ubuntu:/out" \
             ubuntu@sha256:68ee22004a9109b44973313b02ff7b1de250f1de0f5ecb628d73f579aaff33ac \
             sh /src/tools/release/verify.sh "/packages/$package" /out

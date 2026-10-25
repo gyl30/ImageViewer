@@ -48,6 +48,8 @@ if grep -q 'not found\|Qt6Test\|/home/' "$output/ldd.txt"; then
     exit 1
 fi
 desktop-file-validate /usr/share/applications/io.github.gyl30.ImageViewer.desktop
+stat -c '%s %n' /usr/bin/ImageViewer > "$output/installed-executable-size.txt"
+sha256sum /usr/bin/ImageViewer > "$output/installed-executable.sha256"
 QT_QPA_PLATFORM=offscreen ImageViewer --version > "$output/version.txt"
 if ! getent passwd 1000 > /dev/null; then
     useradd --uid 1000 --create-home imageviewer-test

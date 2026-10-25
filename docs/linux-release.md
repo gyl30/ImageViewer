@@ -13,18 +13,21 @@
 CMake 最低支持的 Qt 为6.4.2，以实际发行版测试为依据；源码使用了6.3才引入的 `QDir::mkdir` 权限接口，Qt6.2.4已有真实编译失败证据。没有声称未测试的Qt6.3兼容，也不通过删改核心逻辑兼容旧系统。
 
 构建器只安装发行版开发包。Dockerfile固定基础镜像摘要，apt/dnf仍从发行版仓库解析依赖；记录的完整已解析镜像ID及依赖版本用于本轮复建。跨日期重新创建构建器可能获得新依赖，不承诺跨工具链字节一致。
+发布输入必须使用Git规范导出，不直接绑定具有不同文件mtime的工作树；RPM会保留较早的资源文件时间。
 
 ## 构建与打包
 
 从干净的已提交源码开始，在仓库根执行：
 
 ```sh
-docker build -t imageviewer-build:debian12 -f tools/release/debian.Dockerfile tools/release
+mkdir -p dist/source
+git archive HEAD | tar -x -C dist/source
+docker build -t imageviewer-build:debian12 -f dist/source/tools/release/debian.Dockerfile dist/source/tools/release
 mkdir -p dist/debian12
 SOURCE_EPOCH=$(git show -s --format=%ct HEAD)
 docker run --rm --init --user "$(id -u):$(id -g)" \
   -e SOURCE_DATE_EPOCH="$SOURCE_EPOCH" \
-  -v "$PWD:/src:ro" -v "$PWD/dist/debian12:/out" \
+  -v "$PWD/dist/source:/src:ro" -v "$PWD/dist/debian12:/out" \
   imageviewer-build:debian12 sh /src/tools/release/build.sh DEB /out
 ```
 
@@ -32,7 +35,8 @@ RPM使用 `fedora.Dockerfile`、`imageviewer-build:fedora43`、`dist/fedora43` �
 每次构建固定 Release、四路编译，仅构建程序和单元测试；不构建 benchmark，不运行大型性能矩阵。
 先运行既有回归，再执行 `cmake --install --strip` 和 CPack。
 
-脚本输出安装包、SHA256SUMS、包和可执行文件的字节大小、编译器/CMake版本、完整构建包版本、ELF动态依赖及包内容。
+脚本输出安装包、SHA256SUMS、包和暂存可执行文件的字节大小、编译器/CMake版本、完整构建包版本、ELF动态依赖及包内容。
+原生RPM后处理可能改变ELF；实际分发程序的大小及SHA256另外在装包后采集，不能用暂存值替代。
 包内仅有以下文件和必要目录：
 
 ```text
@@ -64,7 +68,7 @@ RPM保留rpmbuild自动依赖发现，并显式要求相应Qt插件包。
 ```sh
 mkdir -p dist/runtime-debian12
 docker run --rm --init \
-  -v "$PWD:/src:ro" -v "$PWD/dist/debian12:/packages:ro" \
+  -v "$PWD/dist/source:/src:ro" -v "$PWD/dist/debian12:/packages:ro" \
   -v "$PWD/dist/runtime-debian12:/out" debian:12-slim \
   sh /src/tools/release/verify.sh /packages/imageviewer_0.1.0~rc1-1_amd64.deb /out
 ```
@@ -82,10 +86,11 @@ docker run --rm --init \
 
 ## 可重复构建
 
-使用同一已解析构建器、同一源码、同一 `SOURCE_DATE_EPOCH`，在两个全新容器和输出目录分别执行完整构建。
+使用同一已解析构建器、同一提交的两份独立Git导出、同一 `SOURCE_DATE_EPOCH`，在两个全新容器和输出目录分别执行完整构建。
 比较两个安装包及安装后可执行文件的SHA256，而非仅比较文件大小。
 DEB由CPack使用SOURCE_DATE_EPOCH规范时间；RPM固定构建主机标记、构建时间，并使用Fedora43的RPM时间策略。
-首次RPM复打包已发现默认构建主机/时间导致哈希不同，因此这些处理有实际依据。
+首次RPM复打包已发现默认构建主机/时间导致哈希不同；进一步跨导出复验又发现工作树mtime差异。
+规范Git导出固定内容、模式和文件时间，因此不引入额外的时间修补脚本。
 
 ```sh
 cd dist/debian12
