@@ -53,12 +53,20 @@ void waterfall_item::bind_model(const layout_model& model, int index, const QStr
     setVisible(true);
 }
 
+void waterfall_item::start_request(quint64 id, qreal dpr)
+{
+    current_request_id_ = id;
+    requested_dpr_ = dpr;
+    state_ = state_ == load_state::ready ? load_state::refreshing : load_state::loading;
+}
+
 void waterfall_item::reset()
 {
     index_ = -1;
     path_.clear();
     original_size_ = QSize();
     current_request_id_ = 0;
+    requested_dpr_ = 0;
     is_hovered_ = false;
 
     setPixmap(get_placeholder());
@@ -69,7 +77,7 @@ void waterfall_item::reset()
 
 void waterfall_item::set_pixmap_safe(const QPixmap& pixmap)
 {
-    state_ = pixmap.isNull() ? load_state::failed : load_state::ready;
+    state_ = pixmap.isNull() && state_ != load_state::refreshing ? load_state::failed : load_state::ready;
     if (pixmap.isNull())
     {
         update();
@@ -132,7 +140,7 @@ void waterfall_item::paint(QPainter* painter, const QStyleOptionGraphicsItem* op
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing);
     painter->setClipPath(clip);
-    if (state_ == load_state::ready)
+    if (state_ == load_state::ready || state_ == load_state::refreshing)
     {
         painter->drawPixmap(bounds, pixmap(), QRectF(pixmap().rect()));
     }

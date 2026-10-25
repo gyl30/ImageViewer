@@ -9,11 +9,13 @@
 class waterfall_item : public QGraphicsPixmapItem
 {
    public:
-    enum class load_state { empty, loading, ready, failed };
+    enum class load_state { empty, loading, ready, refreshing, failed };
     explicit waterfall_item(QGraphicsItem* parent = nullptr);
 
     void bind_model(const layout_model& model, int index, const QString& path, int display_width, quint64 request_id);
     void reset();
+    void start_request(quint64 id, qreal dpr);
+    [[nodiscard]] qreal requested_dpr() const { return requested_dpr_; }
 
     [[nodiscard]] int get_index() const { return index_; }
     [[nodiscard]] QString get_path() const { return path_; }
@@ -38,6 +40,7 @@ class waterfall_item : public QGraphicsPixmapItem
     int target_width_ = 0;
     int target_height_ = 0;
     quint64 current_request_id_ = 0;
+    qreal requested_dpr_ = 0;
     bool is_hovered_ = false;
     load_state state_ = load_state::empty;
 };

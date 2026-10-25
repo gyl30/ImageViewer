@@ -21,6 +21,23 @@ waterfall_view::waterfall_view(QWidget* parent) : QGraphicsView(parent)
     connect(viewport_timer_, &QTimer::timeout, this, &waterfall_view::check_visible_area);
 }
 
+bool waterfall_view::event(QEvent* event)
+{
+    const bool result = QGraphicsView::event(event);
+    if (event->type() == QEvent::ScreenChangeInternal
+#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
+        || event->type() == QEvent::DevicePixelRatioChange
+#endif
+    )
+    {
+        if (!viewport_timer_->isActive())
+        {
+            viewport_timer_->start();
+        }
+    }
+    return result;
+}
+
 void waterfall_view::resizeEvent(QResizeEvent* event)
 {
     QGraphicsView::resizeEvent(event);

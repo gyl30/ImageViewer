@@ -17,6 +17,7 @@ class waterfall_view : public QGraphicsView
     void view_resized(int new_width);
 
    protected:
+    bool event(QEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
     void scrollContentsBy(int dx, int dy) override;
 

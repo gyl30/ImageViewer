@@ -37,6 +37,26 @@ constexpr char kAnimatedGif[] =
     "R0lGODlhAgACAIEAAP8AAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQACgAAACwAAAAAAgACAAAIBgABCAQQEAAh+QQBCgABACwAAAAAAgACAIEAAP8AAAAAAAAAAAAIBgABCAQQEAA7";
 }
 
+class scaled_view : public waterfall_view
+{
+   public:
+    qreal ratio = 1;
+
+   protected:
+    int metric(PaintDeviceMetric metric) const override
+    {
+        if (metric == PdmDevicePixelRatio) { return qRound(ratio); }
+        if (metric == PdmDevicePixelRatioScaled) { return qRound(ratio * devicePixelRatioFScale()); }
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
+        if (metric == PdmDevicePixelRatioF_EncodedA || metric == PdmDevicePixelRatioF_EncodedB)
+        {
+            return encodeMetricF(metric, ratio);
+        }
+#endif
+        return waterfall_view::metric(metric);
+    }
+};
+
 class loader_worker
 {
    public:
@@ -110,6 +130,7 @@ class correctness_test : public QObject
     void relayout_preserves_image_data();
     void relayout_preserves_image();
     void relayout_keeps_anchor();
+    void dpr_refresh_keeps_image();
     void item_reuse_resets_image();
     void latest_layout_width_data();
     void latest_layout_width();
@@ -308,6 +329,58 @@ void correctness_test::relayout_keeps_anchor()
         const qreal actual = (rect.top() + fraction * rect.height() - after.top()) / after.height();
         QVERIFY2(std::abs(actual - relative) < 0.02, qPrintable(QString("image=%1 relative=%2 actual=%3 width=%4").arg(anchor).arg(relative).arg(actual).arg(width)));
     }
+}
+
+void correctness_test::dpr_refresh_keeps_image()
+{
+    waterfall_scene scene;
+    scaled_view view;
+    view.setScene(&scene);
+    view.resize(500, 400);
+    view.show();
+    QSignalSpy requested(&scene, &waterfall_scene::request_load_batch);
+    scene.add_images({{"photo.jpg", QSize(4000, 3000)}});
+    scene.layout_models(view.viewport()->width());
+    QTRY_COMPARE(requested.size(), 1);
+    auto task = qvariant_cast<QList<load_task>>(requested.last()[0]).first();
+    QImage image(task.target_size, QImage::Format_RGB32);
+    image.fill(Qt::green);
+    scene.on_image_loaded(task.id, task.path, image, task.session_id);
+    auto* item = scene.active_items_[0];
+    const qint64 old_key = item->pixmap().cacheKey();
+    for (qreal ratio : {1.5, 2.0})
+    {
+        const int previous = requested.size();
+        view.ratio = ratio;
+        QCOMPARE(view.devicePixelRatioF(), ratio);
+        QEvent event(QEvent::ScreenChangeInternal);
+        QApplication::sendEvent(&view, &event);
+        QTRY_COMPARE(requested.size(), previous + 1);
+        task = qvariant_cast<QList<load_task>>(requested.last()[0]).first();
+        QCOMPARE(task.target_size.width(), qRound(scene.all_models_[0].layout_rect.width() * ratio));
+        QVERIFY(!item->pixmap().isNull());
+        if (ratio == 1.5) { QCOMPARE(item->pixmap().cacheKey(), old_key); }
+        const qint64 retained_key = item->pixmap().cacheKey();
+        QImage next;
+        if (ratio == 1.5)
+        {
+            next = QImage(task.target_size, QImage::Format_RGB32);
+            next.fill(Qt::green);
+        }
+        scene.on_image_loaded(task.id, task.path, next, task.session_id);
+        if (ratio == 2)
+        {
+            QCOMPARE(item->pixmap().cacheKey(), retained_key);
+            QCOMPARE(item->state(), waterfall_item::load_state::ready);
+        }
+    }
+    const int previous = requested.size();
+    view.ratio = 1;
+    QEvent event(QEvent::ScreenChangeInternal);
+    QApplication::sendEvent(&view, &event);
+    QTest::qWait(50);
+    QCOMPARE(requested.size(), previous);
+    QCOMPARE(item->state(), waterfall_item::load_state::ready);
 }
 
 void correctness_test::item_reuse_resets_image()

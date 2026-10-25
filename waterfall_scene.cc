@@ -423,10 +423,12 @@ void waterfall_scene::update_viewport(const QRectF& visible_rect)
 void waterfall_scene::request_visible_images(const QRectF& visible_rect, request_mode mode)
 {
     int available = kMaxThumbnailTasks;
+    const qreal dpr = views().isEmpty() ? 1.0 : views().first()->devicePixelRatioF();
     std::vector<int> pending;
     for (auto it = active_items_.begin(); it != active_items_.end(); ++it)
     {
-        if (it.value()->state() == waterfall_item::load_state::loading)
+        if (it.value()->state() == waterfall_item::load_state::loading ||
+            it.value()->state() == waterfall_item::load_state::refreshing)
         {
             --available;
             if (mode == request_mode::viewport_changed)
@@ -434,8 +436,11 @@ void waterfall_scene::request_visible_images(const QRectF& visible_rect, request
                 pending.push_back(it.key());
             }
         }
-        else if (it.value()->state() == waterfall_item::load_state::empty &&
-                 all_models_[it.key()].layout_rect.intersects(visible_rect))
+        else if (all_models_[it.key()].layout_rect.intersects(visible_rect) &&
+                 (it.value()->state() == waterfall_item::load_state::empty ||
+                  (it.value()->state() == waterfall_item::load_state::ready &&
+                   dpr > it.value()->requested_dpr() &&
+                   it.value()->pixmap().width() < all_models_[it.key()].original_size.width())))
         {
             pending.push_back(it.key());
         }
@@ -457,13 +462,12 @@ void waterfall_scene::request_visible_images(const QRectF& visible_rect, request
         return std::abs(a.center().y() - visible_rect.center().y()) <
                std::abs(b.center().y() - visible_rect.center().y());
     });
-    const qreal dpr = views().isEmpty() ? 1.0 : views().first()->devicePixelRatioF();
     QList<load_task> tasks;
     QList<quint64> priority;
     for (int index : pending)
     {
         auto* item = active_items_[index];
-        if (item->state() == waterfall_item::load_state::loading)
+        if (item->state() == waterfall_item::load_state::loading || item->state() == waterfall_item::load_state::refreshing)
         {
             priority.append(item->get_request_id());
             continue;
@@ -475,7 +479,7 @@ void waterfall_scene::request_visible_images(const QRectF& visible_rect, request
         --available;
         const auto& model = all_models_[index];
         const quint64 id = ++request_counter_;
-        item->bind_model(model, index, image_paths_.at(index), current_col_width_, id);
+        item->start_request(id, dpr);
         const QSize size(std::max(1, qRound(model.layout_rect.width() * dpr)),
                          std::max(1, qRound(model.layout_rect.height() * dpr)));
         tasks.append({id, image_paths_.at(index), size, current_session_id_});
