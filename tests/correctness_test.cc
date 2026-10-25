@@ -131,6 +131,7 @@ class correctness_test : public QObject
     void panorama_is_requested_data();
     void panorama_is_requested();
     void loader_failure_finishes();
+    void thumbnail_source_counts();
     void foreground_is_serial();
     void navigation_focus_data();
     void navigation_focus();
@@ -884,6 +885,37 @@ void correctness_test::loader_failure_finishes()
     QTRY_COMPARE_WITH_TIMEOUT(loaded.size(), 1, 300);
     QCOMPARE(loaded.first()[3].toInt(), 7);
     QVERIFY(qvariant_cast<QImage>(loaded.first()[2]).isNull());
+    QCOMPARE(qvariant_cast<image_loader::thumbnail_source>(loaded.first()[4]), image_loader::thumbnail_source::failed);
+}
+
+void correctness_test::thumbnail_source_counts()
+{
+    QTemporaryDir dir;
+    const QString path = dir.filePath("source.png");
+    QImage image(200, 150, QImage::Format_RGB32);
+    image.fill(Qt::green);
+    QVERIFY(image.save(path));
+    {
+        loader_worker worker;
+        QSignalSpy started(worker.loader, &image_loader::thumbnail_started);
+        QSignalSpy loaded(worker.loader, &image_loader::thumbnail_loaded);
+        worker.thread.start();
+        worker.loader->request_thumbnails({{1, path, QSize(80, 60), 9}});
+        QTRY_COMPARE(loaded.size(), 1);
+        QCOMPARE(qvariant_cast<image_loader::thumbnail_source>(loaded[0][4]), image_loader::thumbnail_source::decoded);
+        worker.loader->request_thumbnails({{2, path, QSize(80, 60), 9}});
+        QTRY_COMPARE(loaded.size(), 2);
+        QCOMPARE(qvariant_cast<image_loader::thumbnail_source>(loaded[1][4]), image_loader::thumbnail_source::memory);
+        QCOMPARE(started.size(), 2);
+        QCOMPARE(started[1][0].toULongLong(), quint64(2));
+        QCOMPARE(started[1][1].toInt(), 9);
+    }
+    loader_worker worker;
+    QSignalSpy loaded(worker.loader, &image_loader::thumbnail_loaded);
+    worker.thread.start();
+    worker.loader->request_thumbnails({{3, path, QSize(80, 60), 9}});
+    QTRY_COMPARE(loaded.size(), 1);
+    QCOMPARE(qvariant_cast<image_loader::thumbnail_source>(loaded[0][4]), image_loader::thumbnail_source::disk);
 }
 
 void correctness_test::foreground_is_serial()

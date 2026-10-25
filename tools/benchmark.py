@@ -4,6 +4,10 @@ import argparse
 import hashlib
 import json
 import os
+import ctypes
+import mmap
+import re
+import shutil
 from pathlib import Path
 import subprocess
 import tempfile
@@ -54,6 +58,134 @@ def generate(args):
     }, ensure_ascii=False, indent=2))
 
 
+def device_snapshot(path):
+    device = path.stat().st_dev
+    stat = Path(f"/sys/dev/block/{os.major(device)}:{os.minor(device)}/stat")
+    values = list(map(int, stat.read_text().split())) if stat.exists() else []
+    return dict(zip(("reads", "reads_merged", "sectors_read", "read_ms", "writes", "writes_merged",
+                     "sectors_written", "write_ms", "inflight", "busy_ms", "weighted_ms"), values))
+
+
+def system_memory():
+    return {key: int(value.split()[0]) for key, value in
+            (line.split(":", 1) for line in Path("/proc/meminfo").read_text().splitlines())
+            if key in ("Cached", "Dirty", "Writeback", "MemAvailable")}
+
+
+def resident_sample(folder):
+    # 固定有界样本；mincore 仅查询驻留，不触发文件内容读取。
+    paths = []
+    index = 0
+    for parent, directories, files in os.walk(folder):
+        directories.sort()
+        for name in sorted(files):
+            if index % 127 == 0 and len(paths) < 256:
+                paths.append(Path(parent) / name)
+            index += 1
+        if len(paths) == 256:
+            break
+    libc = ctypes.CDLL(None, use_errno=True)
+    resident = pages = errors = 0
+    for path in paths:
+        try:
+            with path.open("rb") as file:
+                length = min(path.stat().st_size, 1024 * 1024)
+                if length == 0:
+                    continue
+                with mmap.mmap(file.fileno(), length, access=mmap.ACCESS_COPY) as mapping:
+                    address = ctypes.addressof(ctypes.c_char.from_buffer(mapping))
+                    count = (length + mmap.PAGESIZE - 1) // mmap.PAGESIZE
+                    vector = (ctypes.c_ubyte * count)()
+                    if libc.mincore(ctypes.c_void_p(address), ctypes.c_size_t(length), vector) != 0:
+                        errors += 1
+                    else:
+                        pages += count
+                        resident += sum(value & 1 for value in vector)
+        except (OSError, ValueError):
+            errors += 1
+    return {"files": len(paths), "pages": pages, "resident_pages": resident, "errors": errors,
+            "method": "每127个路径取样，最多256文件，每文件前1MiB；非全库驻留率"}
+
+
+def generate_mixed(args):
+    from PIL import Image, ImageEnhance
+
+    root = args.root.resolve()
+    if root.exists():
+        raise SystemExit("混合数据集必须使用新目录")
+    root.mkdir(parents=True)
+    samples = root / "samples"
+    samples.mkdir()
+    definitions = []
+    with Image.open(args.source) as photo:
+        photo = photo.convert("RGB")
+        for index in range(80):
+            format_name = ["JPEG"] * 4 + ["PNG"] * 2 + ["WEBP", "GIF", "BMP", "JPEG"]
+            fmt = format_name[index % 10]
+            size = [(640, 480), (480, 640), (1024, 683), (96, 96)][index % 4]
+            if fmt == "BMP":
+                size = (64, 48)
+            image = ImageEnhance.Color(photo.resize(size)).enhance(0.5 + index / 80)
+            options = {}
+            if fmt == "JPEG":
+                exif = Image.Exif()
+                exif[274] = index % 8 + 1
+                options = {"quality": 80, "exif": exif}
+            if fmt == "PNG" and index % 2:
+                image = image.convert("RGBA")
+                image.putalpha(180)
+            if fmt == "GIF":
+                options = {"save_all": True, "append_images": [image.transpose(Image.Transpose.FLIP_LEFT_RIGHT)],
+                           "duration": 80, "loop": 0}
+            extension = {"JPEG": "jpg", "PNG": "png", "WEBP": "webp", "GIF": "gif", "BMP": "bmp"}[fmt]
+            path = samples / f"{index:02}.{extension}"
+            image.save(path, format=fmt, **options)
+            definitions.append({"file": path.name, "format": fmt, "size": size, "sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
+        for name, size, fmt in [("large.jpg", (9000, 8000), "JPEG"), ("large.png", (6000, 4000), "PNG"), ("large.bmp", (4096, 4096), "BMP")]:
+            photo.resize(size).save(samples / name, format=fmt)
+    (samples / "corrupt.jpg").write_bytes(b"not-an-image")
+    bmp = (samples / "08.bmp").read_bytes()
+    (samples / "truncated.bmp").write_bytes(bmp[:54])
+    largest = max(args.sizes)
+    counts = {}
+    def relative(index):
+        group = Path(f"分组 {index // 1000:04}")
+        if index % 97 == 0:
+            group = group / "深层" / "一" / "二" / "三" / "四" / "五"
+        remainder = index % 10000
+        special = {9996: "large.jpg", 9997: "large.png", 9998: "large.bmp"}
+        name = special.get(remainder)
+        category = "large" if name else "normal"
+        if index % 1000 == 995:
+            name, category = "corrupt.jpg", "corrupt_header"
+        elif index % 1000 == 994:
+            name, category = "truncated.bmp", "truncated_body"
+        elif index % 1000 == 993:
+            name, category = definitions[index % 80]["file"], "unreadable"
+        if name is None:
+            name = definitions[index % 80]["file"]
+        return group / (f"图片 # % []+'\" {index:06}." + name.split(".")[-1]), name, category
+    for count in sorted(args.sizes, reverse=True):
+        categories = {}
+        for index in range(count):
+            rel, sample, category = relative(index)
+            target = root / str(count) / rel
+            target.parent.mkdir(parents=True, exist_ok=True)
+            if count == largest:
+                shutil.copyfile(samples / sample, target)
+                if category == "unreadable":
+                    target.chmod(0)
+            else:
+                os.link(root / str(largest) / rel, target)
+            categories[category] = categories.get(category, 0) + 1
+        counts[str(count)] = categories
+        print(f"generated mixed {count}", flush=True)
+    (root / "dataset.json").write_text(json.dumps({"source": str(args.source.resolve()),
+        "source_sha256": hashlib.sha256(args.source.read_bytes()).hexdigest(), "samples": definitions,
+        "sizes": args.sizes, "categories": counts, "storage": "independent within each library; hardlinks across sizes",
+        "description": "现有真实壁纸派生的五格式场景集，不是独立摄影原片；每万张含3个大文件，每千张含权限/损坏头/截断体各1个"}, ensure_ascii=False, indent=2))
+
+
 def run(args):
     args.output.mkdir(parents=True, exist_ok=True)
     revision = subprocess.check_output(["git", "rev-parse", "--verify", (args.revision or "HEAD") + "^{commit}"], text=True).strip()
@@ -67,13 +199,26 @@ def run(args):
                             with path.open("rb") as file:
                                 os.posix_fadvise(file.fileno(), 0, 0, os.POSIX_FADV_DONTNEED)
                 result = args.output.resolve() / f"{count}-{mode}.json"
-                env = dict(os.environ, QT_QPA_PLATFORM="offscreen", QT_SCALE_FACTOR="1",
+                env = dict(os.environ, QT_QPA_PLATFORM=args.backend, QT_SCALE_FACTOR=str(args.scale),
+                           IV_BENCH_WINDOW=args.window,
                            XDG_CONFIG_HOME=str(cache / "config"), XDG_CACHE_HOME=str(cache))
+                pages_before = resident_sample(args.data / str(count))
+                device_before = device_snapshot(cache)
+                memory_before = system_memory()
                 start = time.monotonic()
                 subprocess.run([str(args.exe.resolve()), str(args.data.resolve() / str(count)),
-                                str(result), mode], env=env, check=True, timeout=600)
+                                str(result), mode if args.scenario == "legacy" else args.scenario], env=env, check=True, timeout=600)
                 document = json.loads(result.read_text())
                 document["revision"] = revision
+                document["runner_sha256"] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+                document["probe_sha256"] = hashlib.sha256((Path(__file__).parent / "performance_probe.cc").read_bytes()).hexdigest()
+                document["executable_sha256"] = hashlib.sha256(args.exe.read_bytes()).hexdigest()
+                document["scenario"] = args.scenario
+                device_after = device_snapshot(cache)
+                document["whole_device_delta"] = {key: device_after[key] - value for key, value in device_before.items()}
+                document["whole_device_note"] = "包含桌面及其他进程；不是本进程或SSD介质写入归因"
+                document["system_memory_kib"] = {"before": memory_before, "after": system_memory()}
+                document["source_page_sample"] = {"before": pages_before, "after": resident_sample(args.data / str(count))}
                 document["advised_drop_file_pages"] = args.evict_files
                 manifest = args.data / "dataset.json"
                 document["dataset_definition"] = json.loads(manifest.read_text()) if manifest.exists() else {}
@@ -102,6 +247,11 @@ dataset.add_argument("--source", type=Path, required=True)
 dataset.add_argument("--sizes", type=int, nargs="+", default=[10000, 50000, 100000, 300000])
 dataset.add_argument("--storage", choices=["hardlinks", "independent"], default="hardlinks")
 dataset.set_defaults(action=generate)
+mixed = commands.add_parser("generate-mixed")
+mixed.add_argument("--root", type=Path, required=True)
+mixed.add_argument("--source", type=Path, required=True)
+mixed.add_argument("--sizes", type=int, nargs="+", default=[1000, 10000, 100000, 300000])
+mixed.set_defaults(action=generate_mixed)
 viewer_data = commands.add_parser("generate-viewer")
 viewer_data.add_argument("--root", type=Path, required=True)
 viewer_data.add_argument("--source", type=Path, required=True)
@@ -112,7 +262,13 @@ bench.add_argument("--data", type=Path, required=True)
 bench.add_argument("--output", type=Path, required=True)
 bench.add_argument("--sizes", type=int, nargs="+", default=[10000, 50000, 100000, 300000])
 bench.add_argument("--revision")
+bench.add_argument("--backend", choices=["offscreen", "xcb"], default="offscreen")
+bench.add_argument("--scale", type=float, choices=[1, 1.5, 2], default=1)
+bench.add_argument("--window", default="1280x800")
+bench.add_argument("--scenario", choices=["legacy", "usage", "soak", "profile"], default="legacy")
 bench.add_argument("--evict-files", action="store_true")
 bench.set_defaults(action=run)
 arguments = parser.parse_args()
+if hasattr(arguments, "window") and not re.fullmatch(r"[1-9][0-9]{2,3}x[1-9][0-9]{2,3}", arguments.window):
+    parser.error("window 格式为 宽x高，范围100至9999")
 arguments.action(arguments)

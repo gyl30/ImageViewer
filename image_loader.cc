@@ -157,6 +157,7 @@ void image_loader::load_next()
         current_task = task_queue_.takeFirst();
     }
 
+    emit thumbnail_started(current_task.id, current_task.session_id);
     load_image_internal(current_task);
     QMetaObject::invokeMethod(this, &image_loader::load_next, Qt::QueuedConnection);
 }
@@ -169,7 +170,7 @@ void image_loader::load_image_internal(const load_task& current_task)
         QMutexLocker locker(&mutex_);
         if (cache_.contains(cache_key))
         {
-            emit thumbnail_loaded(current_task.id, current_task.path, *cache_.object(cache_key), current_task.session_id);
+            emit thumbnail_loaded(current_task.id, current_task.path, *cache_.object(cache_key), current_task.session_id, thumbnail_source::memory);
             return;
         }
     }
@@ -186,7 +187,7 @@ void image_loader::load_image_internal(const load_task& current_task)
         QMutexLocker locker(&mutex_);
         cache_.insert(cache_key, new QImage(image), image.sizeInBytes());
         locker.unlock();
-        emit thumbnail_loaded(current_task.id, current_task.path, image, current_task.session_id);
+        emit thumbnail_loaded(current_task.id, current_task.path, image, current_task.session_id, thumbnail_source::disk);
         return;
     }
 
@@ -220,7 +221,7 @@ void image_loader::load_image_internal(const load_task& current_task)
         }
         else if (exceeds_allocation_limit)
         {
-            emit thumbnail_loaded(current_task.id, current_task.path, QImage(), current_task.session_id);
+            emit thumbnail_loaded(current_task.id, current_task.path, QImage(), current_task.session_id, thumbnail_source::failed);
             return;
         }
     }
@@ -246,7 +247,7 @@ void image_loader::load_image_internal(const load_task& current_task)
             cache_.insert(cache_key, new QImage(image), cost);
         }
 
-        emit thumbnail_loaded(current_task.id, current_task.path, image, current_task.session_id);
+        emit thumbnail_loaded(current_task.id, current_task.path, image, current_task.session_id, thumbnail_source::decoded);
         const QFileInfo previous(cache_key);
         const bool existed = previous.exists();
         const qint64 previous_size = previous.size();
@@ -271,5 +272,5 @@ void image_loader::load_image_internal(const load_task& current_task)
         }
         return;
     }
-    emit thumbnail_loaded(current_task.id, current_task.path, image, current_task.session_id);
+    emit thumbnail_loaded(current_task.id, current_task.path, image, current_task.session_id, thumbnail_source::failed);
 }

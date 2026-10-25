@@ -19,6 +19,16 @@
 #include <QStandardPaths>
 #include <QtTest>
 #include <atomic>
+#include <array>
+#include <chrono>
+#include <QScreen>
+#include <QWindow>
+#include <QTimer>
+#include <QWheelEvent>
+#include <QMutex>
+#include <QMutexLocker>
+#include <unistd.h>
+#include <sys/syscall.h>
 #include <sys/resource.h>
 #include <time.h>
 #include <fcntl.h>
@@ -64,28 +74,136 @@ static qint64 proc_value(const QString& path, const QByteArray& key)
     return -1;
 }
 
-class performance_probe
+static qint64 clock_ns()
+{
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::steady_clock::now().time_since_epoch()).count();
+}
+
+struct latency_stats
+{
+    static constexpr int kLastBucketMs = 1000;
+    std::array<quint64, kLastBucketMs + 1> bins{};
+    quint64 count = 0;
+    qint64 total_ns = 0;
+    qint64 max_ns = 0;
+    quint64 overflow = 0;
+
+    void add(qint64 ns)
+    {
+        ns = std::max<qint64>(0, ns);
+        ++count;
+        total_ns += ns;
+        max_ns = std::max(max_ns, ns);
+        const qint64 bucket = (ns + 999999) / 1000000;
+        ++bins[std::min<qint64>(bucket, kLastBucketMs)];
+        overflow += bucket > kLastBucketMs;
+    }
+
+    QJsonObject json() const
+    {
+        const auto percentile = [this](int percent)
+        {
+            quint64 cumulative = 0;
+            for (int index = 0; index <= kLastBucketMs; ++index)
+            {
+                cumulative += bins[index];
+                if (cumulative * 100 >= count * percent)
+                {
+                    return index;
+                }
+            }
+            return kLastBucketMs;
+        };
+        return {{"count", static_cast<qint64>(count)},
+                {"mean_ms", count == 0 ? 0.0 : total_ns / (1000000.0 * count)},
+                {"max_ms", max_ns / 1000000.0}, {"p50_ms_upper", percentile(50)},
+                {"p95_ms_upper", percentile(95)}, {"p99_ms_upper", percentile(99)},
+                {"over_1000ms", static_cast<qint64>(overflow)}};
+    }
+};
+
+class performance_probe : public QObject
 {
    public:
-    enum class run_mode { cold, warm, capture, trim, soak };
-    explicit performance_probe(main_window& window) : window_(window)
+    enum class run_mode { cold, warm, capture, trim, soak, usage, profile };
+    explicit performance_probe(main_window& window) : QObject(&window), window_(window)
     {
         timer_.start();
+        window_.view_->viewport()->installEventFilter(this);
+        // 先记录提交，再调用原有槽；避免很快的缓存命中先于探针记时。
+        QObject::disconnect(window_.scene_, &waterfall_scene::request_load_batch,
+                            window_.image_loader_, &image_loader::request_thumbnails);
+        QObject::connect(window_.scene_, &waterfall_scene::request_load_batch, this,
+                         [this](const QList<load_task>& tasks)
+        {
+            QMutexLocker lock(&timing_mutex_);
+            for (const auto& task : tasks)
+            {
+                pending_.insert({task.session_id, task.id}, {task.path, clock_ns(), 0});
+            }
+        });
+        QObject::connect(window_.scene_, &waterfall_scene::request_load_batch,
+                         window_.image_loader_, &image_loader::request_thumbnails, Qt::DirectConnection);
+        QObject::connect(window_.image_loader_, &image_loader::thumbnail_started, this,
+                         [this](quint64 id, int session)
+        {
+            const qint64 now = clock_ns();
+            QMutexLocker lock(&timing_mutex_);
+            auto it = pending_.find({session, id});
+            if (it != pending_.end())
+            {
+                it->started = now;
+                queue_latency_.add(now - it->submitted);
+            }
+        }, Qt::DirectConnection);
+        QObject::connect(window_.scene_, &waterfall_scene::request_cancel_batch, this,
+                         [this](const QList<QString>& paths)
+        {
+            QMutexLocker lock(&timing_mutex_);
+            pending_.removeIf([&paths](const QHash<QPair<int, quint64>, task_timing>::iterator& entry)
+            {
+                return entry->started == 0 && paths.contains(entry->path);
+            });
+            display_pending_.removeIf([&paths](const QHash<QPair<int, quint64>, paint_timing>::iterator& entry) { return paths.contains(entry->path); });
+        });
+        QObject::connect(window_.scene_, &waterfall_scene::request_cancel_all, this, [this]()
+        {
+            QMutexLocker lock(&timing_mutex_);
+            pending_.removeIf([](const QHash<QPair<int, quint64>, task_timing>::iterator& entry) { return entry->started == 0; });
+            display_pending_.clear();
+        });
+        QMetaObject::invokeMethod(window_.image_loader_, [this]() { loader_tid_ = syscall(SYS_gettid); },
+                                  Qt::BlockingQueuedConnection);
+        heartbeat_.setInterval(16);
+        QObject::connect(&heartbeat_, &QTimer::timeout, this, [this]()
+        {
+            const qint64 now = clock_ns();
+            if (heartbeat_ns_ != 0)
+            {
+                heartbeat_delay_.add(now - heartbeat_ns_ - 16000000);
+            }
+            heartbeat_ns_ = now;
+        });
         QObject::connect(window_.scene_, &waterfall_scene::request_load_batch, &window_, [this]()
         {
             QMutexLocker locker(&window_.image_loader_->mutex_);
             max_queue_ = std::max(max_queue_, window_.image_loader_->task_queue_.size());
             max_active_ = std::max(max_active_, window_.scene_->active_items_.size());
         });
-        QObject::connect(window_.file_scanner_, &file_scanner::images_scanned_batch, &window_, [this]()
+        QObject::connect(window_.file_scanner_, &file_scanner::images_scanned_batch, &window_, [this](const QList<image_meta>&, int session)
         {
-            if (first_batch_ms_ < 0)
+            if (session == window_.current_scan_session_id_ && first_batch_ms_ < 0)
             {
                 first_batch_ms_ = timer_.elapsed();
             }
         });
-        QObject::connect(window_.file_scanner_, &file_scanner::scan_finished, &window_, [this](int, qint64 ms)
+        QObject::connect(window_.file_scanner_, &file_scanner::scan_finished, &window_, [this](int, qint64 ms, int session)
         {
+            if (session != window_.current_scan_session_id_)
+            {
+                return;
+            }
             scan_ms_ = ms;
             scan_done_ = true;
         });
@@ -98,8 +216,28 @@ class performance_probe
             loader_cpu_ms_ = thread_cpu_ms();
         }, Qt::DirectConnection);
         QObject::connect(window_.image_loader_, &image_loader::thumbnail_loaded, &window_,
-                         [this](quint64 id, const QString&, const QImage& image)
+                         [this](quint64 id, const QString& path, const QImage& image, int session,
+                                image_loader::thumbnail_source source)
         {
+            const qint64 now = clock_ns();
+            ++source_counts_[static_cast<int>(source)];
+            {
+                QMutexLocker lock(&timing_mutex_);
+                auto it = pending_.find({session, id});
+                if (it != pending_.end())
+                {
+                    if (it->started != 0)
+                    {
+                        ready_latency_.add(now - it->started);
+                    }
+                    callback_latency_.add(now - it->submitted);
+                    if (!image.isNull() && session == window_.scene_->current_session_id_)
+                    {
+                        display_pending_.insert({session, id}, {path, it->submitted, now});
+                    }
+                    pending_.erase(it);
+                }
+            }
             ++decoded_count_;
             if (!image.isNull() && first_thumbnail_ms_ < 0)
             {
@@ -162,7 +300,12 @@ class performance_probe
     {
         auto* scene = window_.scene_;
         auto* loader = window_.image_loader_;
-        QJsonObject row{{"phase", phase}, {"elapsed_ms", timer_.elapsed()}, {"cpu_ms", process_cpu_ms()},
+        rusage usage{};
+        getrusage(RUSAGE_SELF, &usage);
+        QJsonObject row{{"minor_faults", static_cast<qint64>(usage.ru_minflt)},
+                        {"major_faults", static_cast<qint64>(usage.ru_majflt)},
+                        {"rusage_peak_rss_kib", static_cast<qint64>(usage.ru_maxrss)},
+                        {"phase", phase}, {"elapsed_ms", timer_.elapsed()}, {"cpu_ms", process_cpu_ms()},
                         {"rss_kib", proc_value("/proc/self/status", "VmRSS")},
                         {"peak_rss_kib", proc_value("/proc/self/status", "VmHWM")},
                         {"pss_kib", proc_value("/proc/self/smaps_rollup", "Pss")},
@@ -170,7 +313,7 @@ class performance_probe
                         {"metadata_capacity_bytes", static_cast<qint64>(scene->all_models_.capacity() * sizeof(layout_model) +
                             scene->item_bottom_index_.capacity() * sizeof(int) + scene->image_paths_.capacity() * sizeof(QString))},
                         {"active_items", scene->active_items_.size()}, {"pool_items", scene->pool_.size()},
-                        {"total_items", scene->items().size()}, {"loaded_stat_paths", 0},
+                        {"total_items", scene->items().size()},
                         {"decoded_count", decoded_count_}, {"visible_results", visible_results_},
                         {"prefetch_results", prefetch_results_}, {"stale_results", stale_results_},
                         {"failed_results", failed_results_},
@@ -195,7 +338,7 @@ class performance_probe
             row["cache_logical_bytes"] = loader->cache_.totalCost();
             row["cache_budget_bytes"] = loader->cache_.maxCost();
         }
-        for (const QByteArray& field : {"rchar", "wchar", "syscr", "syscw", "read_bytes", "write_bytes"})
+        for (const QByteArray& field : {"rchar", "wchar", "syscr", "syscw", "read_bytes", "write_bytes", "cancelled_write_bytes"})
         {
             row[QString::fromLatin1(field)] = proc_value("/proc/self/io", field);
         }
@@ -210,6 +353,9 @@ class performance_probe
         }
         row["disk_cache_bytes"] = cache_bytes;
         row["disk_cache_files"] = cache_files;
+        row["source_counts"] = QJsonObject{{"memory", source_counts_[0]}, {"disk", source_counts_[1]},
+            {"decoded", source_counts_[2]}, {"failed", source_counts_[3]}};
+        row["latency"] = latency_json();
         samples_.append(row);
     }
 
@@ -221,6 +367,7 @@ class performance_probe
         QTest::qWait(500);
         idle_cpu_ms_ = process_cpu_ms() - idle_start;
         timer_.restart();
+        heartbeat_.start();
         QMimeData mime;
         mime.setUrls({QUrl::fromLocalFile(directory)});
         QDragEnterEvent enter(QPoint(1, 1), Qt::CopyAction, &mime, Qt::LeftButton, Qt::NoModifier);
@@ -240,11 +387,14 @@ class performance_probe
             {
                 window_.scene_->active_items_[0]->setSelected(true);
             }
-            QTest::qWait(40);
-            window_.grab().save(output + "/light.png");
+            window_.raise();
+            window_.activateWindow();
+            QTest::qWaitForWindowExposed(&window_);
+            QTest::qWait(300);
+            window_.screen()->grabWindow(window_.winId()).save(output + "/light.png");
             window_.dark_theme_action_->setChecked(true);
-            QTest::qWait(40);
-            window_.grab().save(output + "/dark.png");
+            QTest::qWait(300);
+            window_.screen()->grabWindow(window_.winId()).save(output + "/dark.png");
             window_.show_image_viewer(window_.scene_->image_paths_.first(), window_.scene_->get_all_paths());
             QElapsedTimer wait;
             wait.start();
@@ -252,27 +402,48 @@ class performance_probe
             {
                 QTest::qWait(20);
             }
-            window_.viewer_window_->grab().save(output + "/preview.png");
+            window_.viewer_window_->raise();
+            window_.viewer_window_->activateWindow();
+            QTest::qWait(300);
+            window_.viewer_window_->screen()->grabWindow(window_.viewer_window_->winId()).save(output + "/preview.png");
             window_.viewer_window_->close();
             window_.dark_theme_action_->setChecked(false);
             QTemporaryDir empty;
             window_.open_path(empty.path(), false);
-            QTest::qWait(100);
-            window_.grab().save(output + "/empty.png");
+            window_.raise();
+            window_.activateWindow();
+            QTest::qWait(300);
+            window_.screen()->grabWindow(window_.winId()).save(output + "/empty.png");
             return 0;
         }
         QImage surface(window_.view_->size(), QImage::Format_RGB32);
         double render_ms = 0;
         auto* scroll = window_.view_->verticalScrollBar();
-        const int laps = mode == run_mode::soak ? 30 : 3;
+        const bool natural = mode == run_mode::usage || mode == run_mode::profile;
+        const int laps = mode == run_mode::soak ? 30 : (mode == run_mode::profile ? 1 : 3);
         for (int lap = 0; lap < laps; ++lap)
         {
             for (int step = 0; step < 120; ++step)
             {
-                const int position = lap % 2 == 0 ? step : 119 - step;
-                scroll->setValue(static_cast<qint64>(scroll->maximum()) * position / 119);
-                window_.view_->check_visible_area();
+                if (natural && lap == 0)
+                {
+                    // 连续滚动走视图原有 16ms 合并路径，不强制刷新可见区。
+                    scroll->setValue(scroll->value() + window_.view_->viewport()->height() / 5);
+                }
+                else
+                {
+                    const int position = natural ? (step * 73 + lap * 19) % 120 : (lap % 2 == 0 ? step : 119 - step);
+                    scroll->setValue(static_cast<qint64>(scroll->maximum()) * position / 119);
+                }
+                if (!natural)
+                {
+                    window_.view_->check_visible_area();
+                }
                 QTest::qWait(40);
+                if (natural)
+                {
+                    continue;
+                }
                 QElapsedTimer render;
                 render.start();
                 QPainter painter(&surface);
@@ -293,6 +464,25 @@ class performance_probe
             {
                 return 4;
             }
+        }
+        if (mode == run_mode::usage)
+        {
+            window_.showMaximized();
+            QTest::qWait(300);
+            wait_idle();
+            window_.showNormal();
+            QTest::qWait(300);
+            wait_idle();
+            sample("restored");
+            QTemporaryDir empty;
+            scan_done_ = false;
+            window_.open_path(empty.path(), false);
+            if (!wait_idle()) { return 7; }
+            sample("switched_empty");
+            scan_done_ = false;
+            window_.open_path(directory, false);
+            if (!wait_idle()) { return 8; }
+            sample("reopened");
         }
         scroll->setValue(0);
         QTest::qWait(180);
@@ -323,13 +513,26 @@ class performance_probe
 #endif
             sample("trimmed");
         }
-        QJsonObject result{{"qt", qVersion()}, {"dataset", directory}, {"viewport", "1280x800 window"},
+        heartbeat_.stop();
+        QJsonArray screen_info;
+        for (const auto* screen : QGuiApplication::screens())
+        {
+            screen_info.append(QJsonObject{{"name", screen->name()}, {"dpr", screen->devicePixelRatio()},
+                {"geometry", QJsonArray{screen->geometry().width(), screen->geometry().height()}},
+                {"logical_dpi", screen->logicalDotsPerInch()}});
+        }
+        QJsonObject result{{"platform", QGuiApplication::platformName()},
+                           {"window_logical_px", QJsonArray{window_.width(), window_.height()}},
+                           {"viewport_logical_px", QJsonArray{window_.view_->viewport()->width(), window_.view_->viewport()->height()}},
+                           {"dpr", window_.view_->devicePixelRatioF()}, {"screens", screen_info},
+                           {"loader_tid", loader_tid_}, {"pid", static_cast<qint64>(getpid())},
+                           {"latency", latency_json()}, {"qt", qVersion()}, {"dataset", directory},
                            {"first_batch_ms", first_batch_ms_}, {"first_thumbnail_ms", first_thumbnail_ms_},
                            {"first_visible_ms", first_visible_ms_},
                            {"scan_ms", scan_ms_}, {"idle_cpu_ms_500ms", idle_cpu_ms_},
                            {"max_queue_sampled", max_queue_}, {"max_active_items", max_active_},
                            {"clear_disk_at_end", clear_disk},
-                           {QString("explicit_render_ms_%1_frames").arg(laps * 120), render_ms}, {"samples", samples_}};
+                           {QString("explicit_render_ms_%1_frames").arg(natural ? 0 : laps * 120), render_ms}, {"samples", samples_}};
         QFile file(output);
         if (!file.open(QIODevice::WriteOnly))
         {
@@ -339,7 +542,50 @@ class performance_probe
         return 0;
     }
 
+   protected:
+    bool eventFilter(QObject* watched, QEvent* event) override
+    {
+        if (event->type() == QEvent::Paint)
+        {
+            const qint64 now = clock_ns();
+            const QRectF visible = window_.view_->mapToScene(window_.view_->viewport()->rect()).boundingRect();
+            for (auto* item : window_.scene_->active_items_)
+            {
+                const QPair<int, quint64> key{window_.scene_->current_session_id_, item->get_request_id()};
+                auto it = display_pending_.find(key);
+                if (it == display_pending_.end() || item->state() != waterfall_item::load_state::ready ||
+                    !item->sceneBoundingRect().intersects(visible))
+                {
+                    continue;
+                }
+                paint_latency_.add(now - it->ready);
+                visible_latency_.add(now - it->submitted);
+                display_pending_.erase(it);
+            }
+        }
+        return QObject::eventFilter(watched, event);
+    }
+
    private:
+    QJsonObject latency_json()
+    {
+        QMutexLocker lock(&timing_mutex_);
+        return {{"queue", queue_latency_.json()}, {"worker_to_callback", ready_latency_.json()},
+                {"submit_to_callback", callback_latency_.json()}, {"callback_to_paint", paint_latency_.json()},
+                {"submit_to_paint", visible_latency_.json()}, {"gui_timer_delay", heartbeat_delay_.json()},
+                {"pending_tasks", pending_.size()}, {"pending_paint", display_pending_.size()}};
+    }
+
+    struct task_timing { QString path; qint64 submitted; qint64 started; };
+    struct paint_timing { QString path; qint64 submitted; qint64 ready; };
+    QHash<QPair<int, quint64>, task_timing> pending_;
+    QHash<QPair<int, quint64>, paint_timing> display_pending_;
+    QMutex timing_mutex_;
+    latency_stats queue_latency_, ready_latency_, callback_latency_, paint_latency_, visible_latency_, heartbeat_delay_;
+    std::array<int, 4> source_counts_{};
+    QTimer heartbeat_;
+    qint64 heartbeat_ns_ = 0;
+    int loader_tid_ = 0;
     main_window& window_;
     QElapsedTimer timer_;
     bool scan_done_ = false;
@@ -577,13 +823,14 @@ int main(int argc, char** argv)
         return viewer_benchmark(QString::fromLocal8Bit(argv[2]), QString::fromLocal8Bit(argv[3]));
     }
     main_window window;
-    window.resize(1280, 800);
+    const QStringList dimensions = qEnvironmentVariable("IV_BENCH_WINDOW", "1280x800").split('x');
+    window.resize(dimensions.at(0).toInt(), dimensions.at(1).toInt());
     window.show();
     QTest::qWait(200);
-    performance_probe probe(window);
+    auto* probe = new performance_probe(window);
     if (QString::fromLocal8Bit(argv[1]) == "--ui")
     {
-        return probe.run(QString::fromLocal8Bit(argv[2]), QString::fromLocal8Bit(argv[3]), performance_probe::run_mode::capture);
+        return probe->run(QString::fromLocal8Bit(argv[2]), QString::fromLocal8Bit(argv[3]), performance_probe::run_mode::capture);
     }
     auto mode = performance_probe::run_mode::cold;
     if (QString::fromLocal8Bit(argv[3]) == "warm")
@@ -594,9 +841,17 @@ int main(int argc, char** argv)
     {
         mode = performance_probe::run_mode::trim;
     }
+    else if (QString::fromLocal8Bit(argv[3]) == "usage")
+    {
+        mode = performance_probe::run_mode::usage;
+    }
+    else if (QString::fromLocal8Bit(argv[3]) == "profile")
+    {
+        mode = performance_probe::run_mode::profile;
+    }
     else if (QString::fromLocal8Bit(argv[3]) == "soak")
     {
         mode = performance_probe::run_mode::soak;
     }
-    return probe.run(QString::fromLocal8Bit(argv[1]), QString::fromLocal8Bit(argv[2]), mode);
+    return probe->run(QString::fromLocal8Bit(argv[1]), QString::fromLocal8Bit(argv[2]), mode);
 }

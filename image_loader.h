@@ -18,6 +18,8 @@ class image_loader : public QObject
     friend class correctness_test;
 
    public:
+    enum class thumbnail_source { memory, disk, decoded, failed };
+    Q_ENUM(thumbnail_source)
     explicit image_loader(QObject* parent = nullptr);
     ~image_loader() override;
 
@@ -30,7 +32,8 @@ class image_loader : public QObject
     void clear_cache();
 
    signals:
-    void thumbnail_loaded(quint64 id, QString path, QImage image, int session_id);
+    void thumbnail_started(quint64 id, int session_id);
+    void thumbnail_loaded(quint64 id, QString path, QImage image, int session_id, thumbnail_source source);
 
    private:
     void load_next();
