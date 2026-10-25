@@ -37,6 +37,7 @@ else
     rpm -qip "$output"/*.rpm > "$output/package-info.txt"
     rpm -qRp "$output"/*.rpm > "$output/package-requires.txt"
     rpm -qlp "$output"/*.rpm > "$output/package-contents.txt"
+    rpm -qp --dump "$output"/*.rpm > "$output/package-file-metadata.txt"
 fi
 printf '%s\n' "$SOURCE_DATE_EPOCH" > "$output/source-date-epoch.txt"
 (
