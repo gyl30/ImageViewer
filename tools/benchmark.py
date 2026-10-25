@@ -311,8 +311,9 @@ def analyze_long(args):
     header = records[0]
     finished = next((row for row in records if row.get("event") == "finished"), None)
     samples = [row for row in records if "phase" in row]
-    warmup_ms = 20 * 60 * 1000
-    bin_ms = 20 * 60 * 1000
+    period_minutes = 20
+    bin_ms = period_minutes * 60 * 1000
+    warmup_ms = bin_ms
     groups = {}
     for row in samples:
         if row["elapsed_ms"] < warmup_ms:
@@ -321,7 +322,7 @@ def analyze_long(args):
         groups.setdefault(key, []).append(row)
     bins = []
     for (phase, models, period), rows in sorted(groups.items()):
-        bins.append({"phase": phase, "models": models, "minute_start": period * 20,
+        bins.append({"phase": phase, "models": models, "minute_start": period * period_minutes,
                      "samples": len(rows),
                      "rss_median_mib": statistics.median(row["rss_kib"] for row in rows) / 1024,
                      "rss_min_mib": min(row["rss_kib"] for row in rows) / 1024,
@@ -346,7 +347,7 @@ def analyze_long(args):
     cleanup = [row for row in samples if row["phase"] in ("periodic_cleared", "final_cleared")]
     result = {"complete": finished is not None and finished["elapsed_ms"] >= header["seconds_requested"] * 1000,
               "requested_seconds": header["seconds_requested"], "finished": finished,
-              "warmup_excluded_minutes": 20, "sample_count": len(samples), "timeline_bytes": args.input.stat().st_size,
+              "warmup_excluded_minutes": period_minutes, "sample_count": len(samples), "timeline_bytes": args.input.stat().st_size,
               "peak_rss_mib": max(max(row["peak_rss_kib"], row["rusage_peak_rss_kib"]) for row in samples) / 1024,
               "max_sampled_pss_mib": max(row["pss_kib"] for row in samples) / 1024,
               "max_threads": max(row["threads"] for row in samples),
