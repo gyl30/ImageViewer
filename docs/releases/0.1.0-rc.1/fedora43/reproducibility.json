@@ -1,0 +1,37 @@
+{
+  "source_revision": "3a276dacb63cf03179533725eb877ce05c7a2ad1",
+  "source_date_epoch": 1792969845,
+  "builder_image": "sha256:0305a129ef17ea74166a089c42d604033322c71be6a434d71386cc0deffdfcb9 amd64 linux",
+  "package": "imageviewer-0.1.0-0.1.rc1.fc43.x86_64.rpm",
+  "package_bytes": 145054,
+  "package_sha256": "564ce5c27264eb66ab71bf5b1c0c6cab162112ef766ad2c739ef97ed9dc839be",
+  "independent_runs": [
+    {
+      "source_export": "release-source-1",
+      "output": "canonical-fedora43-1",
+      "container_fresh": true,
+      "package_sha256": "564ce5c27264eb66ab71bf5b1c0c6cab162112ef766ad2c739ef97ed9dc839be",
+      "staged_executable_sha256": "396239c2ea98eec33f9831ce6ee14c48400dea8c3b973d2425fc552b5e00618b",
+      "qt_test_passed": 84,
+      "qt_test_failed": 0,
+      "qt_test_skipped": 0,
+      "qt_test_milliseconds": 8207
+    },
+    {
+      "source_export": "release-source-2",
+      "output": "canonical-fedora43-2",
+      "container_fresh": true,
+      "package_sha256": "564ce5c27264eb66ab71bf5b1c0c6cab162112ef766ad2c739ef97ed9dc839be",
+      "staged_executable_sha256": "396239c2ea98eec33f9831ce6ee14c48400dea8c3b973d2425fc552b5e00618b",
+      "qt_test_passed": 84,
+      "qt_test_failed": 0,
+      "qt_test_skipped": 0,
+      "qt_test_milliseconds": 8157
+    }
+  ],
+  "package_byte_equal": true,
+  "staged_executable_bytes": 386568,
+  "staged_executable_sha256": "396239c2ea98eec33f9831ce6ee14c48400dea8c3b973d2425fc552b5e00618b",
+  "staged_executable_byte_equal": true,
+  "final_executable_check": "完整安装包字节一致覆盖最终ELF；另在干净目标环境核对实际安装文件摘要"
+}

@@ -1,0 +1,1 @@
+install, desktop launch, five formats, gallery and uninstall: PASS

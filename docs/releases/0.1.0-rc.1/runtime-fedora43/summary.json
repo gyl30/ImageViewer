@@ -1,0 +1,27 @@
+{
+  "base_image": "fedora@sha256:a651ddf48ea28a06ed4e1e6519f51c9f47e7a5a138722ade87369b8fbb7e5b42",
+  "result": "PASS",
+  "gui": "Xvfb / X11 / Openbox，UID 1000",
+  "opened_images": 5,
+  "gallery_thumbnails": 5,
+  "installed_payload_files": 4,
+  "user_data_checks_passed": 14,
+  "installed_executable_bytes": 386440,
+  "installed_executable_sha256": "b14677d543b0504f2b93444416f4beb837df54b947ba5d0a94374386e8476b52",
+  "package_size_unit": "bytes",
+  "added_packages_including_application": 148,
+  "updated_base_packages": [],
+  "new_packages_declared_installed_bytes": 498698938,
+  "net_declared_installed_bytes": 498698938,
+  "application_declared_installed_bytes": 387404,
+  "dependency_net_declared_installed_bytes": 498311534,
+  "size_measurement": "包管理器的Installed-Size/Size声明，测试工具安装前采样；不是RSS、du或下载量",
+  "application_qt_packages": {
+    "qt6-filesystem.x86_64": "6.10.3-1.fc43",
+    "qt6-qtbase.x86_64": "6.10.3-1.fc43",
+    "qt6-qtbase-common.noarch": "6.10.3-1.fc43",
+    "qt6-qtbase-gui.x86_64": "6.10.3-1.fc43",
+    "qt6-qtsvg.x86_64": "6.10.3-1.fc43",
+    "qt6-qtimageformats.x86_64": "6.10.3-1.fc43"
+  }
+}

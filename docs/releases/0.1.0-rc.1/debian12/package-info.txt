@@ -1,0 +1,16 @@
+ new Debian package, version 2.0.
+ size 151310 bytes: control archive=688 bytes.
+     627 bytes,    13 lines      control
+     321 bytes,     4 lines      md5sums
+ Architecture: amd64
+ Depends: libqt6core6 (>= 6.4.2), libqt6svg6 (>= 6.4.2), qt6-image-formats-plugins, hicolor-icon-theme, libc6 (>= 2.34), libgcc-s1 (>= 3.0), libqt6core6 (>= 6.4.0), libqt6gui6 (>= 6.4.0), libqt6widgets6 (>= 6.3.0), libstdc++6 (>= 11)
+ Description: Lightweight waterfall image viewer
+  Qt Widgets image viewer for local JPEG, PNG, WebP, GIF and BMP files.
+  Internal release candidate; project license is not yet determined.
+ Homepage: https://github.com/gyl30/ImageViewer
+ Maintainer: gyl30 <im.ggyyll@gmail.com>
+ Package: imageviewer
+ Priority: optional
+ Section: graphics
+ Version: 0.1.0~rc1-1
+ Installed-Size: 409

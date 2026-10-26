@@ -1,0 +1,12 @@
+{
+  "phase": "未提交发布原型的复打包诊断，不作为最终候选",
+  "source_date_epoch": 1792911814,
+  "first_sha256": "25b6fc5af4f4ec141ef19cab24f2e146d7357551dc0a58255c4d69cb2c312e10",
+  "second_sha256": "7089691c1ef2961580677d643ac691839a1b801316d702c7cacb9f1de7cdb6c5",
+  "first_buildtime": 1792935612,
+  "second_buildtime": 1792965606,
+  "first_buildhost": "6e07e3d81874",
+  "second_buildhost": "3b1ec8533b56",
+  "payload_metadata_equal": true,
+  "method": "rpm -qp --dump逐字节对比相同，BUILDTIME/BUILDHOST观察到不同；随后固定RPM构建主机与SOURCE_DATE_EPOCH"
+}

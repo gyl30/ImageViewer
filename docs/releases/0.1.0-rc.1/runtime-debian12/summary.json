@@ -1,0 +1,27 @@
+{
+  "base_image": "debian@sha256:7ff6ba31527b9e336162fa061746c366c4b2032f4d2cff2078bea43f78efe3f8",
+  "result": "PASS",
+  "gui": "Xvfb / X11 / Openbox，UID 1000",
+  "opened_images": 5,
+  "gallery_thumbnails": 5,
+  "installed_payload_files": 4,
+  "user_data_checks_passed": 14,
+  "installed_executable_bytes": 376880,
+  "installed_executable_sha256": "27604ec331e050f882cc303d086900eab4b6a7e75037c94bd51a33b755b9423b",
+  "package_size_unit": "KiB",
+  "added_packages_including_application": 103,
+  "updated_base_packages": [],
+  "new_packages_declared_installed_bytes": 279202816,
+  "net_declared_installed_bytes": 279202816,
+  "application_declared_installed_bytes": 418816,
+  "dependency_net_declared_installed_bytes": 278784000,
+  "size_measurement": "包管理器的Installed-Size/Size声明，测试工具安装前采样；不是RSS、du或下载量",
+  "application_qt_packages": {
+    "libqt6core6:amd64": "6.4.2+dfsg-10",
+    "libqt6dbus6:amd64": "6.4.2+dfsg-10",
+    "libqt6gui6:amd64": "6.4.2+dfsg-10",
+    "libqt6svg6:amd64": "6.4.2-2",
+    "libqt6widgets6:amd64": "6.4.2+dfsg-10",
+    "qt6-image-formats-plugins": "6.4.2-1"
+  }
+}

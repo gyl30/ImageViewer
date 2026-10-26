@@ -1,0 +1,236 @@
+_NET_WM_ICON(CARDINAL) = 	Icon (16 x 16):
+
+	  ;llllllllll;
+	 ;[llllllllll[;
+	 ll  `       ll
+	 ll )]>      ll
+	 ll`]>(      ll
+	 ll >("      ll
+	 ll `l       ll
+	 ll`{r?  |]  ll
+	 lI{?`{??rr? ll
+	 I]?  `rr``{?ll
+	 (1    ''  `{1l
+	 ll         `[(
+	 ;[llllllllll[-
+	  ;llllllllll;
+
+
+	Icon (32 x 32):
+
+
+	      ',,,,,,,,,,,,,,,,,,'
+	    ~{rrrrrrrrrrrrrrrrrrrr{~
+	   ~rrrrrrrrrrrrrrrrrrrrrrrr~
+	   {rI,,,,,,,,,,,,,,,,,,,,Ir{
+	  'rr,                    ,rr'
+	  ,rr,   ,+;              ,rr,
+	  ,rr,  +rrr\             ,rr,
+	  ,rr, ,rr1]r>            ,rr,
+	  ,rr, +r1 ir|            ,rr,
+	  ,rr, ;r]i1rI            ,rr,
+	  ,rr,  \rrr[`            ,rr,
+	  ,rr,   >|I`             ,rr,
+	  ,rr,    '               ,rr,
+	  ,rr,   <rr.             ,rr,
+	  ,rr,  <rrr|.    .?1.    ,rr,
+	  ,rr, <rrrrr|.  .|rr1.   ,rr,
+	  ,rr,<rr|.<rr|..|rrrr|.  ,rr,
+	  ,rrirr|.  <rr((rr<<rr|. ,rr,
+	  ,rrrr|.    <rrrr<  <rr|.,rr,
+	  ,rrr|.      <rr<    <rr|^rr,
+	  :rr(.        ~~      <rr(rr,
+	  ,rr^                  <rrrr,
+	  ,rr,                   <rrr,
+	  'rr,                    !rr^
+	   {rI,,,,,,,,,,,,,,,,,,,,Ir}
+	   ~rrrrrrrrrrrrrrrrrrrrrrrr~
+	    ~{rrrrrrrrrrrrrrrrrrrr{~
+	      ',,,,,,,,,,,,,,,,,,'
+
+
+
+	Icon (64 x 64):
+
+
+
+
+
+	           .:;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:.
+	         ,?]rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr]?,
+	        -]rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr]-
+	       -rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr-
+	      ,]rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr],
+	      ?rrrr\-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-\rrrr?
+	     .]rrr\                                          \rrr].
+	     :rrrr-                                          -rrrr:
+	     ;rrrr;                                          ;rrrr;
+	     ;rrrr;                                          ;rrrr;
+	     ;rrrr;       `I{[)<                             ;rrrr;
+	     ;rrrr;      -[rrrrr(,                           ;rrrr;
+	     ;rrrr;     ~rrrrrrrr}'                          ;rrrr;
+	     ;rrrr;    `[rrrrrrrrr\                          ;rrrr;
+	     ;rrrr;    Irrrr|I{rrrr"                         ;rrrr;
+	     ;rrrr;    {rrr|  'rrrri                         ;rrrr;
+	     ;rrrr;    [rrrI   ]rrrI                         ;rrrr;
+	     ;rrrr;    )rrr{' ;rrrr<                         ;rrrr;
+	     ;rrrr;    <rrrrr]rrrrr,                         ;rrrr;
+	     ;rrrr;     (rrrrrrrrr<                          ;rrrr;
+	     ;rrrr;     ,}rrrrrrr\                           ;rrrr;
+	     ;rrrr;      '\rrrrr<                            ;rrrr;
+	     ;rrrr;        "iI<,                             ;rrrr;
+	     ;rrrr;                                          ;rrrr;
+	     ;rrrr;         `".                              ;rrrr;
+	     ;rrrr;        _rrr"                             ;rrrr;
+	     ;rrrr;       _rrrrr,                            ;rrrr;
+	     ;rrrr;      _rrrrrr},            `!!`           ;rrrr;
+	     ;rrrr;     _rrrrrrrr},          ,}rrr^          ;rrrr;
+	     ;rrrr;    _rrrrrrrrrr},        ,}rrrrr,         ;rrrr;
+	     ;rrrr;   _rrrrr}!rrrrr},      ,}rrrrrr},        ;rrrr;
+	     ;rrrr;  _rrrrr}, _rrrrr},    ,}rrrrrrrr},       ;rrrr;
+	     ;rrrr; _rrrrr},   _rrrrr},  ,}rrrrrrrrrr},      ;rrrr;
+	     ;rrrr;_rrrrr},     _rrrrr},,}rrrrr__rrrrr},     ;rrrr;
+	     ;rrrrlrrrrr},       _rrrrrrrrrrrr_  _rrrrr},    ;rrrr;
+	     ;rrrrrrrrr},         _rrrrrrrrrr_    _rrrrr},   ;rrrr;
+	     ;rrrrrrrr},           _rrrrrrrr_      _rrrrr},  ;rrrr;
+	     ;rrrrrrr},             _rrrrrr_        _rrrrr}, ;rrrr;
+	     ;rrrrrr},               _rrrr_          _rrrrr},;rrrr;
+	     -rrrrr},                 -{{-            _rrrrr}_rrrr;
+	     <rrrr[,                                   _rrrrr[rrrr;
+	     ;rrrr_                                     _rrrrrrrrr;
+	     ;rrrr;                                      _rrrrrrrr;
+	     ;rrrr;                                       _rrrrrrr;
+	     ;rrrr;                                        _rrrrrr;
+	     ;rrrr;                                         _rrrrr<
+	     :rrrr-                                          Irrrr;
+	     .]rrr\                                          \rrr].
+	      ?rrrr\-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-\rrrr?
+	      ,]rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr],
+	       -rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr-
+	        -]rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr]-
+	         ,?]rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr]?,
+	           .:;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:.
+
+
+
+
+
+
+	Icon (128 x 128):
+
+
+
+
+
+
+
+
+
+
+
+	                       ,_>!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!>_,
+	                    'i{rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr{i'
+	                   i]rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr]i
+	                 ,1rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr1,
+	                ;]rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr];
+	               ;]rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr];
+	              ,]rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr],
+	              1rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr1
+	             irrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrri
+	            ']rrrrrrrrrr(I!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!I(rrrrrrrrrr]'
+	            irrrrrrrrr\`                                                                                `\rrrrrrrrri
+	            {rrrrrrrr\                                                                                    \rrrrrrrr{
+	           ,rrrrrrrrr`                                                                                    `rrrrrrrrr,
+	           _rrrrrrrr(                                                                                      (rrrrrrrr_
+	           >rrrrrrrrI                                                                                      Irrrrrrrr>
+	           !rrrrrrrr!                                                                                      !rrrrrrrr!
+	           !rrrrrrrr!                                                                                      !rrrrrrrr!
+	           !rrrrrrrr!                                                                                      !rrrrrrrr!
+	           !rrrrrrrr!                                                                                      !rrrrrrrr!
+	           !rrrrrrrr!                 .-?){1\>`                                                            !rrrrrrrr!
+	           !rrrrrrrr!               .i]rrrrrrrr\,                                                          !rrrrrrrr!
+	           !rrrrrrrr!              "}rrrrrrrrrrrr>                                                         !rrrrrrrr!
+	           !rrrrrrrr!             +rrrrrrrrrrrrrrr\.                                                       !rrrrrrrr!
+	           !rrrrrrrr!            +rrrrrrrrrrrrrrrrr\                                                       !rrrrrrrr!
+	           !rrrrrrrr!           "rrrrrrrrrrrrrrrrrrrl                                                      !rrrrrrrr!
+	           !rrrrrrrr!          .}rrrrrrrrrrrrrrrrrrrr;                                                     !rrrrrrrr!
+	           !rrrrrrrr!          irrrrrrrrrrrrrrrrrrrrr1                                                     !rrrrrrrr!
+	           !rrrrrrrr!         .]rrrrrrrrrrrrrrrrrrrrrr~                                                    !rrrrrrrr!
+	           !rrrrrrrr!         -rrrrrrrrr?~:">[rrrrrrrr\                                                    !rrrrrrrr!
+	           !rrrrrrrr!         ?rrrrrrrr?     ~rrrrrrrr]                                                    !rrrrrrrr!
+	           !rrrrrrrr!         )rrrrrrrr~      ]rrrrrrrr`                                                   !rrrrrrrr!
+	           !rrrrrrrr!         {rrrrrrrr:      }rrrrrrrr:                                                   !rrrrrrrr!
+	           !rrrrrrrr!         1rrrrrrrr"      [rrrrrrrr,                                                   !rrrrrrrr!
+	           !rrrrrrrr!         \rrrrrrrr>     ,rrrrrrrrr.                                                   !rrrrrrrr!
+	           !rrrrrrrr!         >rrrrrrrr[~   ,(rrrrrrrr)                                                    !rrrrrrrr!
+	           !rrrrrrrr!         `rrrrrrrrrr]}[rrrrrrrrrr<                                                    !rrrrrrrr!
+	           !rrrrrrrr!          \rrrrrrrrrrrrrrrrrrrrr]'                                                    !rrrrrrrr!
+	           !rrrrrrrr!          ,rrrrrrrrrrrrrrrrrrrrr>                                                     !rrrrrrrr!
+	           !rrrrrrrr!           >rrrrrrrrrrrrrrrrrrr)                                                      !rrrrrrrr!
+	           !rrrrrrrr!            \rrrrrrrrrrrrrrrrr}`                                                      !rrrrrrrr!
+	           !rrrrrrrr!            .\rrrrrrrrrrrrrrr}^                                                       !rrrrrrrr!
+	           !rrrrrrrr!              lrrrrrrrrrrrrr)`                                                        !rrrrrrrr!
+	           !rrrrrrrr!               ;1rrrrrrrrr]>                                                          !rrrrrrrr!
+	           !rrrrrrrr!                 ~\]rrrr)<'                                                           !rrrrrrrr!
+	           !rrrrrrrr!                    `:,.                                                              !rrrrrrrr!
+	           !rrrrrrrr!                                                                                      !rrrrrrrr!
+	           !rrrrrrrr!                                                                                      !rrrrrrrr!
+	           !rrrrrrrr!                                                                                      !rrrrrrrr!
+	           !rrrrrrrr!                   ._!<,                                                              !rrrrrrrr!
+	           !rrrrrrrr!                  "[rrrrl                                                             !rrrrrrrr!
+	           !rrrrrrrr!                 ;]rrrrrrr                                                            !rrrrrrrr!
+	           !rrrrrrrr!                ;]rrrrrrrrI                                                           !rrrrrrrr!
+	           !rrrrrrrr!               ;]rrrrrrrrrrl                                                          !rrrrrrrr!
+	           !rrrrrrrr!              ;]rrrrrrrrrrrrl                             ,,                          !rrrrrrrr!
+	           !rrrrrrrr!             ;]rrrrrrrrrrrrrrl                          <[rr[<                        !rrrrrrrr!
+	           !rrrrrrrr!            ;]rrrrrrrrrrrrrrrrl                        lrrrrrrr                       !rrrrrrrr!
+	           !rrrrrrrr!           ;]rrrrrrrrrrrrrrrrrrl                      lrrrrrrrr|                      !rrrrrrrr!
+	           !rrrrrrrr!          ;]rrrrrrrrrrrrrrrrrrrrl                    lrrrrrrrrrrl                     !rrrrrrrr!
+	           !rrrrrrrr!         ;]rrrrrrrrrrrrrrrrrrrrrrl                  lrrrrrrrrrrrrl                    !rrrrrrrr!
+	           !rrrrrrrr!        ;]rrrrrrrrrrr1]rrrrrrrrrrrl                lrrrrrrrrrrrrrrl                   !rrrrrrrr!
+	           !rrrrrrrr!       ;]rrrrrrrrrrrl ;]rrrrrrrrrrrl              lrrrrrrrrrrrrrrrrl                  !rrrrrrrr!
+	           !rrrrrrrr!      ;]rrrrrrrrrrrl   ;]rrrrrrrrrrrl            lrrrrrrrrrrrrrrrrrrl                 !rrrrrrrr!
+	           !rrrrrrrr!     ;]rrrrrrrrrrrl     ;]rrrrrrrrrrrl          lrrrrrrrrrrrrrrrrrrrrl                !rrrrrrrr!
+	           !rrrrrrrr!    ;]rrrrrrrrrrrl       ;]rrrrrrrrrrrl        lrrrrrrrrrrrrrrrrrrrrrrl               !rrrrrrrr!
+	           !rrrrrrrr!   ;]rrrrrrrrrrrl         ;]rrrrrrrrrrrl      lrrrrrrrrrrrrrrrrrrrrrrrrl              !rrrrrrrr!
+	           !rrrrrrrr!  ;]rrrrrrrrrrrl           ;]rrrrrrrrrrrl    lrrrrrrrrrrr];;]rrrrrrrrrrrl             !rrrrrrrr!
+	           !rrrrrrrr! ;]rrrrrrrrrrrl             ;]rrrrrrrrrrrl  lrrrrrrrrrrr];  ;]rrrrrrrrrrrl            !rrrrrrrr!
+	           !rrrrrrrr!;]rrrrrrrrrrrl               ;]rrrrrrrrrrrllrrrrrrrrrrr];    ;]rrrrrrrrrrrl           !rrrrrrrr!
+	           !rrrrrrrr/]rrrrrrrrrrrl                 ;]rrrrrrrrrrrrrrrrrrrrrr];      ;]rrrrrrrrrrrl          !rrrrrrrr!
+	           !rrrrrrrrrrrrrrrrrrrrl                   ;]rrrrrrrrrrrrrrrrrrrr];        ;]rrrrrrrrrrrl         !rrrrrrrr!
+	           !rrrrrrrrrrrrrrrrrrrl                     ;]rrrrrrrrrrrrrrrrrr];          ;]rrrrrrrrrrrl        !rrrrrrrr!
+	           !rrrrrrrrrrrrrrrrrrl                       ;]rrrrrrrrrrrrrrrr];            ;]rrrrrrrrrrrl       !rrrrrrrr!
+	           !rrrrrrrrrrrrrrrrrl                         ;]rrrrrrrrrrrrrr];              ;]rrrrrrrrrrrl      !rrrrrrrr!
+	           !rrrrrrrrrrrrrrrrl                           ;]rrrrrrrrrrrr];                ;]rrrrrrrrrrrl     !rrrrrrrr!
+	           !rrrrrrrrrrrrrrrl                             ;]rrrrrrrrrr];                  ;]rrrrrrrrrrrl    !rrrrrrrr!
+	           !rrrrrrrrrrrrrrl                               ;]rrrrrrrr];                    ;]rrrrrrrrrrrl   !rrrrrrrr!
+	           !rrrrrrrrrrrrrl                                 ;]rrrrrr];                      ;]rrrrrrrrrrrl  !rrrrrrrr!
+	           lrrrrrrrrrrrrl                                   ;]rrrr];                        ;]rrrrrrrrrrrl !rrrrrrrr!
+	           \rrrrrrrrrrrl                                     ,I11I,                          ;]rrrrrrrrrrrl!rrrrrrrr!
+	           (rrrrrrrrrrl                                                                       ;]rrrrrrrrrrr)rrrrrrrr!
+	           |rrrrrrrrrl                                                                         ;]rrrrrrrrrrrrrrrrrrr!
+	           Irrrrrrrr)                                                                           ;]rrrrrrrrrrrrrrrrrr!
+	           !rrrrrrrr!                                                                            ;]rrrrrrrrrrrrrrrrr!
+	           !rrrrrrrr!                                                                             ;]rrrrrrrrrrrrrrrr!
+	           !rrrrrrrr!                                                                              ;]rrrrrrrrrrrrrrr!
+	           !rrrrrrrr!                                                                               ;]rrrrrrrrrrrrrr!
+	           !rrrrrrrr!                                                                                ;]rrrrrrrrrrrrr!
+	           !rrrrrrrr!                                                                                 ;]rrrrrrrrrrrr!
+	           !rrrrrrrr!                                                                                  ;]rrrrrrrrrrrI
+	           !rrrrrrrr!                                                                                   ;]rrrrrrrrrr|
+	           !rrrrrrrr!                                                                                    ;]rrrrrrrrr(
+	           >rrrrrrrrI                                                                                     ;rrrrrrrrr/
+	           _rrrrrrrr(                                                                                      1rrrrrrrr+
+	           ,rrrrrrrrr`                                                                                    `rrrrrrrrr,
+	            {rrrrrrrr\                                                                                    \rrrrrrrr{
+	            irrrrrrrrr\`                                                                                `\rrrrrrrrri
+	            ']rrrrrrrrrr(I!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!I(rrrrrrrrrr]'
+	             irrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrri
+	              1rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr1
+	              ,]rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr],
+	               ;]rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr];
+	                ;]rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr];
+	                 ,1rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr1,
+	                   i]rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr]i
+	                    'i{rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr{i'
+	                       ,_>!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!>_,

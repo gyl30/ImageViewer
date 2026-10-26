@@ -1,0 +1,31 @@
+[  0%] Built target ImageViewer_autogen_timestamp_deps
+[  7%] Automatic MOC and UIC for target ImageViewer
+[  7%] Built target ImageViewer_autogen
+[ 14%] Automatic RCC for resources.qrc
+[ 21%] Building CXX object CMakeFiles/ImageViewer.dir/ImageViewer_autogen/mocs_compilation.cpp.o
+[ 28%] Building CXX object CMakeFiles/ImageViewer.dir/main.cc.o
+[ 35%] Building CXX object CMakeFiles/ImageViewer.dir/image_loader.cc.o
+[ 42%] Building CXX object CMakeFiles/ImageViewer.dir/waterfall_item.cc.o
+[ 50%] Building CXX object CMakeFiles/ImageViewer.dir/waterfall_scene.cc.o
+[ 57%] Building CXX object CMakeFiles/ImageViewer.dir/waterfall_view.cc.o
+[ 64%] Building CXX object CMakeFiles/ImageViewer.dir/file_scanner.cc.o
+[ 71%] Building CXX object CMakeFiles/ImageViewer.dir/main_window.cc.o
+[ 78%] Building CXX object CMakeFiles/ImageViewer.dir/image_viewer_window.cc.o
+[ 85%] Building CXX object CMakeFiles/ImageViewer.dir/ImageViewer_autogen/EWIEGA46WW/qrc_resources.cpp.o
+/home/gyl/example/ImageViewer/main_window.cc: In member function ‘void main_window::on_move_path_to_trash(const QString&)’:
+/home/gyl/example/ImageViewer/main_window.cc:741:17: 错误： 对‘QDir::mkdir(const QString&, QFlags<QFileDevice::Permission>)’的调用没有匹配的函数
+  741 |     QDir().mkdir(data_home, QFile::ReadOwner | QFile::WriteOwner | QFile::ExeOwner);
+      |     ~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  • there is 1 candidate
+In file included from /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qfiledialog.h:44,
+                 from /usr/include/x86_64-linux-gnu/qt6/QtWidgets/QFileDialog:1,
+                 from /home/gyl/example/ImageViewer/main_window.cc:6:
+    • 备选 1: ‘bool QDir::mkdir(const QString&) const’
+      /usr/include/x86_64-linux-gnu/qt6/QtCore/qdir.h:198:10:
+        198 |     bool mkdir(const QString &dirName) const;
+            |          ^~~~~
+      • candidate expects 1 argument, 2 provided
+gmake[2]: *** [CMakeFiles/ImageViewer.dir/build.make:199：CMakeFiles/ImageViewer.dir/main_window.cc.o] 错误 1
+gmake[2]: *** 正在等待未完成的任务....
+gmake[1]: *** [CMakeFiles/Makefile2:90：CMakeFiles/ImageViewer.dir/all] 错误 2
+gmake: *** [Makefile:91：all] 错误 2

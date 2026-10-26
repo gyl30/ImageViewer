@@ -1,0 +1,37 @@
+{
+  "source_revision": "3a276dacb63cf03179533725eb877ce05c7a2ad1",
+  "source_date_epoch": 1792969845,
+  "builder_image": "sha256:acffb6f76dc1a78a96e95770851133996f4f1e64560ddf05f11306cf3fb53b94 amd64 linux",
+  "package": "imageviewer_0.1.0~rc1-1_amd64.deb",
+  "package_bytes": 151310,
+  "package_sha256": "09aa282ea90b1794a8a1586e0a8e74fe0f6db6c41c26aa3e06d67170d839553a",
+  "independent_runs": [
+    {
+      "source_export": "release-source-1",
+      "output": "canonical-debian12-1",
+      "container_fresh": true,
+      "package_sha256": "09aa282ea90b1794a8a1586e0a8e74fe0f6db6c41c26aa3e06d67170d839553a",
+      "staged_executable_sha256": "27604ec331e050f882cc303d086900eab4b6a7e75037c94bd51a33b755b9423b",
+      "qt_test_passed": 84,
+      "qt_test_failed": 0,
+      "qt_test_skipped": 0,
+      "qt_test_milliseconds": 7787
+    },
+    {
+      "source_export": "release-source-2",
+      "output": "canonical-debian12-2",
+      "container_fresh": true,
+      "package_sha256": "09aa282ea90b1794a8a1586e0a8e74fe0f6db6c41c26aa3e06d67170d839553a",
+      "staged_executable_sha256": "27604ec331e050f882cc303d086900eab4b6a7e75037c94bd51a33b755b9423b",
+      "qt_test_passed": 84,
+      "qt_test_failed": 0,
+      "qt_test_skipped": 0,
+      "qt_test_milliseconds": 7697
+    }
+  ],
+  "package_byte_equal": true,
+  "staged_executable_bytes": 376880,
+  "staged_executable_sha256": "27604ec331e050f882cc303d086900eab4b6a7e75037c94bd51a33b755b9423b",
+  "staged_executable_byte_equal": true,
+  "final_executable_check": "完整安装包字节一致覆盖最终ELF；另在干净目标环境核对实际安装文件摘要"
+}

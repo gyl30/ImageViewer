@@ -1,0 +1,14 @@
+/usr
+/usr/bin
+/usr/bin/ImageViewer
+/usr/share
+/usr/share/applications
+/usr/share/applications/io.github.gyl30.ImageViewer.desktop
+/usr/share/doc
+/usr/share/doc/imageviewer
+/usr/share/doc/imageviewer/copyright
+/usr/share/icons
+/usr/share/icons/hicolor
+/usr/share/icons/hicolor/scalable
+/usr/share/icons/hicolor/scalable/apps
+/usr/share/icons/hicolor/scalable/apps/io.github.gyl30.ImageViewer.svg

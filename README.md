@@ -50,6 +50,7 @@ cmake --build build --target ImageViewer --parallel 4
 ## 发布与支持范围
 
 - [Linux 构建、打包、安装验收流程](docs/linux-release.md)
+- [0.1.0-rc.1 本地安装包验收与依赖清单](docs/releases/0.1.0-rc.1/validation.md)
 - [现有功能和资源验收](docs/final-acceptance-2026-10-25.md)
 
 已完成的真实桌面验收范围是 Linux/Xorg 单屏及静态 100%/150%/200% DPI，基于 Qt 6.9.3。

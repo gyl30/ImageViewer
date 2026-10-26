@@ -1,0 +1,14 @@
+/out/gui/cache/ImageViewer/thumbnails/169d5583a236d83e5012c2229c21e3b2bafbfbfa.thumb: OK
+/out/gui/cache/ImageViewer/thumbnails/18971b097154a11ac21b5b91e4143b170e753673.thumb: OK
+/out/gui/cache/ImageViewer/thumbnails/23dbcd5480c5d8c9b93bbe5664e7742fe563513b.thumb: OK
+/out/gui/cache/ImageViewer/thumbnails/7555182ceab62d581eb565724128acfe1c3d4e56.thumb: OK
+/out/gui/cache/ImageViewer/thumbnails/f6faf7674f85cebcfb93f985b91cae71f7bb271a.thumb: OK
+/out/gui/cache/openbox/openbox.log: OK
+/out/gui/config/QtProject.conf: OK
+/out/gui/config/gyl30/ImageViewer.conf: OK
+/out/user-pictures/color.bmp: OK
+/out/user-pictures/color.gif: OK
+/out/user-pictures/color.jpg: OK
+/out/user-pictures/color.png: OK
+/out/user-pictures/color.webp: OK
+/out/user-pictures/corrupt.png: OK

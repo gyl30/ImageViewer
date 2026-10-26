@@ -1,0 +1,13 @@
+/usr/lib/x86_64-linux-gnu/qt6/plugins/iconengines/libqsvgicon.so
+/usr/lib/x86_64-linux-gnu/qt6/plugins/imageformats/libqgif.so
+/usr/lib/x86_64-linux-gnu/qt6/plugins/imageformats/libqicns.so
+/usr/lib/x86_64-linux-gnu/qt6/plugins/imageformats/libqico.so
+/usr/lib/x86_64-linux-gnu/qt6/plugins/imageformats/libqjpeg.so
+/usr/lib/x86_64-linux-gnu/qt6/plugins/imageformats/libqmng.so
+/usr/lib/x86_64-linux-gnu/qt6/plugins/imageformats/libqsvg.so
+/usr/lib/x86_64-linux-gnu/qt6/plugins/imageformats/libqtga.so
+/usr/lib/x86_64-linux-gnu/qt6/plugins/imageformats/libqtiff.so
+/usr/lib/x86_64-linux-gnu/qt6/plugins/imageformats/libqwbmp.so
+/usr/lib/x86_64-linux-gnu/qt6/plugins/imageformats/libqwebp.so
+/usr/lib/x86_64-linux-gnu/qt6/plugins/platforminputcontexts/libcomposeplatforminputcontextplugin.so
+/usr/lib/x86_64-linux-gnu/qt6/plugins/platforms/libqxcb.so

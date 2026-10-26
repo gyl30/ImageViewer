@@ -1,0 +1,120 @@
+_NET_WM_ICON(CARDINAL) = 	Icon (16 x 16):
+
+	    ;;llllllllllllllllllll;;
+	  ;;[[llllllllllllllllllll[[;;
+	  llll    ``              II!!
+	  llll  ))]]>>            llll
+	  llll``]]>>((            llll
+	  llll  >>((""            llll
+	  llll  ``ll              llll
+	  llll``{{rr??    ||]]    llll
+	  llII{{??``{{????rrrr??  llll
+	  II]]??    ``rrrr````{{??llll
+	  ((11        ''''    ``{{11ll
+	  llll                  ``]]((
+	  ;;[[IIllllllllllllllllII[[--
+	    ;;!!llllllllllllllll!!;;
+
+
+	Icon (32 x 32):
+
+
+	            '',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,''
+	        ~~{{rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr{{~~
+	      ~~rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr~~
+	      {{rrII,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,IIrr{{
+	    ''rrrr,,                                        ,,rrrr''
+	    ,,rrrr,,      ,,++;;                            ,,rrrr,,
+	    ,,rrrr,,    ++rrrrrr\\                          ,,rrrr,,
+	    ,,rrrr,,  ,,rrrr11]]rr>>                        ,,rrrr,,
+	    ,,rrrr,,  ++rr11  iirr||                        ,,rrrr,,
+	    ,,rrrr,,  ;;rr]]ii11rrII                        ,,rrrr,,
+	    ,,rrrr,,    \\rrrrrr[[``                        ,,rrrr,,
+	    ,,rrrr,,      >>||II``                          ,,rrrr,,
+	    ,,rrrr,,        ''                              ,,rrrr,,
+	    ,,rrrr,,      <<rrrr..                          ,,rrrr,,
+	    ,,rrrr,,    <<rrrrrr||..        ..??11..        ,,rrrr,,
+	    ,,rrrr,,  <<rrrrrrrrrr||..    ..||rrrr11..      ,,rrrr,,
+	    ,,rrrr,,<<rrrr||..<<rrrr||....||rrrrrrrr||..    ,,rrrr,,
+	    ,,rrrriirrrr||..    <<rrrr((((rrrr<<<<rrrr||..  ,,rrrr,,
+	    ,,rrrrrrrr||..        <<rrrrrrrr<<    <<rrrr||..,,rrrr,,
+	    ,,rrrrrr||..            <<rrrr<<        <<rrrr||^^rrrr,,
+	    ::rrrr((..                ~~~~            <<rrrr((rrrr,,
+	    ,,rrrr^^                                    <<rrrrrrrr,,
+	    ,,rrrr,,                                      <<rrrrrr,,
+	    ''rrrr,,                                        !!rrrr^^
+	      {{rrII,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,IIrr}}
+	      ~~rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr~~
+	        ~~{{rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr{{~~
+	            '',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,''
+
+
+
+	Icon (64 x 64):
+
+
+
+
+
+	                      ..::;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;::..
+	                  ``II]]rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr]]II``
+	                ~~]]rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr]]~~
+	              ~~rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr~~
+	            ``]]rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr]]``
+	            IIrrrrrrrr||--;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;--||rrrrrrrrII
+	          ..]]rrrrrr||                                                                                    ||rrrrrr]]..
+	          ::rrrrrrrr--                                                                                    --rrrrrrrr::
+	          ;;rrrrrrrr;;                                                                                    ;;rrrrrrrr;;
+	          ;;rrrrrrrr;;                                                                                    ;;rrrrrrrr;;
+	          ;;rrrrrrrr;;              ``II{{[[))<<                                                          ;;rrrrrrrr;;
+	          ;;rrrrrrrr;;            --[[rrrrrrrrrr((,,                                                      ;;rrrrrrrr;;
+	          ;;rrrrrrrr;;          ~~rrrrrrrrrrrrrrrr}}''                                                    ;;rrrrrrrr;;
+	          ;;rrrrrrrr;;        ``[[rrrrrrrrrrrrrrrrrr\\                                                    ;;rrrrrrrr;;
+	          ;;rrrrrrrr;;        IIrrrrrrrr||II{{rrrrrrrr""                                                  ;;rrrrrrrr;;
+	          ;;rrrrrrrr;;        {{rrrrrr||    ''rrrrrrrrii                                                  ;;rrrrrrrr;;
+	          ;;rrrrrrrr;;        [[rrrrrrII      ]]rrrrrrII                                                  ;;rrrrrrrr;;
+	          ;;rrrrrrrr;;        ))rrrrrr{{''  ;;rrrrrrrr<<                                                  ;;rrrrrrrr;;
+	          ;;rrrrrrrr;;        <<rrrrrrrrrr]]rrrrrrrrrr,,                                                  ;;rrrrrrrr;;
+	          ;;rrrrrrrr;;          ((rrrrrrrrrrrrrrrrrr<<                                                    ;;rrrrrrrr;;
+	          ;;rrrrrrrr;;          ,,}}rrrrrrrrrrrrrr\\                                                      ;;rrrrrrrr;;
+	          ;;rrrrrrrr;;            ''\\rrrrrrrrrr<<                                                        ;;rrrrrrrr;;
+	          ;;rrrrrrrr;;                ""iiII<<,,                                                          ;;rrrrrrrr;;
+	          ;;rrrrrrrr;;                                                                                    ;;rrrrrrrr;;
+	          ;;rrrrrrrr;;                  ``""..                                                            ;;rrrrrrrr;;
+	          ;;rrrrrrrr;;                __rrrrrr""                                                          ;;rrrrrrrr;;
+	          ;;rrrrrrrr;;              __rrrrrrrrrr,,                                                        ;;rrrrrrrr;;
+	          ;;rrrrrrrr;;            __rrrrrrrrrrrr}},,                        ``!!!!``                      ;;rrrrrrrr;;
+	          ;;rrrrrrrr;;          __rrrrrrrrrrrrrrrr}},,                    ,,}}rrrrrr^^                    ;;rrrrrrrr;;
+	          ;;rrrrrrrr;;        __rrrrrrrrrrrrrrrrrrrr}},,                ,,}}rrrrrrrrrr,,                  ;;rrrrrrrr;;
+	          ;;rrrrrrrr;;      __rrrrrrrrrr}}!!rrrrrrrrrr}},,            ,,}}rrrrrrrrrrrr}},,                ;;rrrrrrrr;;
+	          ;;rrrrrrrr;;    __rrrrrrrrrr}},,  __rrrrrrrrrr}},,        ,,}}rrrrrrrrrrrrrrrr}},,              ;;rrrrrrrr;;
+	          ;;rrrrrrrr;;  __rrrrrrrrrr}},,      __rrrrrrrrrr}},,    ,,}}rrrrrrrrrrrrrrrrrrrr}},,            ;;rrrrrrrr;;
+	          ;;rrrrrrrr;;__rrrrrrrrrr}},,          __rrrrrrrrrr}},,,,}}rrrrrrrrrr____rrrrrrrrrr}},,          ;;rrrrrrrr;;
+	          ;;rrrrrrrrllrrrrrrrrrr}},,              __rrrrrrrrrrrrrrrrrrrrrrrr__    __rrrrrrrrrr}},,        ;;rrrrrrrr;;
+	          ;;rrrrrrrrrrrrrrrrrr}},,                  __rrrrrrrrrrrrrrrrrrrr__        __rrrrrrrrrr}},,      ;;rrrrrrrr;;
+	          ;;rrrrrrrrrrrrrrrr}},,                      __rrrrrrrrrrrrrrrr__            __rrrrrrrrrr}},,    ;;rrrrrrrr;;
+	          ;;rrrrrrrrrrrrrr}},,                          __rrrrrrrrrrrr__                __rrrrrrrrrr}},,  ;;rrrrrrrr;;
+	          ;;rrrrrrrrrrrr}},,                              __rrrrrrrr__                    __rrrrrrrrrr}},,;;rrrrrrrr;;
+	          --rrrrrrrrrr}},,                                  --{{{{--                        __rrrrrrrrrr}}__rrrrrrrr;;
+	          <<rrrrrrrr[[,,                                                                      __rrrrrrrrrr[[rrrrrrrr;;
+	          ;;rrrrrrrr__                                                                          __rrrrrrrrrrrrrrrrrr;;
+	          ;;rrrrrrrr;;                                                                            __rrrrrrrrrrrrrrrr;;
+	          ;;rrrrrrrr;;                                                                              __rrrrrrrrrrrrrr;;
+	          ;;rrrrrrrr;;                                                                                __rrrrrrrrrrrr;;
+	          ;;rrrrrrrr;;                                                                                  __rrrrrrrrrr<<
+	          ::rrrrrrrr--                                                                                    IIrrrrrrrr;;
+	          ..]]rrrrrr||                                                                                    ||rrrrrr]]..
+	            IIrrrrrrrr||--;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;--||rrrrrrrrII
+	            ``]]rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr]]``
+	              ~~rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr~~
+	                ~~]]rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr]]~~
+	                  ``II]]rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr]]II``
+	                      ..::;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;::..
+
+
+
+
+
+
+	Icon (128 x 128):
+	(not shown)
