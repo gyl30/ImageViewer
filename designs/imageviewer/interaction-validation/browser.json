@@ -1,0 +1,29 @@
+{
+  "url": "http://localhost:4311/imageviewer/Interaction.html",
+  "viewport": [
+    1280,
+    900
+  ],
+  "images_loaded": true,
+  "cards": 8,
+  "sort_menu": true,
+  "enter_open": true,
+  "arrow_navigation": true,
+  "stable_outer_geometry": true,
+  "zoom_and_rotate": true,
+  "view_mode_persists": true,
+  "escape_returns": true,
+  "narrow_width": 640,
+  "narrow_preview_toolbar_height": 50,
+  "theme_and_empty": true,
+  "slideshow_play_pause": true,
+  "help_dialog": true,
+  "page_errors": [],
+  "http_errors": [],
+  "final_visual_checks": {
+    "prototype_sha256": "7320a45b80e94e5985d6b632780d6855a8bc698573dc0b679fce6457f6d52cd2",
+    "narrow_toolbar_all_controls_within_640": true,
+    "play_pause_tooltips": true,
+    "page_errors": []
+  }
+}

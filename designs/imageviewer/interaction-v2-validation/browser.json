@@ -1,0 +1,20 @@
+{
+  "url": "http://localhost:4311/imageviewer/Interaction%20v2.html",
+  "no_path_input": true,
+  "single_header": true,
+  "flat_recent_menu": true,
+  "sorting_in_more": true,
+  "icon_toolbar": true,
+  "navigation": true,
+  "zoom_rotate_modes": true,
+  "slideshow": true,
+  "window_controls_demo": true,
+  "narrow_width": 640,
+  "all_narrow_controls_visible": true,
+  "empty_and_theme": true,
+  "page_errors": [],
+  "http_errors": [],
+  "recent_file_opens_named_image": true,
+  "header_has_no_text_buttons": true,
+  "prototype_sha256": "b8d8540ee4197a181f02ea373e2a239f59f9ec2962ca90b92e881c0e4c93e19a"
+}

@@ -1,0 +1,131 @@
+{
+  "recorded_at": "2026-10-27T11:58:58.577491+00:00",
+  "baseline": "36f9c1644a312b72492600c574f5c1a634e61897",
+  "working_tree_changes_committed": false,
+  "source_sha256": {
+    "CMakeLists.txt": "14a35b63b146e484772f82e55f050f0c980be312d8b13048beaa319eb9ebc2d4",
+    "main_window.cc": "898fe2e517b61875a4c36c4b8492108013386d8b432794b750fee74c3fe5c2e7",
+    "main_window.h": "96aa00b399afb8af67853be9709c73df678638706d046bc3f9b2b8b29eb8fe3b",
+    "image_viewer_window.cc": "6d1d28dec2ae8666c1b4faef3dfba71804a1f0b4b9673a0e80826f69716eb595",
+    "image_viewer_window.h": "ace7aa7981bd585e4394e1884025be0dd8a81d8abe282bbac1f4397765fbea3e",
+    "window_title_bar.cc": "c8e153507459702751a3217741dcee020eb076a1edf0f363c2b1864010091e63",
+    "window_title_bar.h": "28fc1c18e99957e4638844fc212fb51d64549070aca9ab0082e2bf3423469950",
+    "waterfall_scene.h": "39c0a7357114eaf0f4fbfad29adc8f2e9cb972a9be508fbbe1742bd0d59a960f",
+    "resources.qrc": "2ffd6aba2b6936920cef261b5c81e923aa2a74ef76007709216826c26b0cdb81",
+    "tests/correctness_test.cc": "ef93b48f61aed5872d0f5c0a0b40d9b347943c716063ba97f87067210996aef8",
+    "designs/imageviewer/Interaction v2.html": "b8d8540ee4197a181f02ea373e2a239f59f9ec2962ca90b92e881c0e4c93e19a",
+    "icons/actual-size.svg": "0dfa7b53e2148d794c250b7667f94e211ad40c0619e39f8452ff2861e38adafc",
+    "icons/close.svg": "8ce71534d485ee71d65b17f4c201b678d515cde28451dcc4ccd0d88ecf379dd1",
+    "icons/fit-width.svg": "ded5c80b80d965cbaf1d703d190da3437cf6fb036c204e103861daa07f36cea5",
+    "icons/fit.svg": "21a41bb883721d6229ae79682bd1ccad1e3a50e2ca2c4fa75cd3656dd2c87928",
+    "icons/folder.svg": "7feb8a52607fd3b5e6ad917fccc198f13bfead1b91d30748181f2d8a014629e5",
+    "icons/grid.svg": "2d69f2899a261cfcb9f6d97e807bcc2a4dce9efa5949250a4a8fe0d1f674d99e",
+    "icons/history.svg": "348b3a2e729c663a12caa640f2f190284617b34fdda42a49418455eb7de580f0",
+    "icons/image.svg": "b90438f7b0eb94e5a1e3e6a5865b36e0bcf20143d9d159a7fc85aaefafacaea6",
+    "icons/maximize.svg": "748a786f8c02e76ff8a88a5f4e91028af3e67751e473f6ff53fa3a6f69fe3276",
+    "icons/minimize.svg": "2ec7bf77b59b72c36ce21b0eb5196c158467f6230d79b0d6443f79cb52d51bdc",
+    "icons/more.svg": "04d6d17bb2f40bed2295f32375d33ecb6a9f78a231c2bdabc4f0339e948a370f",
+    "icons/next.svg": "50e871885334601ae13c17b06d56529e2c988500bc2fea858739b0cb4ff91cbd",
+    "icons/pause.svg": "f0b456e6c8373050d4f688aef2c9c3e69806fc0f0eef9d843e9631cd80f115ce",
+    "icons/play.svg": "9c870be94f57433ba621495665d418c1bf090f9b6bb96fb9d368299b09a3bca8",
+    "icons/previous.svg": "141687771dd5d9eec5088ec5ab0d27b93c6233c47a3906866159eca71f456809",
+    "icons/restore.svg": "1f843f6d2d85c049b8bfc80d2c07f819025914ffa39825e8758d58a2678e363c",
+    "icons/rotate-right.svg": "880b61c3ed2803280ced6c7b5d4b4d9e8823ddf0edc2b0cead622dd799fe56f7",
+    "icons/sort.svg": "6d6715099453084fc752319cfa810194f75934c5e1507ccbc1cc6f3bf6e32902",
+    "icons/theme.svg": "98bf8321f84464448961dffedee17311e363a5caadae43bddd5b5a2d59b3e5b4",
+    "icons/zoom-in.svg": "587e26ef571840e601a88e8e74174f3a0cbfcb4bc45dbee022787eeb73e650e2",
+    "icons/zoom-out.svg": "d9321a0aba6f7e75171dd6e3543ea4fdb87a1edc07abb52cc6896ad093004d73"
+  },
+  "binaries_sha256": {
+    "/tmp/iv-header-build/ImageViewer": "c7838cb83368bc302bf99f0e9dd07ec59816dbfc0dcdbf2dae1b0523a500ac03",
+    "/tmp/iv-header-build/imageviewer_tests": "8c06aa63c14963d53af5ade035a5dfb1045c4a9c8feb71edbcc9d301ec506421",
+    "/tmp/iv-header-build/imageviewer_benchmark": "0f6b41191dc0fb3e80a60cc8a1528045c448f768fb101b4d14eece66a94d736a",
+    "build/ImageViewer": "f4d76e5b4235d0476f849aea10af5b0bfed1196b55ff105f08d773add7dfd4d8",
+    "/tmp/iv-ergonomics-qt64/build/imageviewer_tests": "96e9e1cd63f4dc44cb265e0fab29121af9b0d1bfe60ae336bc4914e25d1a027e"
+  },
+  "qt69": {
+    "version": "6.9.3",
+    "compiler": "GCC11",
+    "build_type": "Release",
+    "cxx_flags": "-O3 -DNDEBUG",
+    "test_platform": "offscreen / xcb"
+  },
+  "qt64": {
+    "version": "6.4.2",
+    "compiler": "GCC12",
+    "build_type": "Release",
+    "distribution": "Debian12",
+    "test_platform": "offscreen",
+    "builder": "sha256:acffb6f76dc1a78a96e95770851133996f4f1e64560ddf05f11306cf3fb53b94"
+  },
+  "user_build": {
+    "directory": "build",
+    "compiler": "GCC16.2",
+    "qt": "6.9.3",
+    "build_type": "Release",
+    "build_testing": false,
+    "target": "ImageViewer"
+  },
+  "results": {
+    "qt69_full": {
+      "passed": 96,
+      "failed": 0,
+      "skipped": 1
+    },
+    "qt64_full": {
+      "passed": 96,
+      "failed": 0,
+      "skipped": 1
+    },
+    "offscreen_skipped": "xcb_header_gestures：仅用于真实单屏X11",
+    "native_xcb": {
+      "1": {
+        "passed": 20,
+        "failed": 0,
+        "skipped": 0
+      },
+      "1.5": {
+        "passed": 20,
+        "failed": 0,
+        "skipped": 0
+      },
+      "2": {
+        "passed": 20,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    "native_gesture_scope": "验证移动和缩放生效、方向与逻辑像素上界；不证明系统接管初始位移逐像素一致",
+    "browser": {
+      "url": "http://localhost:4311/imageviewer/Interaction%20v2.html",
+      "no_path_input": true,
+      "single_header": true,
+      "flat_recent_menu": true,
+      "sorting_in_more": true,
+      "icon_toolbar": true,
+      "navigation": true,
+      "zoom_rotate_modes": true,
+      "slideshow": true,
+      "window_controls_demo": true,
+      "narrow_width": 640,
+      "all_narrow_controls_visible": true,
+      "empty_and_theme": true,
+      "page_errors": [],
+      "http_errors": [],
+      "recent_file_opens_named_image": true,
+      "header_has_no_text_buttons": true,
+      "prototype_sha256": "b8d8540ee4197a181f02ea373e2a239f59f9ec2962ca90b92e881c0e4c93e19a"
+    }
+  },
+  "single_display": "HDMI-0 2560x1440",
+  "native_scaling_method": "单屏，分进程QT_SCALE_FACTOR=1/1.5/2",
+  "cross_monitor_hardware_tested": false,
+  "dynamic_hardware_dpi_tested": false,
+  "wayland_tested": false,
+  "sanitizers_run": false,
+  "large_performance_matrix_run": false,
+  "original_release_packages_rebuilt": false,
+  "compiler_failures_preserved": true,
+  "native_input_failures_preserved": true,
+  "photo_sources_modified": false
+}

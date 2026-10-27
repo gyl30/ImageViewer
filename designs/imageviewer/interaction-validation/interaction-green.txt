@@ -1,0 +1,24 @@
+********* Start testing of correctness_test *********
+Config: Using QtTest library 6.9.3, Qt 6.9.3 (x86_64-little_endian-lp64 shared (dynamic) release build; by GCC 10.3.1 20210422 (Red Hat 10.3.1-1)), ubuntu 22.04
+PASS   : correctness_test::initTestCase()
+QWARN  : correctness_test::viewer_keeps_window_geometry() This plugin does not support propagateSizeHints()
+PASS   : correctness_test::viewer_keeps_window_geometry()
+QWARN  : correctness_test::directory_shortcut() This plugin does not support propagateSizeHints()
+PASS   : correctness_test::directory_shortcut()
+QWARN  : correctness_test::open_selected_with_keyboard(return) This plugin does not support propagateSizeHints()
+QWARN  : correctness_test::open_selected_with_keyboard(return) This plugin does not support propagateSizeHints()
+QWARN  : correctness_test::open_selected_with_keyboard(return) This plugin does not support raise()
+PASS   : correctness_test::open_selected_with_keyboard(return)
+QWARN  : correctness_test::open_selected_with_keyboard(enter) This plugin does not support propagateSizeHints()
+QWARN  : correctness_test::open_selected_with_keyboard(enter) This plugin does not support propagateSizeHints()
+QWARN  : correctness_test::open_selected_with_keyboard(enter) This plugin does not support raise()
+PASS   : correctness_test::open_selected_with_keyboard(enter)
+QWARN  : correctness_test::open_selected_with_keyboard(space) This plugin does not support propagateSizeHints()
+QWARN  : correctness_test::open_selected_with_keyboard(space) This plugin does not support propagateSizeHints()
+QWARN  : correctness_test::open_selected_with_keyboard(space) This plugin does not support raise()
+PASS   : correctness_test::open_selected_with_keyboard(space)
+QWARN  : correctness_test::viewer_mouse_navigation() This plugin does not support propagateSizeHints()
+PASS   : correctness_test::viewer_mouse_navigation()
+PASS   : correctness_test::cleanupTestCase()
+Totals: 8 passed, 0 failed, 0 skipped, 0 blacklisted, 727ms
+********* Finished testing of correctness_test *********

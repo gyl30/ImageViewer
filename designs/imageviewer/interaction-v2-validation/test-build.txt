@@ -1,0 +1,3 @@
+[1/4] Automatic MOC and UIC for target imageviewer_tests
+[2/3] Building CXX object CMakeFiles/imageviewer_tests.dir/tests/correctness_test.cc.o
+[3/3] Linking CXX executable imageviewer_tests

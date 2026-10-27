@@ -68,7 +68,6 @@ class image_viewer_window : public QMainWindow
     void setup_ui();
     void load_image(const QString& path);
     void navigate_image(int delta);
-    void resize_window_to_image(const QSize& image_size);
     void apply_auto_view();
     void load_settings();
     void save_settings() const;
@@ -99,6 +98,7 @@ class image_viewer_window : public QMainWindow
 
     QAction* prev_action_;
     QAction* next_action_;
+    QLabel* position_label_ = nullptr;
     QActionGroup* view_mode_group_ = nullptr;
     QAction* fit_window_action_ = nullptr;
     QAction* actual_size_action_ = nullptr;

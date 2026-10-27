@@ -1,0 +1,11 @@
+********* Start testing of correctness_test *********
+Config: Using QtTest library 6.9.3, Qt 6.9.3 (x86_64-little_endian-lp64 shared (dynamic) release build; by GCC 10.3.1 20210422 (Red Hat 10.3.1-1)), ubuntu 22.04
+PASS   : correctness_test::initTestCase()
+QWARN  : correctness_test::xcb_header_gestures() qt.accessibility.atspi: Error in contacting registry: "org.freedesktop.DBus.Error.Disconnected" "Not connected to D-Bus server"
+QINFO  : correctness_test::xcb_header_gestures() Resize target main_window(0x7fff1a6a5550) geometry QRect(180,160 640x440) DPR 1.5
+QINFO  : correctness_test::xcb_header_gestures() Resize result QRect(180,160 688x472) size delta QSize(48, 32)
+FAIL!  : correctness_test::xcb_header_gestures() 'qAbs(window.width() - size.width() - 60) <= 3' returned FALSE. (expected width 700, actual 688)
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(2311)]
+PASS   : correctness_test::cleanupTestCase()
+Totals: 2 passed, 1 failed, 0 skipped, 0 blacklisted, 45896ms
+********* Finished testing of correctness_test *********

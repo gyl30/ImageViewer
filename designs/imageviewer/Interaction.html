@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ImageViewer · 操作交互原型</title>
+  <link rel="icon" href="interaction-assets/image.svg" type="image/svg+xml">
+  <!-- 基于36f9c16的Qt界面与既有蓝灰色系；主操作分层、稳定窗口、键鼠一致。
+       本页仅演示交互。照片为既有测试库的壁纸派生样本，不代表独立摄影作品。 -->
+  <style>
+    :root { color-scheme:light; --page:#e8ecf1; --surface:#fff; --base:#f3f5f7; --text:#222831; --muted:#536170; --line:#d7dce3; --accent:#286dc6; --selected:#eaf2fc; --button:#fff; }
+    [data-theme="dark"] { color-scheme:dark; --page:#101216; --surface:#20232a; --base:#17191e; --text:#eef1f6; --muted:#a2adbf; --line:#475363; --accent:#78acf0; --selected:#253c59; --button:#262b33; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--page); color:var(--text); font:14px/1.65 system-ui,"Noto Sans CJK SC",sans-serif; }
+    button,input,summary { font:inherit; color:inherit; }
+    button,summary { cursor:pointer; }
+    button { display:inline-flex; align-items:center; justify-content:center; gap:7px; background:transparent; border:1px solid transparent; border-radius:5px; min-height:36px; padding:5px 10px; }
+    button:hover,summary:hover { background:var(--selected); }
+    button:disabled { opacity:.38; cursor:default; }
+    button:focus-visible,input:focus-visible,summary:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+    button img,summary img { width:19px; height:19px; }
+    .review { max-width:1440px; margin:auto; padding:20px 24px 10px; display:flex; gap:16px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+    .review h1 { margin:0; font-size:17px; font-weight:600; }
+    .review p { margin:2px 0 0; color:var(--muted); font-size:12px; }
+    .review-controls,.group,.bar { display:flex; align-items:center; gap:6px; }
+    .review-controls { flex-wrap:wrap; }
+    .review-controls button { font-size:12px; border:1px solid var(--line); }
+    main { max-width:1440px; margin:auto; padding:10px 24px 24px; }
+    .app { margin:auto; width:100%; height:min(790px,calc(100vh - 140px)); min-height:430px; display:flex; flex-direction:column; background:var(--base); border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+    .app.narrow { max-width:640px; }
+    .titlebar { background:var(--surface); border-bottom:1px solid var(--line); padding:6px 14px; font-size:12px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .titlebar span:last-child { color:var(--muted); }
+    .bar { padding:7px 10px; background:var(--surface); flex-wrap:wrap; }
+    .bar .stretch { flex:1; }
+    .bar .primary { border-color:var(--line); background:var(--button); font-weight:600; }
+    .pathbar { padding-top:0; border-bottom:1px solid var(--line); }
+    .pathbar label { color:var(--muted); font-size:12px; margin:0 5px; }
+    .pathbar input { flex:1; min-width:100px; height:36px; padding:5px 10px; background:var(--base); border:1px solid var(--line); border-radius:5px; }
+    .key { color:var(--muted); font-size:11px; }
+    .divider { width:1px; height:20px; background:var(--line); margin:0 3px; }
+    .icon { width:36px; padding:5px; }
+    details { position:relative; }
+    summary { list-style:none; display:flex; align-items:center; justify-content:center; gap:7px; min-height:36px; border:1px solid transparent; border-radius:5px; padding:5px 10px; }
+    summary::-webkit-details-marker { display:none; }
+    summary::after { content:"⌄"; font-size:12px; color:var(--muted); }
+    .menu { position:absolute; z-index:5; top:calc(100% + 5px); left:0; width:234px; padding:5px; background:var(--surface); border:1px solid var(--line); border-radius:6px; box-shadow:0 5px 16px #0002; }
+    .right .menu { left:auto; right:0; }
+    .menu button { width:100%; justify-content:space-between; text-align:left; font-size:13px; }
+    .menu button[aria-checked="true"]::before { content:"✓"; color:var(--accent); }
+    .menu hr { border:0; border-top:1px solid var(--line); margin:5px; }
+    .gallery-scroll { flex:1; min-height:0; overflow:auto; padding:12px; }
+    .gallery { columns:210px; column-gap:12px; }
+    .card { display:block; width:100%; min-height:0; margin:0 0 12px; padding:0; break-inside:avoid; overflow:hidden; border:2px solid transparent; border-radius:6px; background:var(--surface); }
+    .card img { display:block; width:100%; height:auto; }
+    .card:hover { border-color:var(--accent); }
+    .card[aria-selected="true"] { border-color:var(--accent); outline:1px solid var(--accent); outline-offset:1px; }
+    .status { padding:6px 12px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:4px 16px; border-top:1px solid var(--line); background:var(--surface); font-size:12px; color:var(--muted); }
+    .status span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .empty { display:grid; place-items:center; text-align:center; height:100%; min-height:250px; }
+    .empty h2 { margin:10px 0 4px; font-size:18px; font-weight:500; }
+    .empty p { color:var(--muted); margin:0 0 16px; font-size:13px; }
+    .empty img { width:40px; height:40px; }
+    .viewer { flex:1; min-height:0; display:flex; flex-direction:column; }
+    .canvas { flex:1; min-height:0; overflow:auto; display:grid; place-items:center; padding:20px; background:var(--base); }
+    .canvas img { display:block; max-width:100%; max-height:100%; object-fit:contain; }
+    .canvas.zoomed { display:block; }
+    .canvas.zoomed img { max-width:none; max-height:none; margin:auto; }
+    .file-index { font-variant-numeric:tabular-nums; color:var(--muted); min-width:45px; text-align:center; font-size:12px; }
+    .hidden { display:none!important; }
+    .help { position:fixed; inset:0; z-index:20; display:grid; place-items:center; background:#0007; padding:20px; }
+    .help section { width:min(460px,100%); background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:20px; }
+    .help h2 { margin:0 0 12px; font-size:17px; }
+    .help dl { display:grid; grid-template-columns:1fr auto; gap:10px 20px; font-size:13px; }
+    .help dt,.help dd { margin:0; }
+    .help dd { color:var(--muted); }
+    .help footer { display:flex; justify-content:flex-end; padding-top:10px; }
+    @media(max-width:700px) { .review { padding:12px; } main { padding:4px 8px 12px; } .review p { max-width:36em; } .app { height:calc(100vh - 150px); } .viewer-toolbar { gap:2px; } .viewer-toolbar .divider { display:none; } .viewer-toolbar button,.viewer-toolbar summary { padding:5px 7px; } .gallery { columns:165px; } .key { display:none; } }
+    @media(prefers-reduced-motion:reduce) { * { scroll-behavior:auto!important; } }
+  </style>
+</head>
+<body>
+  <header class="review">
+    <div><h1>ImageViewer · 操作交互</h1><p>可操作原型：单击选择，双击或 Enter 打开；方向键翻图，Esc 返回。Qt 实现以原生窗口验收为准。</p></div>
+    <nav class="review-controls" aria-label="原型查看选项"><button id="width-toggle" type="button">窄窗口 640</button><button id="empty-toggle" type="button">查看空目录</button><button id="theme-toggle" type="button">切换深浅色</button></nav>
+  </header>
+  <main>
+    <section id="app" class="app" data-screen-label="图库与大图预览">
+      <div class="titlebar"><span id="title">ImageViewer</span><span>交互原型</span></div>
+      <section id="library" class="viewer" aria-label="图库">
+        <div class="bar">
+          <div class="group"><button type="button" class="primary" data-do="folder"><img src="interaction-assets/folder.svg" alt="">打开文件夹</button><details id="open-menu"><summary aria-label="更多打开方式"></summary><div class="menu"><button type="button" data-do="open">打开示例图片<span class="key">Ctrl+Shift+O</span></button></div></details></div>
+          <details><summary><img src="interaction-assets/history.svg" alt="">最近</summary><div class="menu"><button type="button" data-do="folder">示例图库</button><button type="button" data-do="open">上次查看的图片</button></div></details>
+          <span class="stretch"></span>
+          <details class="right"><summary id="sort-title">文件名</summary><div class="menu" role="menu"><button type="button" data-sort="name" role="menuitemradio" aria-checked="true">文件名</button><button type="button" data-sort="time" role="menuitemradio" aria-checked="false">修改时间</button><button type="button" data-sort="size" role="menuitemradio" aria-checked="false">文件大小</button><hr><button type="button" id="reverse" role="menuitemcheckbox" aria-checked="false">倒序</button></div></details>
+          <details class="right"><summary>更多</summary><div class="menu"><button type="button" data-do="theme">切换深浅主题</button><button type="button" data-do="help">快捷键<span class="key">F1</span></button></div></details>
+        </div>
+        <form id="path-form" class="bar pathbar"><label for="path">位置</label><input id="path" value="图片 / 示例图库" spellcheck="false" aria-label="当前文件夹路径"><span class="key">Ctrl+L</span></form>
+        <div id="gallery-scroll" class="gallery-scroll"><div id="gallery" class="gallery" role="listbox" aria-label="示例图片"></div><div id="empty" class="empty hidden"><div><img src="interaction-assets/folder.svg" alt=""><h2>从一个文件夹开始</h2><p>打开或拖入文件夹，浏览其中的图片。</p><button class="primary" data-do="folder" type="button">打开示例图库</button></div></div></div>
+        <footer class="status"><span id="library-count">8 张示例图片</span><span id="selection-info">单击选择图片 · 双击或 Enter 打开</span></footer>
+      </section>
+      <section id="viewer" class="viewer hidden" aria-label="大图预览">
+        <div class="bar viewer-toolbar">
+          <button id="back" type="button" title="返回图库（Esc）">图库</button><span class="divider"></span>
+          <button id="previous" class="icon" type="button" aria-label="上一张" title="上一张（← / Backspace / 鼠标后退键）"><img src="interaction-assets/previous.svg" alt=""></button><span id="index" class="file-index"></span><button id="next" class="icon" type="button" aria-label="下一张" title="下一张（→ / Space / 鼠标前进键）"><img src="interaction-assets/next.svg" alt=""></button>
+          <span class="divider"></span><details><summary id="fit-title">适应窗口</summary><div class="menu"><button type="button" data-fit="window">适应窗口<span class="key">Ctrl+0</span></button><button type="button" data-fit="actual">原始大小<span class="key">Ctrl+1</span></button><button type="button" data-fit="width">适应宽度<span class="key">Ctrl+2</span></button></div></details>
+          <button id="zoom-out" class="icon" type="button" aria-label="缩小" title="缩小"><img src="interaction-assets/zoom-out.svg" alt=""></button><button id="zoom-in" class="icon" type="button" aria-label="放大" title="放大"><img src="interaction-assets/zoom-in.svg" alt=""></button>
+          <button id="rotate" type="button" title="向右旋转（Ctrl+R）">右转</button><button id="play" class="icon" type="button" aria-label="播放幻灯片" aria-pressed="false" title="播放幻灯片（F5）"><img id="play-icon" src="interaction-assets/play.svg" alt=""></button><span class="stretch"></span>
+          <details class="right"><summary>更多</summary><div class="menu"><button type="button" id="rotate-left">向左旋转<span class="key">Ctrl+L</span></button><button type="button" id="flip">水平翻转<span class="key">Ctrl+H</span></button><button type="button" id="full">全屏预览<span class="key">F11</span></button><hr><button type="button" data-do="help">快捷键<span class="key">F1</span></button></div></details>
+        </div>
+        <div id="canvas" class="canvas" tabindex="0" aria-label="图片，方向键翻图，Ctrl加滚轮缩放"><img id="large-image" src="interaction-assets/00.jpg" alt=""></div>
+        <footer class="status"><span id="image-info"></span><span id="zoom">适应窗口</span></footer>
+      </section>
+    </section>
+  </main>
+  <aside id="help" class="help hidden" role="dialog" aria-modal="true" aria-labelledby="help-title"><section><h2 id="help-title">常用操作</h2><dl><dt>图库打开选中图片</dt><dd>Enter / Space</dd><dt>上一张 / 下一张</dt><dd>← / →</dd><dt>单手翻图</dt><dd>Backspace / Space</dd><dt>缩放</dt><dd>Ctrl + 滚轮</dd><dt>适应窗口 / 原始大小 / 适宽</dt><dd>Ctrl + 0 / 1 / 2</dd><dt>返回图库</dt><dd>Esc</dd></dl><footer><button id="help-close" class="primary" type="button">知道了</button></footer></section></aside>
+  <script>
+    const el = id => document.getElementById(id);
+    const photos = Array.from({length:8}, (_, i) => ({id:i, name:`image-${String(i).padStart(3,"0")}.jpg`, src:`interaction-assets/0${i%4}.jpg`, size:[40584,40257,86422,42824][i%4]}));
+    let ordered = [...photos], selected = 0, viewing = false, empty = false, sort = "name", reverse = false;
+    let scale = 1, fit = "window", rotation = 0, flipped = false, playback = null;
+    const closeMenus = () => document.querySelectorAll("details[open]").forEach(node => node.removeAttribute("open"));
+    function renderGallery() {
+      el("gallery").replaceChildren(...ordered.map(photo => {
+        const card = document.createElement("button"); card.type = "button"; card.className = "card";
+        card.role = "option"; card.dataset.id = photo.id; card.setAttribute("aria-label", photo.name); card.setAttribute("aria-selected", photo.id === selected);
+        const img = document.createElement("img"); img.src = photo.src; img.alt = photo.name; img.draggable = false;
+        card.append(img); card.addEventListener("click", () => select(photo.id)); card.addEventListener("dblclick", () => openImage(photo.id));
+        return card;
+      }));
+      el("gallery").classList.toggle("hidden", empty); el("empty").classList.toggle("hidden", !empty);
+      el("library-count").textContent = empty ? "没有图片" : "8 张示例图片";
+      el("selection-info").textContent = empty ? "可打开或拖入其他文件夹" : `${photos[selected].name} · Enter 打开`;
+    }
+    function select(id) { selected = id; document.querySelectorAll(".card").forEach(card => card.setAttribute("aria-selected", +card.dataset.id === id)); el("selection-info").textContent = `${photos[id].name} · Enter 打开`; }
+    function stopPlayback() { clearInterval(playback); playback = null; el("play-icon").src = "interaction-assets/play.svg"; el("play").setAttribute("aria-label","播放幻灯片"); el("play").title = "播放幻灯片（F5）"; el("play").setAttribute("aria-pressed", "false"); }
+    function showPicture() {
+      const photo = photos[selected], index = ordered.findIndex(item => item.id === selected);
+      rotation = 0; flipped = false; scale = 1;
+      el("large-image").src = photo.src; el("large-image").alt = photo.name;
+      el("title").textContent = `${photo.name} · ImageViewer`; el("index").textContent = `${index+1} / ${ordered.length}`;
+      el("image-info").textContent = `${photo.name} · JPEG · ${(photo.size/1024).toFixed(1)} KiB`;
+      el("previous").disabled = index === 0; el("next").disabled = index === ordered.length-1;
+      updateTransform(); select(selected);
+    }
+    function openImage(id = selected) { if(empty) { return; } selected = id; viewing = true; closeMenus(); el("library").classList.add("hidden"); el("viewer").classList.remove("hidden"); showPicture(); el("canvas").focus(); }
+    function back() { stopPlayback(); viewing = false; closeMenus(); el("viewer").classList.add("hidden"); el("library").classList.remove("hidden"); el("title").textContent = "ImageViewer"; const card = document.querySelector(`.card[data-id="${selected}"]`); card?.scrollIntoView({block:"nearest"}); card?.focus({preventScroll:true}); }
+    function navigate(delta) { const index = ordered.findIndex(photo => photo.id === selected)+delta; if(index < 0 || index >= ordered.length) { stopPlayback(); return; } selected = ordered[index].id; showPicture(); }
+    function updateTransform() {
+      el("canvas").classList.toggle("zoomed", fit !== "window" || scale !== 1);
+      const image = el("large-image"); image.style.width = fit === "actual" ? `${image.naturalWidth || 640}px` : fit === "width" ? "100%" : "auto";
+      image.style.transform = `scale(${scale}) rotate(${rotation}deg) scaleX(${flipped ? -1:1})`;
+      el("zoom").textContent = scale === 1 ? ({window:"适应窗口",actual:"原始大小",width:"适应宽度"})[fit] : `${Math.round(scale*100)}%`;
+      el("fit-title").textContent = ({window:"适应窗口",actual:"原始大小",width:"适应宽度"})[fit];
+    }
+    function setFit(mode) { fit = mode; scale = 1; updateTransform(); closeMenus(); }
+    function zoom(delta) { scale = Math.min(8, Math.max(.2,scale*delta)); updateTransform(); }
+    function showHelp() { closeMenus(); el("help").classList.remove("hidden"); el("help-close").focus(); }
+    document.querySelectorAll("[data-do]").forEach(button => button.addEventListener("click", () => {
+      closeMenus();
+      if(button.dataset.do === "folder") { empty = false; if(viewing) { back(); } renderGallery(); }
+      if(button.dataset.do === "open") { openImage(); }
+      if(button.dataset.do === "theme") { el("theme-toggle").click(); }
+      if(button.dataset.do === "help") { showHelp(); }
+    }));
+    document.querySelectorAll("[data-sort]").forEach(button => button.addEventListener("click", () => { sort = button.dataset.sort; el("sort-title").textContent = button.textContent; reorder(); closeMenus(); }));
+    function reorder() { ordered = [...photos].sort((a,b) => sort === "name" ? a.name.localeCompare(b.name) : sort === "size" ? a.size-b.size : b.id-a.id); if(reverse) { ordered.reverse(); } document.querySelectorAll("[data-sort]").forEach(button => button.setAttribute("aria-checked",button.dataset.sort===sort)); renderGallery(); }
+    el("reverse").onclick = () => { reverse = !reverse; el("reverse").setAttribute("aria-checked",reverse); reorder(); closeMenus(); };
+    el("path-form").onsubmit = event => { event.preventDefault(); empty = false; renderGallery(); el("path").blur(); };
+    el("width-toggle").onclick = () => { el("app").classList.toggle("narrow"); el("width-toggle").textContent = el("app").classList.contains("narrow") ? "恢复宽窗口" : "窄窗口 640"; };
+    el("empty-toggle").onclick = () => { if(viewing) { back(); } empty = !empty; renderGallery(); };
+    el("theme-toggle").onclick = () => { document.documentElement.dataset.theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark"; };
+    el("back").onclick = back; el("previous").onclick = () => navigate(-1); el("next").onclick = () => navigate(1);
+    el("zoom-in").onclick = () => zoom(1.2); el("zoom-out").onclick = () => zoom(1/1.2);
+    el("rotate").onclick = () => { rotation += 90; updateTransform(); }; el("rotate-left").onclick = () => { rotation -= 90; updateTransform(); closeMenus(); };
+    el("flip").onclick = () => { flipped = !flipped; updateTransform(); closeMenus(); };
+    el("full").onclick = () => { closeMenus(); if(document.fullscreenElement) { document.exitFullscreen(); } else { el("app").requestFullscreen().catch(() => {}); } };
+    el("play").onclick = () => { if(playback) { stopPlayback(); } else { el("play-icon").src = "interaction-assets/pause.svg"; el("play").setAttribute("aria-label","暂停幻灯片"); el("play").title = "暂停幻灯片（F5）"; el("play").setAttribute("aria-pressed","true"); playback = setInterval(() => navigate(1),3000); } };
+    document.querySelectorAll("[data-fit]").forEach(button => button.onclick = () => setFit(button.dataset.fit));
+    el("help-close").onclick = () => { el("help").classList.add("hidden"); (viewing ? el("canvas") : el("path")).focus(); };
+    el("large-image").onload = updateTransform;
+    el("canvas").addEventListener("wheel", event => { if(event.ctrlKey) { event.preventDefault(); zoom(event.deltaY < 0 ? 1.2 : 1/1.2); } },{passive:false});
+    document.addEventListener("click", event => { document.querySelectorAll("details[open]").forEach(node => { if(!node.contains(event.target)) { node.open = false; } }); });
+    document.addEventListener("keydown", event => {
+      if(event.key === "Escape") { event.preventDefault(); if(!el("help").classList.contains("hidden")) { el("help-close").click(); } else if(viewing) { back(); } else { closeMenus(); } return; }
+      if(event.target.matches("input")) { return; }
+      if(event.key === "F1") { event.preventDefault(); showHelp(); return; }
+      if(!viewing && ["Enter"," "].includes(event.key) && event.target.classList.contains("card")) { event.preventDefault(); openImage(); return; }
+      if(!viewing) { return; }
+      if(event.ctrlKey && ["0","1","2"].includes(event.key)) { event.preventDefault(); setFit(({0:"window",1:"actual",2:"width"})[event.key]); }
+      if(event.key === "ArrowLeft" || event.key === "Backspace") { event.preventDefault(); navigate(-1); }
+      if(event.key === "ArrowRight" || (event.key === " " && event.target === el("canvas"))) { event.preventDefault(); navigate(1); }
+    });
+    renderGallery();
+  </script>
+</body>
+</html>

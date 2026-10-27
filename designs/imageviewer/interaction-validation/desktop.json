@@ -1,0 +1,19 @@
+{
+  "backend": "xcb",
+  "runs": [
+    {
+      "scale": "1",
+      "exit_code": 0
+    },
+    {
+      "scale": "1.5",
+      "exit_code": 0
+    },
+    {
+      "scale": "2",
+      "exit_code": 0
+    }
+  ],
+  "capture_exit": 0,
+  "offscreen_full_exit": 0
+}

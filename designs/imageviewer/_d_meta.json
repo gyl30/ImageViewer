@@ -11,8 +11,32 @@
           "status": "needs-review"
         }
       ]
+    },
+    "操作交互": {
+      "versions": [
+        {
+          "path": "Interaction.html",
+          "createdAt": "2026-10-26T10:22:10.130Z",
+          "status": "changes-requested",
+          "subtitle": "图库与预览的操作分层、稳定窗口和键鼠流程",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        },
+        {
+          "path": "Interaction v2.html",
+          "createdAt": "2026-10-27T06:17:42.407Z",
+          "status": "needs-review",
+          "subtitle": "自定义标题栏、图标操作、无路径栏、最近直达",
+          "viewport": {
+            "width": 1280,
+            "height": 900
+          }
+        }
+      ]
     }
   },
   "createdAt": "2026-10-24T12:27:35.110Z",
-  "updatedAt": "2026-10-24T22:53:18.498Z"
+  "updatedAt": "2026-10-27T06:42:57.630Z"
 }

@@ -1,0 +1,43 @@
+{
+  "baseline": "36f9c1644a312b72492600c574f5c1a634e61897",
+  "working_tree_changes_committed": false,
+  "qt69": "6.9.3",
+  "qt64": "6.4.2",
+  "release_build": true,
+  "source_sha256": {
+    "main_window.cc": "3c8b2a0b1573dcd6dd1b030bc1e1bf9e06f026940cbc15fda5155d8263596b72",
+    "image_viewer_window.cc": "27236e9f5b4ffdf4a6a855971f722aceeff96ab7ce5d34a59bd0ce74676f8fe5",
+    "image_viewer_window.h": "ace7aa7981bd585e4394e1884025be0dd8a81d8abe282bbac1f4397765fbea3e",
+    "resources.qrc": "d5b37651201f4c5f17584186c8ceec47699a4714a1a694c3e504d5bd1d2928ca",
+    "icons/play.svg": "9c870be94f57433ba621495665d418c1bf090f9b6bb96fb9d368299b09a3bca8",
+    "icons/pause.svg": "f0b456e6c8373050d4f688aef2c9c3e69806fc0f0eef9d843e9631cd80f115ce",
+    "tests/correctness_test.cc": "2a7846936df52bd09310589a4eb8cdbe5db048b0031846d94cac28b97e9317e8"
+  },
+  "binaries_sha256": {
+    "/tmp/iv-ergonomics-build/ImageViewer": "a22982d2ffafcab3a7cc4512cd4223b7192e204242b74740743c023c7177389b",
+    "/tmp/iv-ergonomics-build/imageviewer_tests": "2fdd0922846541df75b5cbc83782762fd09d73d0006afadaed773936191ac194",
+    "/tmp/iv-ergonomics-build/imageviewer_benchmark": "1ab80d21d9c470e429d5bd31adea4df0eebe22b3adec6d899cc66b16ecfba131"
+  },
+  "qt64_builder": "sha256:acffb6f76dc1a78a96e95770851133996f4f1e64560ddf05f11306cf3fb53b94",
+  "results": {
+    "qt69_full": {
+      "passed": 92,
+      "failed": 0,
+      "skipped": 0
+    },
+    "qt64_full": {
+      "passed": 92,
+      "failed": 0,
+      "skipped": 0
+    },
+    "native_xcb": {
+      "1": 15,
+      "1.5": 15,
+      "2": 15
+    }
+  },
+  "cross_monitor_hardware_tested": false,
+  "sanitizers_run": false,
+  "large_performance_matrix_run": false,
+  "original_release_packages_rebuilt": false
+}

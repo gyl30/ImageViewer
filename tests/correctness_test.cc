@@ -34,11 +34,30 @@
 #include <QScreen>
 #include <QMessageBox>
 #include <QAbstractButton>
+#include <QLineEdit>
+#include <QToolButton>
+#include <QMenu>
+#include <QToolBar>
+#include <QSettings>
+#include <QLibrary>
+#include <QCursor>
+#include <memory>
 
 namespace
 {
 constexpr char kAnimatedGif[] =
     "R0lGODlhAgACAIEAAP8AAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQACgAAACwAAAAAAgACAAAIBgABCAQQEAAh+QQBCgABACwAAAAAAgACAIEAAP8AAAAAAAAAAAAIBgABCAQQEAA7";
+
+bool drop_folder(main_window& window, const QString& path)
+{
+    QMimeData mime;
+    mime.setUrls({QUrl::fromLocalFile(path)});
+    QDragEnterEvent enter(QPoint(1, 1), Qt::CopyAction, &mime, Qt::LeftButton, Qt::NoModifier);
+    QApplication::sendEvent(&window, &enter);
+    QDropEvent drop(QPointF(1, 1), Qt::CopyAction, &mime, Qt::LeftButton, Qt::NoModifier);
+    QApplication::sendEvent(&window, &drop);
+    return enter.isAccepted() && drop.isAccepted();
+}
 }
 
 class scaled_view : public waterfall_view
@@ -191,6 +210,18 @@ class correctness_test : public QObject
     void thumbnail_native_size_data();
     void thumbnail_native_size();
     void item_uses_smooth_transform();
+    void viewer_keeps_window_geometry();
+    void viewer_rotation_shortcut();
+    void open_selected_with_keyboard_data();
+    void open_selected_with_keyboard();
+    void viewer_mouse_navigation();
+    void compact_sort_controls();
+    void compact_preview_controls();
+    void custom_header_data();
+    void custom_header();
+    void recent_menu_is_flat();
+    void sorting_is_in_more();
+    void xcb_header_gestures();
 };
 
 void correctness_test::large_visible_batch()
@@ -1885,6 +1916,373 @@ void correctness_test::scrolled_result_skips_old()
     QVERIFY(requests.isEmpty());
     scene.update_viewport(view.mapToScene(view.viewport()->rect()).boundingRect());
     QVERIFY(!requests.isEmpty());
+}
+
+void correctness_test::viewer_keeps_window_geometry()
+{
+    QTemporaryDir dir;
+    const QString wide = dir.filePath("wide.png");
+    const QString tall = dir.filePath("tall.png");
+    const QString animated = dir.filePath("animated.gif");
+    QImage image(1200, 600, QImage::Format_RGB32);
+    image.fill(Qt::blue);
+    QVERIFY(image.save(wide));
+    QVERIFY(image.scaled(120, 300).save(tall));
+    QFile gif(animated);
+    QVERIFY(gif.open(QIODevice::WriteOnly));
+    QVERIFY(gif.write(QByteArray::fromBase64(kAnimatedGif)) > 0);
+    gif.close();
+
+    image_viewer_window viewer;
+    viewer.resize(640, 440);
+    viewer.show();
+    QTest::qWait(50);
+    const QRect geometry = viewer.geometry();
+    viewer.set_image_list({wide, tall, animated});
+    for (const QString& path : {wide, tall, animated})
+    {
+        viewer.set_image_path(path);
+        QTRY_VERIFY(viewer.windowTitle().startsWith("Viewer -"));
+        QCOMPARE(viewer.geometry(), geometry);
+    }
+    viewer.close();
+}
+
+void correctness_test::viewer_rotation_shortcut()
+{
+    QTemporaryDir dir;
+    QImage image(100, 50, QImage::Format_RGB32);
+    image.fill(Qt::blue);
+    QVERIFY(image.save(dir.filePath("image.png")));
+    main_window window;
+    window.show();
+    image_viewer_window viewer(&window);
+    viewer.set_image_path(dir.filePath("image.png"));
+    viewer.show();
+    viewer.activateWindow();
+    QTRY_VERIFY(viewer.windowTitle().startsWith("Viewer -"));
+    auto* preview = viewer.findChild<QGraphicsView*>();
+    preview->setFocus();
+    QTest::qWait(50);
+    QTest::keyClick(preview, Qt::Key_L, Qt::ControlModifier);
+    QTRY_COMPARE(qRound(preview->scene()->sceneRect().width()), 50);
+}
+
+void correctness_test::open_selected_with_keyboard_data()
+{
+    QTest::addColumn<int>("key");
+    QTest::newRow("return") << int(Qt::Key_Return);
+    QTest::newRow("enter") << int(Qt::Key_Enter);
+    QTest::newRow("space") << int(Qt::Key_Space);
+}
+
+void correctness_test::open_selected_with_keyboard()
+{
+    QFETCH(int, key);
+    QTemporaryDir dir;
+    const QString path = dir.filePath("image.png");
+    QImage image(100, 50, QImage::Format_RGB32);
+    image.fill(Qt::blue);
+    QVERIFY(image.save(path));
+    main_window window;
+    window.show();
+    window.activateWindow();
+    QVERIFY(drop_folder(window, dir.path()));
+    auto* scene = window.findChild<waterfall_scene*>();
+    auto* view = window.findChild<waterfall_view*>();
+    QTRY_COMPARE(scene->get_all_paths().size(), 1);
+    QTRY_VERIFY(scene->focus_path(path));
+    view->setFocus();
+    QTest::qWait(50);
+    QTest::keyClick(view, static_cast<Qt::Key>(key));
+    QTRY_VERIFY(window.findChild<image_viewer_window*>() != nullptr);
+    auto* viewer = window.findChild<image_viewer_window*>();
+    QVERIFY(viewer->isVisible());
+    QVERIFY(viewer->windowFlags().testFlag(Qt::FramelessWindowHint));
+    QCOMPARE(viewer->current_image_path(), path);
+}
+
+void correctness_test::viewer_mouse_navigation()
+{
+    image_viewer_window viewer;
+    const QStringList paths = {"/missing/first.png", "/missing/middle.png", "/missing/last.png"};
+    viewer.set_image_list(paths);
+    viewer.set_image_path(paths[1]);
+    viewer.show();
+    auto* viewport = viewer.findChild<QGraphicsView*>()->viewport();
+    QTest::mouseClick(viewport, Qt::BackButton);
+    QCOMPARE(viewer.current_image_path(), paths[0]);
+    QTest::mouseClick(viewport, Qt::BackButton);
+    QCOMPARE(viewer.current_image_path(), paths[0]);
+    QTest::mouseClick(viewport, Qt::ForwardButton);
+    QCOMPARE(viewer.current_image_path(), paths[1]);
+}
+
+void correctness_test::compact_sort_controls()
+{
+    QTemporaryDir dir;
+    const QString small = dir.filePath("z-small.png");
+    const QString large = dir.filePath("a-large.png");
+    QImage image(800, 600, QImage::Format_RGB32);
+    image.fill(Qt::blue);
+    QVERIFY(image.save(large));
+    QVERIFY(image.scaled(80, 60).save(small));
+    QVERIFY(QFileInfo(small).size() < QFileInfo(large).size());
+    main_window window;
+    window.resize(640, 480);
+    window.show();
+    QToolButton* button = nullptr;
+    for (auto* candidate : window.findChildren<QToolButton*>())
+    {
+        if (candidate->text() == "更多") { button = candidate; }
+    }
+    QVERIFY(button != nullptr);
+    QTest::qWait(50);
+    QVERIFY(button->isVisibleTo(&window));
+    QVERIFY(window.rect().contains(button->mapTo(&window, button->rect().bottomRight())));
+    QVERIFY(drop_folder(window, dir.path()));
+    auto* scene = window.findChild<waterfall_scene*>();
+    QTRY_COMPARE(scene->get_all_paths().size(), 2);
+    QAction* size_action = nullptr;
+    QAction* reverse_action = nullptr;
+    QMenu* sort = nullptr;
+    for (auto* action : button->menu()->actions())
+    {
+        if (action->text() == "排序") { sort = action->menu(); }
+    }
+    QVERIFY(sort != nullptr);
+    for (auto* action : sort->actions())
+    {
+        if (action->text() == "文件大小") { size_action = action; }
+        if (action->text() == "倒序") { reverse_action = action; }
+    }
+    QVERIFY(size_action != nullptr && reverse_action != nullptr);
+    if (reverse_action->isChecked()) { reverse_action->trigger(); }
+    size_action->trigger();
+    QTRY_COMPARE(scene->get_all_paths().value(0), small);
+    QVERIFY(size_action->isChecked());
+    reverse_action->trigger();
+    QTRY_COMPARE(scene->get_all_paths().value(0), large);
+}
+
+void correctness_test::compact_preview_controls()
+{
+    image_viewer_window viewer;
+    QStringList paths;
+    for (int index = 0; index < 10000; ++index)
+    {
+        paths.append(QString("/missing/%1.png").arg(index));
+    }
+    viewer.set_image_list(paths);
+    viewer.set_image_path(paths[5000]);
+    viewer.resize(640, 440);
+    viewer.show();
+    QTest::qWait(50);
+    QToolButton* back = nullptr;
+    QToolButton* more = nullptr;
+    for (auto* button : viewer.findChildren<QToolButton*>())
+    {
+        if (button->text() == "图库") { back = button; }
+        if (button->text() == "更多") { more = button; }
+    }
+    QVERIFY(back != nullptr && more != nullptr);
+    auto* toolbar = viewer.findChild<QToolBar*>("preview_toolbar");
+    QVERIFY(toolbar != nullptr);
+    qInfo() << "Preview toolbar" << toolbar->sizeHint() << "window" << viewer.size()
+            << "DPR" << viewer.devicePixelRatioF();
+    QVERIFY(more->isVisibleTo(&viewer));
+    QVERIFY(viewer.rect().contains(more->mapTo(&viewer, more->rect().bottomRight())));
+    QTest::mouseClick(back, Qt::LeftButton);
+    QVERIFY(!viewer.isVisible());
+}
+
+void correctness_test::custom_header_data()
+{
+    QTest::addColumn<bool>("preview");
+    QTest::newRow("library") << false;
+    QTest::newRow("preview") << true;
+}
+
+void correctness_test::custom_header()
+{
+    QFETCH(bool, preview);
+    std::unique_ptr<QMainWindow> window;
+    if (preview) { window = std::make_unique<image_viewer_window>(); }
+    else { window = std::make_unique<main_window>(); }
+    window->resize(640, 440);
+    window->show();
+    window->activateWindow();
+    QTest::qWait(50);
+    QVERIFY(window->windowFlags().testFlag(Qt::FramelessWindowHint));
+    QVERIFY(window->findChildren<QLineEdit*>().isEmpty());
+    auto* header = window->findChild<QWidget*>("window_title_bar");
+    QVERIFY(header != nullptr);
+    for (auto* button : header->findChildren<QToolButton*>())
+    {
+        if (button->objectName() == "qt_toolbar_ext_button") { continue; }
+        QCOMPARE(button->toolButtonStyle(), Qt::ToolButtonIconOnly);
+        QVERIFY(!button->icon().isNull());
+        QVERIFY(!button->toolTip().isEmpty());
+    }
+    auto* maximize = header->findChild<QToolButton*>("window_maximize");
+    auto* minimize = header->findChild<QToolButton*>("window_minimize");
+    auto* close = header->findChild<QToolButton*>("window_close");
+    QVERIFY(maximize != nullptr && minimize != nullptr && close != nullptr);
+    QTest::mouseClick(maximize, Qt::LeftButton);
+    QTRY_VERIFY(window->isMaximized());
+    QCOMPARE(maximize->toolTip(), QString("还原"));
+    QTest::mouseDClick(header, Qt::LeftButton, Qt::NoModifier, QPoint(4, 4));
+    QTRY_VERIFY(!window->isMaximized());
+    QTest::mouseClick(minimize, Qt::LeftButton);
+    QTRY_VERIFY(window->isMinimized());
+    window->showNormal();
+    QTest::qWait(50);
+    QTest::mouseClick(close, Qt::LeftButton);
+    QVERIFY(!window->isVisible());
+}
+
+void correctness_test::recent_menu_is_flat()
+{
+    QTemporaryDir dir;
+    const QString image_path = dir.filePath("image.png");
+    QImage image(100, 50, QImage::Format_RGB32);
+    image.fill(Qt::blue);
+    QVERIFY(image.save(image_path));
+    QSettings settings("gyl30", "ImageViewer");
+    settings.setValue("main_window/recent_folder_paths", QStringList{dir.path()});
+    settings.setValue("main_window/recent_image_paths", QStringList{image_path});
+    main_window window;
+    window.show();
+    QAction* recent = nullptr;
+    for (auto* action : window.actions())
+    {
+        if (action->text() == "最近") { recent = action; }
+    }
+    QVERIFY(recent != nullptr);
+    QStringList labels;
+    QStringList paths;
+    bool nested = false;
+    QTimer::singleShot(0, &window, [&]()
+    {
+        auto* menu = qobject_cast<QMenu*>(QApplication::activePopupWidget());
+        if (menu == nullptr) { return; }
+        for (auto* action : menu->actions())
+        {
+            labels.append(action->text());
+            paths.append(action->data().toString());
+            nested = nested || action->menu() != nullptr;
+        }
+        menu->close();
+    });
+    recent->trigger();
+    QVERIFY(!nested);
+    QCOMPARE(labels.size(), 2);
+    QVERIFY(labels[0].contains(QFileInfo(dir.path()).fileName()));
+    QVERIFY(labels[1].contains("image.png"));
+    QVERIFY(!labels.join(' ').contains(dir.path()));
+    QCOMPARE(paths, QStringList({dir.path(), image_path}));
+}
+
+void correctness_test::sorting_is_in_more()
+{
+    main_window window;
+    QToolButton* more = nullptr;
+    for (auto* button : window.findChildren<QToolButton*>())
+    {
+        if (button->text() == "更多") { more = button; }
+    }
+    QVERIFY(more != nullptr && more->menu() != nullptr);
+    QMenu* sort = nullptr;
+    for (auto* action : more->menu()->actions())
+    {
+        if (action->text() == "排序") { sort = action->menu(); }
+    }
+    QVERIFY(sort != nullptr);
+    QVERIFY(window.findChild<QToolButton*>("sort_options") == nullptr);
+    QStringList names;
+    for (auto* action : sort->actions()) { names.append(action->text()); }
+    QVERIFY(names.contains("文件名") && names.contains("修改时间") && names.contains("文件大小"));
+}
+
+void correctness_test::xcb_header_gestures()
+{
+    constexpr int kWindowOperationTimeoutMs = 15000;
+    if (QGuiApplication::platformName() != "xcb" || QGuiApplication::screens().size() != 1)
+    {
+        QSKIP("系统拖动和缩放仅在单屏X11上验证");
+    }
+    QLibrary x11("libX11.so.6");
+    QLibrary xtst("libXtst.so.6");
+    if (!x11.load() || !xtst.load()) { QSKIP("需要系统X11/XTest测试库"); }
+    const auto open = reinterpret_cast<void* (*)(const char*)>(x11.resolve("XOpenDisplay"));
+    const auto close = reinterpret_cast<int (*)(void*)>(x11.resolve("XCloseDisplay"));
+    const auto flush = reinterpret_cast<int (*)(void*)>(x11.resolve("XFlush"));
+    const auto screen = reinterpret_cast<int (*)(void*)>(x11.resolve("XDefaultScreen"));
+    const auto motion = reinterpret_cast<int (*)(void*, int, int, int, unsigned long)>(xtst.resolve("XTestFakeMotionEvent"));
+    const auto button = reinterpret_cast<int (*)(void*, unsigned int, int, unsigned long)>(xtst.resolve("XTestFakeButtonEvent"));
+    QVERIFY(open != nullptr && close != nullptr && flush != nullptr && screen != nullptr &&
+            motion != nullptr && button != nullptr);
+    void* display = open(nullptr);
+    QVERIFY(display != nullptr);
+    const QPoint saved_pointer = QCursor::pos();
+    const auto cleanup = qScopeGuard([&]()
+    {
+        button(display, 1, false, 0);
+        flush(display);
+        close(display);
+        QCursor::setPos(saved_pointer);
+    });
+    main_window window;
+    window.setWindowState(Qt::WindowNoState);
+    window.setGeometry(120, 80, 640, 360);
+    window.show();
+    window.raise();
+    window.activateWindow();
+    QVERIFY(QTest::qWaitForWindowExposed(&window));
+    QVERIFY(QTest::qWaitForWindowActive(&window, kWindowOperationTimeoutMs));
+    const qreal dpr = window.devicePixelRatioF();
+    const QPoint delta(60, 40);
+    const auto drag = [&](const QPoint& from)
+    {
+        const QRect initial = window.geometry();
+        motion(display, screen(display), qRound(from.x() * dpr), qRound(from.y() * dpr), 0);
+        flush(display);
+        QTest::qWait(50);
+        button(display, 1, true, 0);
+        flush(display);
+        QTest::qWait(100);
+        for (int step = 1; step <= 10; ++step)
+        {
+            const QPoint point = from + delta * step / 10;
+            motion(display, screen(display), qRound(point.x() * dpr), qRound(point.y() * dpr), 0);
+            flush(display);
+            QTest::qWait(50);
+        }
+        const bool responded = QTest::qWaitFor([&]() { return window.geometry() != initial; }, kWindowOperationTimeoutMs);
+        button(display, 1, false, 0);
+        flush(display);
+        return responded;
+    };
+    auto* header = window.findChild<QWidget*>("window_title_bar");
+    QVERIFY(header != nullptr);
+    const QPoint before = window.pos();
+    QVERIFY(drag(header->mapToGlobal(header->rect().center())));
+    QTRY_VERIFY_WITH_TIMEOUT(window.x() > before.x() && window.y() > before.y(), kWindowOperationTimeoutMs);
+    // 系统异步接管时可能少消费开头的位移；验证方向和逻辑像素上界。
+    QVERIFY(window.x() - before.x() <= delta.x() + 3);
+    QVERIFY(window.y() - before.y() <= delta.y() + 3);
+    const QSize size = window.size();
+    const QPoint corner = window.mapToGlobal(QPoint(window.width() - 2, window.height() - 2));
+    auto* hit = QApplication::widgetAt(corner);
+    qInfo() << "Resize target" << hit << "geometry" << window.geometry() << "DPR" << dpr;
+    QVERIFY(drag(corner));
+    qInfo() << "Resize result" << window.geometry() << "size delta" << window.size() - size;
+    QTRY_VERIFY_WITH_TIMEOUT(window.width() > size.width() && window.height() > size.height(), kWindowOperationTimeoutMs);
+    QVERIFY(window.width() - size.width() <= delta.x() + 3);
+    QVERIFY(window.height() - size.height() <= delta.y() + 3);
+    QCursor::setPos(window.findChild<waterfall_view*>()->viewport()->mapToGlobal(QPoint(40, 40)));
+    QTest::qWait(50);
+    QCOMPARE(window.cursor().shape(), Qt::ArrowCursor);
 }
 
 int main(int argc, char** argv)

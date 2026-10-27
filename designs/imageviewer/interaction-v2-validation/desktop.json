@@ -1,0 +1,19 @@
+{
+  "runs": [
+    {
+      "scale": "1",
+      "exit_code": 0
+    },
+    {
+      "scale": "1.5",
+      "exit_code": 0
+    },
+    {
+      "scale": "2",
+      "exit_code": 0
+    }
+  ],
+  "offscreen_exit": 0,
+  "capture_exit": 0,
+  "capture_note": "原生截图于本次输入驱动修订前生成；产品代码未变"
+}

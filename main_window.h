@@ -16,7 +16,6 @@
 class QImage;
 class QAction;
 class QActionGroup;
-class QLineEdit;
 class QProgressBar;
 class waterfall_view;
 class waterfall_scene;
@@ -81,7 +80,6 @@ class main_window : public QMainWindow
     file_scanner* file_scanner_ = nullptr;
     QLabel* status_label_ = nullptr;
     QLabel* info_label_ = nullptr;
-    QLineEdit* path_edit_ = nullptr;
     QProgressBar* scan_progress_ = nullptr;
     QAction* dark_theme_action_ = nullptr;
     bool is_scanning_ = false;

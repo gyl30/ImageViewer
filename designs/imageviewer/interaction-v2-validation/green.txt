@@ -1,0 +1,23 @@
+********* Start testing of correctness_test *********
+Config: Using QtTest library 6.9.3, Qt 6.9.3 (x86_64-little_endian-lp64 shared (dynamic) release build; by GCC 10.3.1 20210422 (Red Hat 10.3.1-1)), ubuntu 22.04
+PASS   : correctness_test::initTestCase()
+QWARN  : correctness_test::custom_header(library) This plugin does not support propagateSizeHints()
+QWARN  : correctness_test::custom_header(library) This plugin does not support propagateSizeHints()
+QWARN  : correctness_test::custom_header(library) This plugin does not support propagateSizeHints()
+QWARN  : correctness_test::custom_header(library) This plugin does not support propagateSizeHints()
+QWARN  : correctness_test::custom_header(library) This plugin does not support propagateSizeHints()
+PASS   : correctness_test::custom_header(library)
+QWARN  : correctness_test::custom_header(preview) This plugin does not support propagateSizeHints()
+QWARN  : correctness_test::custom_header(preview) This plugin does not support propagateSizeHints()
+QWARN  : correctness_test::custom_header(preview) This plugin does not support propagateSizeHints()
+QWARN  : correctness_test::custom_header(preview) This plugin does not support propagateSizeHints()
+QWARN  : correctness_test::custom_header(preview) This plugin does not support propagateSizeHints()
+PASS   : correctness_test::custom_header(preview)
+QWARN  : correctness_test::recent_menu_is_flat() This plugin does not support propagateSizeHints()
+QWARN  : correctness_test::recent_menu_is_flat() This plugin does not support raise()
+QWARN  : correctness_test::recent_menu_is_flat() This plugin does not support grabbing the keyboard
+PASS   : correctness_test::recent_menu_is_flat()
+PASS   : correctness_test::sorting_is_in_more()
+PASS   : correctness_test::cleanupTestCase()
+Totals: 6 passed, 0 failed, 0 skipped, 0 blacklisted, 476ms
+********* Finished testing of correctness_test *********

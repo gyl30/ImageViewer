@@ -1,0 +1,19 @@
+********* Start testing of correctness_test *********
+Config: Using QtTest library 6.4.2, Qt 6.4.2 (x86_64-little_endian-lp64 shared (dynamic) release build; by GCC 12.2.0), debian 12
+PASS   : correctness_test::initTestCase()
+QWARN  : correctness_test::custom_header(library) This plugin does not support propagateSizeHints()
+FAIL!  : correctness_test::custom_header(library) 'window->windowFlags().testFlag(Qt::FramelessWindowHint)' returned FALSE. ()
+   Loc: [/src/tests/correctness_test.cc(2111)]
+QWARN  : correctness_test::custom_header(preview) This plugin does not support propagateSizeHints()
+FAIL!  : correctness_test::custom_header(preview) 'window->windowFlags().testFlag(Qt::FramelessWindowHint)' returned FALSE. ()
+   Loc: [/src/tests/correctness_test.cc(2111)]
+QWARN  : correctness_test::recent_menu_is_flat() This plugin does not support propagateSizeHints()
+QWARN  : correctness_test::recent_menu_is_flat() This plugin does not support raise()
+QWARN  : correctness_test::recent_menu_is_flat() This plugin does not support grabbing the keyboard
+FAIL!  : correctness_test::recent_menu_is_flat() '!nested' returned FALSE. ()
+   Loc: [/src/tests/correctness_test.cc(2173)]
+FAIL!  : correctness_test::sorting_is_in_more() 'sort != nullptr' returned FALSE. ()
+   Loc: [/src/tests/correctness_test.cc(2195)]
+PASS   : correctness_test::cleanupTestCase()
+Totals: 2 passed, 4 failed, 0 skipped, 0 blacklisted, 633ms
+********* Finished testing of correctness_test *********

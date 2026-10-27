@@ -83,7 +83,7 @@ class waterfall_scene : public QGraphicsScene
     int pending_view_width_ = 0;
     QStringList recent_folder_paths_;
     QStringList recent_image_paths_;
-    QString empty_text_ = "把文件夹拖到这里\n或使用上方「打开文件夹」";
+    QString empty_text_ = "把文件夹拖到这里\n或点击左上角的打开图标";
 };
 
 #endif

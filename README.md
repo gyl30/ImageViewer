@@ -20,6 +20,8 @@ sudo dnf install ./imageviewer-0.1.0-0.1.rc1.fc43.x86_64.rpm
 
 安装后从应用菜单打开 ImageViewer，或运行 `ImageViewer`。
 `Ctrl+O` 打开文件夹，`Ctrl+Shift+O` 打开图片，`F1` 查看快捷键。
+图库选中图片后，可用 `Enter` 或 `Space` 打开；排序位于“更多”菜单。
+预览支持方向键、`Space`/`Backspace` 和鼠标侧键翻图，`Esc` 返回图库；全屏时先退出全屏。
 当前命令行提供 `--help`、`--version`；尚未提供文件位置参数，因此桌面入口不声明“打开方式”文件关联。
 
 ```sh

@@ -1,0 +1,28 @@
+********* Start testing of correctness_test *********
+Config: Using QtTest library 6.9.3, Qt 6.9.3 (x86_64-little_endian-lp64 shared (dynamic) release build; by GCC 10.3.1 20210422 (Red Hat 10.3.1-1)), ubuntu 22.04
+PASS   : correctness_test::initTestCase()
+QWARN  : correctness_test::viewer_keeps_window_geometry() This plugin does not support propagateSizeHints()
+FAIL!  : correctness_test::viewer_keeps_window_geometry() Compared values are not the same
+   Actual   (viewer.geometry()): QRect(2,2 716x657) (bottomright 717,658)
+   Expected (geometry)         : QRect(2,2 640x440) (bottomright 641,441)
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(1921)]
+QWARN  : correctness_test::directory_shortcut() This plugin does not support propagateSizeHints()
+FAIL!  : correctness_test::directory_shortcut() 'path->hasFocus()' returned FALSE. ()
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(1942)]
+QWARN  : correctness_test::open_selected_with_keyboard(return) This plugin does not support propagateSizeHints()
+FAIL!  : correctness_test::open_selected_with_keyboard(return) 'window.findChild<image_viewer_window*>() != nullptr' returned FALSE. ()
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(1979)]
+QWARN  : correctness_test::open_selected_with_keyboard(enter) This plugin does not support propagateSizeHints()
+FAIL!  : correctness_test::open_selected_with_keyboard(enter) 'window.findChild<image_viewer_window*>() != nullptr' returned FALSE. ()
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(1979)]
+QWARN  : correctness_test::open_selected_with_keyboard(space) This plugin does not support propagateSizeHints()
+FAIL!  : correctness_test::open_selected_with_keyboard(space) 'window.findChild<image_viewer_window*>() != nullptr' returned FALSE. ()
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(1979)]
+QWARN  : correctness_test::viewer_mouse_navigation() This plugin does not support propagateSizeHints()
+FAIL!  : correctness_test::viewer_mouse_navigation() Compared values are not the same
+   Actual   (viewer.current_image_path()): "/missing/middle.png"
+   Expected (paths[0])                   : "/missing/first.png"
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(1994)]
+PASS   : correctness_test::cleanupTestCase()
+Totals: 2 passed, 6 failed, 0 skipped, 0 blacklisted, 61767ms
+********* Finished testing of correctness_test *********

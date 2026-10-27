@@ -1,0 +1,15 @@
+[1/20] Automatic MOC and UIC for target ImageViewer
+[2/20] Automatic MOC and UIC for target imageviewer_tests
+[3/20] Automatic MOC and UIC for target imageviewer_benchmark
+[4/20] Building CXX object CMakeFiles/ImageViewer.dir/ImageViewer_autogen/mocs_compilation.cpp.o
+[5/20] Building CXX object CMakeFiles/ImageViewer.dir/waterfall_scene.cc.o
+[6/20] Building CXX object CMakeFiles/ImageViewer.dir/waterfall_view.cc.o
+[7/20] Building CXX object CMakeFiles/ImageViewer.dir/main_window.cc.o
+[8/20] Linking CXX executable ImageViewer
+[9/20] Building CXX object CMakeFiles/imageviewer_tests.dir/imageviewer_tests_autogen/mocs_compilation.cpp.o
+[10/20] Building CXX object CMakeFiles/imageviewer_tests.dir/tests/correctness_test.cc.o
+FAILED: CMakeFiles/imageviewer_tests.dir/tests/correctness_test.cc.o
+/usr/bin/g++-11 -DQT_CONCURRENT_LIB -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_SVG_LIB -DQT_TESTCASE_BUILDDIR=\"/tmp/iv-header-build\" -DQT_TESTCASE_SOURCEDIR=\"/home/gyl/example/ImageViewer\" -DQT_TESTLIB_LIB -DQT_WIDGETS_LIB -I/tmp/iv-header-build/imageviewer_tests_autogen/include -I/home/gyl/example/ImageViewer -isystem /home/gyl/data/qt/6.9.3/gcc_64/include/QtWidgets -isystem /home/gyl/data/qt/6.9.3/gcc_64/include -isystem /home/gyl/data/qt/6.9.3/gcc_64/include/QtCore -isystem /home/gyl/data/qt/6.9.3/gcc_64/mkspecs/linux-g++ -isystem /home/gyl/data/qt/6.9.3/gcc_64/include/QtGui -isystem /home/gyl/data/qt/6.9.3/gcc_64/include/QtConcurrent -isystem /home/gyl/data/qt/6.9.3/gcc_64/include/QtTest -isystem /home/gyl/data/qt/6.9.3/gcc_64/include/QtSvg -O3 -DNDEBUG -std=c++17 -fPIC -MD -MT CMakeFiles/imageviewer_tests.dir/tests/correctness_test.cc.o -MF CMakeFiles/imageviewer_tests.dir/tests/correctness_test.cc.o.d -o CMakeFiles/imageviewer_tests.dir/tests/correctness_test.cc.o -c /home/gyl/example/ImageViewer/tests/correctness_test.cc
+g++-11: fatal error: 已终止 signal terminated program cc1plus
+compilation terminated.
+ninja: build stopped: subcommand failed.

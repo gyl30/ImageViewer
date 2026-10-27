@@ -8,5 +8,18 @@
     <file>icons/next.svg</file>
     <file>icons/zoom-in.svg</file>
     <file>icons/zoom-out.svg</file>
+    <file>icons/play.svg</file>
+    <file>icons/pause.svg</file>
+    <file>icons/more.svg</file>
+    <file>icons/grid.svg</file>
+    <file>icons/fit.svg</file>
+    <file>icons/actual-size.svg</file>
+    <file>icons/fit-width.svg</file>
+    <file>icons/rotate-right.svg</file>
+    <file>icons/sort.svg</file>
+    <file>icons/minimize.svg</file>
+    <file>icons/maximize.svg</file>
+    <file>icons/restore.svg</file>
+    <file>icons/close.svg</file>
   </qresource>
 </RCC>

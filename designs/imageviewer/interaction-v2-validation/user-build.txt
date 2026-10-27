@@ -1,0 +1,9 @@
+[  0%] Built target ImageViewer_autogen_timestamp_deps
+[  6%] Automatic MOC and UIC for target ImageViewer
+[  6%] Built target ImageViewer_autogen
+[ 13%] Building CXX object CMakeFiles/ImageViewer.dir/ImageViewer_autogen/mocs_compilation.cpp.o
+[ 20%] Building CXX object CMakeFiles/ImageViewer.dir/waterfall_scene.cc.o
+[ 26%] Building CXX object CMakeFiles/ImageViewer.dir/waterfall_view.cc.o
+[ 33%] Building CXX object CMakeFiles/ImageViewer.dir/main_window.cc.o
+[ 40%] Linking CXX executable ImageViewer
+[100%] Built target ImageViewer

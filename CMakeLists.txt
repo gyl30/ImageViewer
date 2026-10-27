@@ -30,6 +30,7 @@ set(PROJECT_SOURCES
     file_scanner.cc
     main_window.cc
     image_viewer_window.cc
+    window_title_bar.cc
     resources.qrc
 )
 
@@ -60,6 +61,7 @@ if(BUILD_TESTING)
         file_scanner.cc
         main_window.cc
         waterfall_view.cc
+        window_title_bar.cc
         resources.qrc
     )
     target_include_directories(imageviewer_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
@@ -72,6 +74,7 @@ if(BUILD_TESTING)
             tools/performance_probe.cc
             image_loader.cc waterfall_item.cc waterfall_scene.cc waterfall_view.cc
             file_scanner.cc main_window.cc image_viewer_window.cc
+            window_title_bar.cc
             resources.qrc
         )
         target_include_directories(imageviewer_benchmark PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

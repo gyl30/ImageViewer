@@ -10,6 +10,8 @@
 #include <QGraphicsPixmapItem>
 #include <QGraphicsTextItem>
 #include <QToolBar>
+#include <QToolButton>
+#include <QMenu>
 #include <QAction>
 #include <QActionGroup>
 #include <QResizeEvent>
@@ -20,17 +22,16 @@
 #include <QDateTime>
 #include <QFont>
 #include <QLabel>
-#include <QGuiApplication>
+#include <QMouseEvent>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QMovie>
-#include <QScreen>
 #include <QSettings>
 #include <QStatusBar>
 #include <QTimer>
-#include <QWindow>
 #include "common_types.h"
 #include "image_viewer_window.h"
+#include "window_title_bar.h"
 
 namespace
 {
@@ -148,84 +149,148 @@ void image_viewer_window::setup_ui()
     zoom_label_ = new QLabel(this);
     statusBar()->addPermanentWidget(zoom_label_);
 
-    auto* toolbar = addToolBar("View");
+    auto* toolbar = new QToolBar("预览", this);
+    toolbar->setObjectName("preview_toolbar");
     toolbar->setMovable(false);
+    toolbar->setFloatable(false);
     toolbar->setIconSize(QSize(18, 18));
-    toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    toolbar->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    toolbar->setStyleSheet("QToolBar { background: palette(window); border: 0; spacing: 2px; padding: 4px; } QToolButton { padding: 6px; }");
+    auto* back_action = toolbar->addAction(QIcon(":/icons/grid.svg"), "图库");
+    back_action->setToolTip("返回图库（Esc）");
+    connect(back_action, &QAction::triggered, this, &QWidget::close);
+    toolbar->addSeparator();
     prev_action_ = toolbar->addAction(QIcon(":/icons/previous.svg"), "上一张");
+    position_label_ = new QLabel(this);
+    position_label_->setMargin(4);
+    position_label_->setAlignment(Qt::AlignCenter);
+    toolbar->addWidget(position_label_);
     next_action_ = toolbar->addAction(QIcon(":/icons/next.svg"), "下一张");
-    prev_action_->setToolTip("上一张（Left / Backspace）");
-    next_action_->setToolTip("下一张（Right / Space）");
+    prev_action_->setToolTip("上一张（Left / Backspace / 鼠标后退键）");
+    next_action_->setToolTip("下一张（Right / Space / 鼠标前进键）");
     connect(prev_action_, &QAction::triggered, this, &image_viewer_window::load_prev_image);
     connect(next_action_, &QAction::triggered, this, &image_viewer_window::load_next_image);
     toolbar->addSeparator();
 
     view_mode_group_ = new QActionGroup(this);
     view_mode_group_->setExclusive(true);
+    auto* mode_button = new QToolButton(toolbar);
+    mode_button->setObjectName("preview_mode");
+    mode_button->setText("适应窗口");
+    mode_button->setIcon(QIcon(":/icons/fit.svg"));
+    mode_button->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    mode_button->setToolTip("适应窗口（Ctrl+0）");
+    mode_button->setPopupMode(QToolButton::InstantPopup);
+    auto* mode_menu = new QMenu(mode_button);
+    mode_button->setMenu(mode_menu);
+    toolbar->addWidget(mode_button);
 
-    fit_window_action_ = toolbar->addAction("适应窗口");
+    fit_window_action_ = mode_menu->addAction("适应窗口");
+    fit_window_action_->setIcon(QIcon(":/icons/fit.svg"));
     fit_window_action_->setCheckable(true);
     fit_window_action_->setShortcut(QKeySequence("Ctrl+0"));
     view_mode_group_->addAction(fit_window_action_);
     connect(fit_window_action_, &QAction::triggered, this, &image_viewer_window::set_fit_window_mode);
 
-    actual_size_action_ = toolbar->addAction("1:1");
+    actual_size_action_ = mode_menu->addAction("1:1");
+    actual_size_action_->setIcon(QIcon(":/icons/actual-size.svg"));
     actual_size_action_->setCheckable(true);
     actual_size_action_->setShortcut(QKeySequence("Ctrl+1"));
     view_mode_group_->addAction(actual_size_action_);
     connect(actual_size_action_, &QAction::triggered, this, &image_viewer_window::set_actual_size_mode);
 
-    fit_width_action_ = toolbar->addAction("适应宽度");
+    fit_width_action_ = mode_menu->addAction("适应宽度");
+    fit_width_action_->setIcon(QIcon(":/icons/fit-width.svg"));
     fit_width_action_->setCheckable(true);
     fit_width_action_->setShortcut(QKeySequence("Ctrl+2"));
     view_mode_group_->addAction(fit_width_action_);
     connect(fit_width_action_, &QAction::triggered, this, &image_viewer_window::set_fit_width_mode);
 
-    full_screen_action_ = toolbar->addAction("全屏");
+    for (auto* action : {fit_window_action_, actual_size_action_, fit_width_action_})
+    {
+        connect(action, &QAction::toggled, mode_button, [mode_button, action](bool checked)
+        {
+            if (checked)
+            {
+                mode_button->setText(action->text());
+                mode_button->setIcon(action->icon());
+                mode_button->setToolTip(QString("%1（%2）").arg(action->text(), action->shortcut().toString(QKeySequence::NativeText)));
+            }
+        });
+    }
+    full_screen_action_ = new QAction("全屏", this);
     full_screen_action_->setCheckable(true);
     full_screen_action_->setShortcut(QKeySequence(Qt::Key_F11));
     connect(full_screen_action_, &QAction::triggered, this, &image_viewer_window::toggle_full_screen);
 
-    toolbar->addSeparator();
     auto* zoom_out_action = toolbar->addAction(QIcon(":/icons/zoom-out.svg"), "缩小");
     auto* zoom_in_action = toolbar->addAction(QIcon(":/icons/zoom-in.svg"), "放大");
     zoom_out_action->setShortcut(QKeySequence::ZoomOut);
     zoom_in_action->setShortcut(QKeySequence::ZoomIn);
     connect(zoom_out_action, &QAction::triggered, this, &image_viewer_window::zoom_out);
     connect(zoom_in_action, &QAction::triggered, this, &image_viewer_window::zoom_in);
-    toolbar->addSeparator();
-
-    rotate_left_action_ = toolbar->addAction("左转");
+    for (auto* action : {prev_action_, next_action_, zoom_out_action, zoom_in_action})
+    {
+        auto* button = qobject_cast<QToolButton*>(toolbar->widgetForAction(action));
+        button->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    }
+    rotate_left_action_ = new QAction("左转", this);
     rotate_left_action_->setShortcut(QKeySequence("Ctrl+L"));
     connect(rotate_left_action_, &QAction::triggered, this, &image_viewer_window::rotate_left);
 
-    rotate_right_action_ = toolbar->addAction("右转");
+    rotate_right_action_ = toolbar->addAction(QIcon(":/icons/rotate-right.svg"), "右转");
     rotate_right_action_->setShortcut(QKeySequence("Ctrl+R"));
     connect(rotate_right_action_, &QAction::triggered, this, &image_viewer_window::rotate_right);
 
-    flip_horizontal_action_ = toolbar->addAction("水平翻转");
+    flip_horizontal_action_ = new QAction("水平翻转", this);
     flip_horizontal_action_->setShortcut(QKeySequence("Ctrl+H"));
     connect(flip_horizontal_action_, &QAction::triggered, this, &image_viewer_window::flip_horizontal);
 
-    flip_vertical_action_ = toolbar->addAction("垂直翻转");
+    flip_vertical_action_ = new QAction("垂直翻转", this);
     flip_vertical_action_->setShortcut(QKeySequence("Ctrl+Shift+H"));
     connect(flip_vertical_action_, &QAction::triggered, this, &image_viewer_window::flip_vertical);
 
-    toolbar->addSeparator();
-
-    slideshow_action_ = toolbar->addAction("幻灯片");
+    slideshow_action_ = toolbar->addAction(QIcon(":/icons/play.svg"), "幻灯片");
     slideshow_action_->setCheckable(true);
     slideshow_action_->setShortcut(QKeySequence(Qt::Key_F5));
+    slideshow_action_->setToolTip("播放幻灯片（F5）");
+    qobject_cast<QToolButton*>(toolbar->widgetForAction(slideshow_action_))->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    connect(slideshow_action_, &QAction::toggled, this, [this](bool playing)
+    {
+        slideshow_action_->setIcon(QIcon(playing ? ":/icons/pause.svg" : ":/icons/play.svg"));
+        slideshow_action_->setToolTip(playing ? "暂停幻灯片（F5）" : "播放幻灯片（F5）");
+    });
     connect(slideshow_action_, &QAction::triggered, this, &image_viewer_window::toggle_slideshow);
 
-    slideshow_loop_action_ = toolbar->addAction("循环播放");
+    auto* spacer = new QWidget(toolbar);
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    spacer->setAttribute(Qt::WA_TransparentForMouseEvents);
+    toolbar->addWidget(spacer);
+    auto* more_button = new QToolButton(toolbar);
+    more_button->setText("更多");
+    more_button->setIcon(QIcon(":/icons/more.svg"));
+    more_button->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    more_button->setToolTip("更多");
+    more_button->setAccessibleName("更多");
+    more_button->setPopupMode(QToolButton::InstantPopup);
+    auto* more_menu = new QMenu(more_button);
+    more_button->setMenu(more_menu);
+    toolbar->addWidget(more_button);
+    more_menu->addAction(rotate_left_action_);
+    more_menu->addAction(flip_horizontal_action_);
+    more_menu->addAction(flip_vertical_action_);
+    more_menu->addSeparator();
+
+    slideshow_loop_action_ = more_menu->addAction("循环播放");
     slideshow_loop_action_->setCheckable(true);
     connect(slideshow_loop_action_, &QAction::triggered, this, &image_viewer_window::toggle_slideshow_loop);
 
-    slideshow_interval_action_ = toolbar->addAction("播放间隔");
+    slideshow_interval_action_ = more_menu->addAction("播放间隔");
     connect(slideshow_interval_action_, &QAction::triggered, this, &image_viewer_window::configure_slideshow_interval);
 
-    auto* shortcuts_action = toolbar->addAction("快捷键");
+    more_menu->addSeparator();
+    more_menu->addAction(full_screen_action_);
+    auto* shortcuts_action = more_menu->addAction("快捷键");
     shortcuts_action->setShortcut(QKeySequence(Qt::Key_F1));
     connect(shortcuts_action,
             &QAction::triggered,
@@ -238,6 +303,7 @@ void image_viewer_window::setup_ui()
                     "Left/Right 上一张/下一张\n"
                     "Space 下一张，Backspace 上一张\n"
                     "Home/End 跳到首张/末张\n"
+                    "鼠标侧键 后退/前进翻图\n"
                     "Ctrl+滚轮 缩放\n"
                     "Ctrl+0 适应窗口\n"
                     "Ctrl+1 1:1\n"
@@ -248,7 +314,8 @@ void image_viewer_window::setup_ui()
                     "Ctrl+H 水平翻转\n"
                     "Ctrl+Shift+H 垂直翻转\n"
                     "F5 幻灯片\n"
-                    "F11 全屏");
+                    "F11 全屏\n"
+                    "Esc 退出全屏或返回图库");
             });
 
     addAction(fit_window_action_);
@@ -268,6 +335,7 @@ void image_viewer_window::setup_ui()
     connect(slideshow_timer_, &QTimer::timeout, this, &image_viewer_window::advance_slideshow);
 
     update_navigation_buttons();
+    setMenuWidget(new window_title_bar(this, toolbar));
 }
 
 void image_viewer_window::set_image_path(const QString& path)
@@ -453,7 +521,6 @@ void image_viewer_window::display_image(QImage image, const QString& path)
     if (image_item_ != nullptr)
     {
         has_manual_zoom_ = false;
-        resize_window_to_image(pixmap.size());
         apply_auto_view();
     }
 
@@ -636,7 +703,6 @@ void image_viewer_window::start_movie(const QString& path)
                     flip_horizontal_ = false;
                     flip_vertical_ = false;
                     update_image_status(path, pixmap.size());
-                    resize_window_to_image(pixmap.size());
                     apply_image_transform();
                     setWindowTitle(QString("Viewer - %1 (%2x%3) [%4/%5]")
                                        .arg(QFileInfo(path).fileName())
@@ -660,40 +726,6 @@ void image_viewer_window::update_view_mode_actions()
     actual_size_action_->setChecked(current_view_mode_ == view_mode::actual_size);
     fit_width_action_->setChecked(current_view_mode_ == view_mode::fit_width);
     full_screen_action_->setChecked(isFullScreen());
-}
-
-void image_viewer_window::resize_window_to_image(const QSize& image_size)
-{
-    if (!image_size.isValid() || isMaximized() || isFullScreen())
-    {
-        return;
-    }
-
-    QScreen* current_screen = screen();
-    if (current_screen == nullptr && windowHandle() != nullptr)
-    {
-        current_screen = windowHandle()->screen();
-    }
-    if (current_screen == nullptr)
-    {
-        current_screen = QGuiApplication::primaryScreen();
-    }
-    if (current_screen == nullptr)
-    {
-        return;
-    }
-
-    const QSize frame_padding = frameGeometry().size() - size();
-    const QSize viewport_size = view_->viewport()->size();
-    const QSize viewport_padding = size() - viewport_size;
-    const QRect available_geometry = current_screen->availableGeometry().adjusted(40, 40, -40, -40);
-    const QSize max_window_size =
-        (available_geometry.size() - frame_padding).expandedTo(QSize(0, 0));
-    const QSize target_window_size =
-        QSize(image_size.width() + viewport_padding.width(), image_size.height() + viewport_padding.height())
-            .boundedTo(max_window_size);
-
-    resize(target_window_size);
 }
 
 void image_viewer_window::apply_auto_view()
@@ -770,6 +802,20 @@ void image_viewer_window::resizeEvent(QResizeEvent* event)
 
 bool image_viewer_window::eventFilter(QObject* watched, QEvent* event)
 {
+    if (watched == view_->viewport() && event->type() == QEvent::MouseButtonPress)
+    {
+        const auto button = static_cast<QMouseEvent*>(event)->button();
+        if (button == Qt::BackButton)
+        {
+            load_prev_image();
+            return true;
+        }
+        if (button == Qt::ForwardButton)
+        {
+            load_next_image();
+            return true;
+        }
+    }
     if (event->type() == QEvent::KeyPress)
     {
         auto* key_event = static_cast<QKeyEvent*>(event);
@@ -994,6 +1040,7 @@ void image_viewer_window::update_navigation_buttons()
 
     prev_action_->setEnabled(has_prev);
     next_action_->setEnabled(has_next);
+    position_label_->setText(current_index_ < 0 ? QString() : QString("%1 / %2").arg(current_index_ + 1).arg(image_list_.size()));
 }
 
 void image_viewer_window::keyPressEvent(QKeyEvent* event)

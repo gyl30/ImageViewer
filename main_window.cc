@@ -23,11 +23,11 @@
 #include <QStandardPaths>
 #include <QToolBar>
 #include <QApplication>
-#include <QLineEdit>
 #include <QProgressBar>
 #include <QStyle>
 #include <QPalette>
 #include <QSignalBlocker>
+#include <QToolButton>
 
 #include "main_window.h"
 #include "image_loader.h"
@@ -37,6 +37,7 @@
 #include "waterfall_item.h"
 #include "image_viewer_window.h"
 #include "file_scanner.h"
+#include "window_title_bar.h"
 
 main_window::main_window(QWidget* parent) : QMainWindow(parent)
 {
@@ -88,7 +89,8 @@ void main_window::setup_ui()
     };
 
     setWindowTitle("ImageViewer");
-    auto* act_open = new QAction(QIcon(":/icons/folder.svg"), "打开文件夹", this);
+    auto* act_open = new QAction(QIcon(":/icons/folder.svg"), "打开", this);
+    act_open->setToolTip("打开（Ctrl+O）");
     act_open->setShortcut(QKeySequence::Open);
     addAction(act_open);
     connect(act_open, &QAction::triggered, this, &main_window::on_add_folder);
@@ -115,16 +117,7 @@ void main_window::setup_ui()
     auto* act_open_recent = new QAction(QIcon(":/icons/history.svg"), "最近", this);
     act_open_recent->setShortcut(QKeySequence("Ctrl+Alt+O"));
     addAction(act_open_recent);
-    connect(act_open_recent,
-            &QAction::triggered,
-            this,
-            [this]()
-            {
-                QRect rect = geometry();
-                show_recent_menu(mapToGlobal(QPoint(rect.width() / 2, rect.height() / 2)));
-            });
-
-    auto* act_shortcuts = new QAction("Shortcuts", this);
+    auto* act_shortcuts = new QAction("快捷键", this);
     act_shortcuts->setShortcut(QKeySequence(Qt::Key_F1));
     addAction(act_shortcuts);
     connect(act_shortcuts,
@@ -139,39 +132,63 @@ void main_window::setup_ui()
                     "Ctrl+O 打开文件夹\n"
                     "Ctrl+Shift+O 打开图片\n"
                     "Ctrl+Alt+O 打开最近项\n"
+                    "Enter/Space 打开所选图片\n"
                     "Alt+1..9 打开最近菜单中的对应项目\n"
                     "F1 查看快捷键\n\n"
                     "预览窗口:\n"
                     "Left/Right 上一张/下一张\n"
+                    "Space/Backspace 下一张/上一张\n"
+                    "鼠标侧键 后退/前进翻图\n"
                     "Ctrl+滚轮 缩放\n"
                     "Ctrl+0 适应窗口\n"
                     "Ctrl+1 1:1\n"
                     "Ctrl+2 适应宽度\n"
                     "F11 全屏\n"
-                    "F5 幻灯片");
+                    "F5 幻灯片\n"
+                    "Esc 退出全屏或返回图库");
             });
 
-    auto* sort_toolbar = addToolBar("浏览");
-    sort_toolbar->setMovable(false);
-    sort_toolbar->setIconSize(QSize(18, 18));
-    sort_toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    sort_toolbar->addAction(act_open);
-    sort_toolbar->addAction(act_open_file);
-    sort_toolbar->addAction(act_open_recent);
-    sort_toolbar->addSeparator();
-    path_edit_ = new QLineEdit(this);
-    path_edit_->setObjectName("directory_path");
-    path_edit_->setPlaceholderText("输入路径，或将文件夹拖到这里");
-    path_edit_->setMinimumWidth(160);
-    path_edit_->setClearButtonEnabled(true);
-    sort_toolbar->addWidget(path_edit_);
-    connect(path_edit_, &QLineEdit::returnPressed, this, [this]() { open_path(path_edit_->text(), true); });
-    sort_toolbar->addSeparator();
+    auto* toolbar = new QToolBar("浏览", this);
+    toolbar->setObjectName("browse_toolbar");
+    toolbar->setMovable(false);
+    toolbar->setFloatable(false);
+    toolbar->setIconSize(QSize(18, 18));
+    toolbar->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    toolbar->setStyleSheet("QToolBar { background: palette(window); border: 0; spacing: 4px; padding: 4px; } QToolButton { padding: 6px; }");
+    auto* open_button = new QToolButton(toolbar);
+    open_button->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    open_button->setDefaultAction(act_open);
+    open_button->setPopupMode(QToolButton::MenuButtonPopup);
+    auto* open_menu = new QMenu(open_button);
+    open_menu->addAction(act_open_file);
+    open_button->setMenu(open_menu);
+    toolbar->addWidget(open_button);
+    toolbar->addAction(act_open_recent);
+    auto* recent_button = toolbar->widgetForAction(act_open_recent);
+    connect(act_open_recent, &QAction::triggered, this, [this, recent_button]()
+    {
+        show_recent_menu(recent_button->mapToGlobal(QPoint(0, recent_button->height())));
+    });
+    auto* spacer = new QWidget(toolbar);
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    spacer->setAttribute(Qt::WA_TransparentForMouseEvents);
+    toolbar->addWidget(spacer);
+    auto* more_button = new QToolButton(toolbar);
+    more_button->setText("更多");
+    more_button->setIcon(QIcon(":/icons/more.svg"));
+    more_button->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    more_button->setToolTip("更多");
+    more_button->setAccessibleName("更多");
+    more_button->setPopupMode(QToolButton::InstantPopup);
+    auto* more_menu = new QMenu(more_button);
+    more_button->setMenu(more_menu);
+    toolbar->addWidget(more_button);
+    auto* sort_menu = more_menu->addMenu(QIcon(":/icons/sort.svg"), "排序");
 
     sort_group_ = new QActionGroup(this);
     sort_group_->setExclusive(true);
 
-    sort_name_action_ = sort_toolbar->addAction("文件名");
+    sort_name_action_ = sort_menu->addAction("文件名");
     sort_name_action_->setCheckable(true);
     sort_name_action_->setChecked(true);
     sort_group_->addAction(sort_name_action_);
@@ -188,7 +205,7 @@ void main_window::setup_ui()
                 rescan_current_folder();
             });
 
-    sort_time_action_ = sort_toolbar->addAction("修改时间");
+    sort_time_action_ = sort_menu->addAction("修改时间");
     sort_time_action_->setCheckable(true);
     sort_group_->addAction(sort_time_action_);
     connect(sort_time_action_,
@@ -204,7 +221,7 @@ void main_window::setup_ui()
                 rescan_current_folder();
             });
 
-    sort_size_action_ = sort_toolbar->addAction("文件大小");
+    sort_size_action_ = sort_menu->addAction("文件大小");
     sort_size_action_->setCheckable(true);
     sort_group_->addAction(sort_size_action_);
     connect(sort_size_action_,
@@ -220,9 +237,8 @@ void main_window::setup_ui()
                 rescan_current_folder();
             });
 
-    sort_toolbar->addSeparator();
-
-    sort_desc_action_ = sort_toolbar->addAction("倒序");
+    sort_menu->addSeparator();
+    sort_desc_action_ = sort_menu->addAction("倒序");
     sort_desc_action_->setCheckable(true);
     connect(sort_desc_action_,
             &QAction::triggered,
@@ -238,15 +254,33 @@ void main_window::setup_ui()
                 rescan_current_folder();
             });
 
-    sort_toolbar->addSeparator();
-    dark_theme_action_ = sort_toolbar->addAction(QIcon(":/icons/theme.svg"), "深色");
+    more_menu->addSeparator();
+    dark_theme_action_ = more_menu->addAction(QIcon(":/icons/theme.svg"), "深色主题");
     dark_theme_action_->setObjectName("dark_theme");
     dark_theme_action_->setCheckable(true);
     connect(dark_theme_action_, &QAction::toggled, this, &main_window::set_dark_theme);
+    more_menu->addAction(act_shortcuts);
 
     scene_ = new waterfall_scene(this);
     view_ = new waterfall_view(this);
     view_->setScene(scene_);
+    auto* open_selected_action = new QAction("打开所选图片", view_);
+    open_selected_action->setShortcuts({QKeySequence(Qt::Key_Return), QKeySequence(Qt::Key_Enter), QKeySequence(Qt::Key_Space)});
+    open_selected_action->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    view_->addAction(open_selected_action);
+    connect(open_selected_action, &QAction::triggered, this, [this]()
+    {
+        const auto selected = scene_->selectedItems();
+        if (selected.isEmpty())
+        {
+            return;
+        }
+        auto* item = dynamic_cast<waterfall_item*>(selected.first());
+        if (item != nullptr)
+        {
+            on_image_double_clicked(item->get_path());
+        }
+    });
 
     setCentralWidget(view_);
     setAcceptDrops(true);
@@ -262,6 +296,7 @@ void main_window::setup_ui()
 
     info_label_ = new QLabel(this);
     statusBar()->addPermanentWidget(info_label_);
+    setMenuWidget(new window_title_bar(this, toolbar));
 }
 
 void main_window::setup_worker()
@@ -468,8 +503,6 @@ void main_window::open_path(const QString& path, bool add_to_recent)
 
     last_open_dir_ = path;
     current_root_path_ = path;
-    path_edit_->setText(QDir::toNativeSeparators(QFileInfo(path).absoluteFilePath()));
-    path_edit_->setToolTip(path_edit_->text());
 
     current_scan_session_id_ = file_scanner_->stop_scan();
 
@@ -490,6 +523,7 @@ void main_window::open_path(const QString& path, bool add_to_recent)
     }
 
     emit request_start_scan(path, current_scan_session_id_, static_cast<int>(current_sort_mode_), sort_descending_);
+    view_->setFocus(Qt::OtherFocusReason);
 }
 
 void main_window::add_recent_path(const QString& path)
@@ -515,37 +549,26 @@ void main_window::show_recent_menu(const QPoint& global_pos)
 
     QMenu menu(this);
 
-    auto add_recent_actions =
-        [this, &menu](const QString& title, const QStringList& paths)
+    const QStringList paths = recent_folder_paths_ + recent_image_paths_;
+    for (qsizetype index = 0; index < paths.size(); ++index)
+    {
+        const QString& path = paths[index];
+        const QFileInfo info(path);
+        const QString name = info.fileName().isEmpty() ? info.absoluteFilePath() : info.fileName();
+        QString label = menu.fontMetrics().elidedText(name, Qt::ElideMiddle, 320);
+        label.replace('&', "&&");
+        if (index < 9)
         {
-            if (paths.isEmpty())
-            {
-                return;
-            }
-
-            QMenu* sub_menu = menu.addMenu(title);
-            for (qsizetype i = 0; i < paths.size(); ++i)
-            {
-                const QString& path = paths[i];
-                const QString display_path =
-                    sub_menu->fontMetrics().elidedText(path, Qt::ElideMiddle, 520);
-                QString label = display_path;
-                if (i < 9)
-                {
-                    label = QString("&%1 %2").arg(i + 1).arg(display_path);
-                }
-
-                QAction* action = sub_menu->addAction(label);
-                if (i < 9)
-                {
-                    action->setShortcut(QKeySequence(QString("Alt+%1").arg(i + 1)));
-                }
-                connect(action, &QAction::triggered, this, [this, path]() { open_path(path, true); });
-            }
-        };
-
-    add_recent_actions("最近文件夹", recent_folder_paths_);
-    add_recent_actions("最近图片", recent_image_paths_);
+            label = QString("&%1 %2").arg(index + 1).arg(label);
+        }
+        auto* action = menu.addAction(QIcon(info.isDir() ? ":/icons/folder.svg" : ":/icons/image.svg"), label);
+        action->setData(path);
+        if (index < 9)
+        {
+            action->setShortcut(QKeySequence(QString("Alt+%1").arg(index + 1)));
+        }
+        connect(action, &QAction::triggered, this, [this, path]() { open_path(path, true); });
+    }
 
     if (menu.isEmpty())
     {
@@ -561,7 +584,6 @@ void main_window::show_image_viewer(const QString& path, const QStringList& imag
     if (viewer_window_ == nullptr)
     {
         viewer_window_ = new image_viewer_window(this);
-        viewer_window_->setWindowFlags(Qt::Window);
         connect(viewer_window_,
                 &image_viewer_window::current_image_changed,
                 this,
