@@ -1,6 +1,9 @@
 #include <QEvent>
 #include <QHBoxLayout>
 #include <QIcon>
+#include <QIconEngine>
+#include <QApplication>
+#include <QPainter>
 #include <QMainWindow>
 #include <QMouseEvent>
 #include <QStatusBar>
@@ -12,6 +15,42 @@
 namespace
 {
 constexpr int kResizeMargin = 5;
+
+class toolbar_icon_engine : public QIconEngine
+{
+   public:
+    explicit toolbar_icon_engine(const QIcon& source) : source_(source) {}
+    QIconEngine* clone() const override { return new toolbar_icon_engine(source_); }
+    bool isNull() override { return source_.isNull(); }
+
+    QPixmap pixmap(const QSize& size, QIcon::Mode mode, QIcon::State state) override
+    {
+        // QIconEngine此处已收到目标像素尺寸，不能再应用屏幕倍率。
+        QPixmap result = source_.pixmap(size, 1.0, QIcon::Normal, state);
+        if (result.isNull()) { return result; }
+        const QPalette palette = QApplication::palette();
+        const auto group = mode == QIcon::Disabled ? QPalette::Disabled : QPalette::Active;
+        const auto role = mode == QIcon::Selected ? QPalette::HighlightedText : QPalette::ButtonText;
+        QPainter painter(&result);
+        painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+        painter.fillRect(result.rect(), palette.color(group, role));
+        return result;
+    }
+
+    void paint(QPainter* painter, const QRect& rect, QIcon::Mode mode, QIcon::State state) override
+    {
+        const qreal dpr = painter->device()->devicePixelRatioF();
+        painter->drawPixmap(rect, pixmap(rect.size() * dpr, mode, state));
+    }
+
+   private:
+    QIcon source_;
+};
+}
+
+QIcon toolbar_icon(const QString& path)
+{
+    return QIcon(new toolbar_icon_engine(QIcon(path)));
 }
 
 window_title_bar::window_title_bar(QMainWindow* owner, QToolBar* toolbar)
@@ -21,19 +60,22 @@ window_title_bar::window_title_bar(QMainWindow* owner, QToolBar* toolbar)
     owner->setWindowFlag(Qt::FramelessWindowHint);
     owner->setMouseTracking(true);
     setAutoFillBackground(true);
+    toolbar->setIconSize(QSize(20, 20));
+    toolbar->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    for (auto* button : toolbar->findChildren<QToolButton*>()) { button->setIconSize(QSize(20, 20)); }
     auto* layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 4, 0);
     layout->setSpacing(0);
     layout->addWidget(toolbar, 1);
 
     auto* controls = new QWidget(this);
-    controls->setStyleSheet("QToolButton { border: 0; border-radius: 4px; padding: 8px; } QToolButton:hover { background: palette(alternate-base); }");
     auto* control_layout = new QHBoxLayout(controls);
     control_layout->setContentsMargins(0, 0, 0, 0);
     control_layout->setSpacing(0);
     auto* minimize = new QToolButton(controls);
     minimize->setObjectName("window_minimize");
-    minimize->setIcon(QIcon(":/icons/minimize.svg"));
+    minimize->setIcon(toolbar_icon(":/icons/minimize.svg"));
+    minimize->setIconSize(QSize(20, 20));
     minimize->setToolTip("最小化");
     minimize->setAccessibleName("最小化");
     minimize->setFixedSize(36, 36);
@@ -43,12 +85,14 @@ window_title_bar::window_title_bar(QMainWindow* owner, QToolBar* toolbar)
     maximize_button_ = new QToolButton(controls);
     maximize_button_->setObjectName("window_maximize");
     maximize_button_->setFixedSize(36, 36);
+    maximize_button_->setIconSize(QSize(20, 20));
     control_layout->addWidget(maximize_button_);
     connect(maximize_button_, &QToolButton::clicked, this, &window_title_bar::toggle_maximized);
 
     auto* close = new QToolButton(controls);
     close->setObjectName("window_close");
-    close->setIcon(QIcon(":/icons/close.svg"));
+    close->setIcon(toolbar_icon(":/icons/close.svg"));
+    close->setIconSize(QSize(20, 20));
     close->setToolTip("关闭");
     close->setAccessibleName("关闭");
     close->setFixedSize(36, 36);
@@ -61,7 +105,26 @@ window_title_bar::window_title_bar(QMainWindow* owner, QToolBar* toolbar)
     owner->centralWidget()->installEventFilter(this);
     owner->statusBar()->installEventFilter(this);
     installEventFilter(this);
+    update_palette();
     update_window_controls();
+}
+
+void window_title_bar::update_palette()
+{
+    const QPalette palette = QApplication::palette();
+    const QString hover = palette.color(QPalette::AlternateBase).name();
+    const QString accent = palette.color(QPalette::Highlight).name();
+    toolbar_->setStyleSheet(QString(
+        "QToolBar { background: transparent; border: 0; spacing: 2px; padding: 4px; }"
+        "QToolButton { padding: 6px; border: 1px solid transparent; border-radius: 5px; }"
+        "QToolButton::menu-button { background: transparent; border: 0; width: 12px; }"
+        "QToolButton:hover, QToolButton:checked { background: %1; }"
+        "QToolButton:focus { border-color: %2; }"
+        "QToolButton#more_menu::menu-indicator, QToolButton#preview_mode::menu-indicator { image: none; }")
+        .arg(hover, accent));
+    maximize_button_->parentWidget()->setStyleSheet(QString(
+        "QToolButton { border: 0; border-radius: 5px; padding: 8px; }"
+        "QToolButton:hover { background: %1; } QToolButton:focus { background: %1; }").arg(hover));
 }
 
 void window_title_bar::toggle_maximized()
@@ -75,7 +138,7 @@ void window_title_bar::update_window_controls()
 {
     const bool maximized = window()->isMaximized();
     const bool full_screen = window()->isFullScreen();
-    maximize_button_->setIcon(QIcon(maximized ? ":/icons/restore.svg" : ":/icons/maximize.svg"));
+    maximize_button_->setIcon(toolbar_icon(maximized ? ":/icons/restore.svg" : ":/icons/maximize.svg"));
     maximize_button_->setToolTip(maximized ? "还原" : "最大化");
     maximize_button_->setAccessibleName(maximize_button_->toolTip());
     maximize_button_->setEnabled(!full_screen);
@@ -87,6 +150,7 @@ void window_title_bar::update_window_controls()
 bool window_title_bar::eventFilter(QObject* watched, QEvent* event)
 {
     auto* owner = window();
+    if (watched == owner && event->type() == QEvent::PaletteChange) { update_palette(); }
     if (watched == owner && event->type() == QEvent::WindowStateChange)
     {
         update_window_controls();

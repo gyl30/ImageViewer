@@ -2,10 +2,13 @@
 #define WINDOW_TITLE_BAR_H
 
 #include <QFrame>
+#include <QIcon>
 
 class QMainWindow;
 class QToolBar;
 class QToolButton;
+
+QIcon toolbar_icon(const QString& path);
 
 class window_title_bar : public QFrame
 {
@@ -18,6 +21,7 @@ class window_title_bar : public QFrame
    private:
     void toggle_maximized();
     void update_window_controls();
+    void update_palette();
 
     QToolBar* toolbar_;
     QToolButton* maximize_button_;

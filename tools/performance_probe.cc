@@ -17,6 +17,7 @@
 #include <QBuffer>
 #include <QMessageBox>
 #include <QAbstractButton>
+#include <QToolButton>
 #include <QRandomGenerator>
 #include <QTemporaryDir>
 #include <QAction>
@@ -379,6 +380,52 @@ class performance_probe : public QObject
         samples_.append(row);
     }
 
+    bool capture_ui(QWidget& widget, const QString& output, const QString& phase)
+    {
+        auto* header = widget.findChild<QWidget*>("window_title_bar");
+        for (auto* button : header->findChildren<QToolButton*>())
+        {
+            if (button->objectName() == "qt_toolbar_ext_button") { continue; }
+            if (!button->isVisibleTo(&widget) || !widget.rect().contains(QRect(button->mapTo(&widget, QPoint()), button->size())))
+            {
+                qWarning() << "标题栏按钮被裁切" << phase << button->text();
+                return false;
+            }
+        }
+        if (!widget.screen()->grabWindow(widget.winId()).save(output + "/" + phase + ".png")) { return false; }
+        const double cpu = process_cpu_ms();
+        QTest::qWait(500);
+        const double idle = process_cpu_ms() - cpu;
+        sample(phase);
+        QImage surface(widget.size() * widget.devicePixelRatioF(), QImage::Format_ARGB32_Premultiplied);
+        surface.setDevicePixelRatio(widget.devicePixelRatioF());
+        std::vector<double> frames;
+        for (int frame = 0; frame < 60; ++frame)
+        {
+            QElapsedTimer elapsed;
+            elapsed.start();
+            QPainter painter(&surface);
+            widget.render(&painter);
+            painter.end();
+            frames.push_back(elapsed.nsecsElapsed() / 1000000.0);
+        }
+        std::sort(frames.begin(), frames.end());
+        QJsonObject row = samples_.last().toObject();
+        row["whole_window_render_frames"] = 60;
+        row["whole_window_render_median_ms"] = frames[30];
+        row["whole_window_render_p95_ms"] = frames[57];
+        row["loaded_idle_cpu_ms_500ms"] = idle;
+        row["render_surface_bytes"] = surface.sizeInBytes();
+        row["peak_rss_after_render_kib"] = proc_value("/proc/self/status", "VmHWM");
+        row["widget_count"] = widget.findChildren<QWidget*>().size();
+        row["window_size"] = QJsonArray{widget.width(), widget.height()};
+        samples_[samples_.size() - 1] = row;
+        QFile file(output + "/review-metrics.json");
+        if (!file.open(QIODevice::WriteOnly)) { return false; }
+        const QByteArray data = QJsonDocument(samples_).toJson();
+        return file.write(data) == data.size();
+    }
+
     int run(const QString& directory, const QString& output, run_mode mode)
     {
         const bool clear_disk = mode == run_mode::warm || mode == run_mode::soak;
@@ -411,10 +458,18 @@ class performance_probe : public QObject
             window_.activateWindow();
             QTest::qWaitForWindowExposed(&window_);
             QTest::qWait(300);
-            window_.screen()->grabWindow(window_.winId()).save(output + "/light.png");
+            if (!capture_ui(window_, output, "light")) { return 6; }
             window_.dark_theme_action_->setChecked(true);
             QTest::qWait(300);
-            window_.screen()->grabWindow(window_.winId()).save(output + "/dark.png");
+            if (!capture_ui(window_, output, "dark")) { return 6; }
+            const QSize wide = window_.size();
+            window_.resize(640, 480);
+            QTest::qWait(180);
+            if (!wait_idle() || window_.width() != 640) { return 4; }
+            if (!capture_ui(window_, output, "narrow")) { return 6; }
+            window_.resize(wide);
+            QTest::qWait(180);
+            if (!wait_idle()) { return 4; }
             window_.show_image_viewer(window_.scene_->image_paths_.first(), window_.scene_->get_all_paths());
             QElapsedTimer wait;
             wait.start();
@@ -425,7 +480,11 @@ class performance_probe : public QObject
             window_.viewer_window_->raise();
             window_.viewer_window_->activateWindow();
             QTest::qWait(300);
-            window_.viewer_window_->screen()->grabWindow(window_.viewer_window_->winId()).save(output + "/preview.png");
+            if (!capture_ui(*window_.viewer_window_, output, "preview")) { return 6; }
+            window_.viewer_window_->resize(640, 480);
+            QTest::qWait(180);
+            if (window_.viewer_window_->width() != 640) { return 4; }
+            if (!capture_ui(*window_.viewer_window_, output, "preview_narrow")) { return 6; }
             window_.viewer_window_->close();
             window_.dark_theme_action_->setChecked(false);
             QTemporaryDir empty;
@@ -433,7 +492,7 @@ class performance_probe : public QObject
             window_.raise();
             window_.activateWindow();
             QTest::qWait(300);
-            window_.screen()->grabWindow(window_.winId()).save(output + "/empty.png");
+            if (!capture_ui(window_, output, "empty")) { return 6; }
             return 0;
         }
         QImage surface(window_.view_->size(), QImage::Format_RGB32);

@@ -127,6 +127,7 @@ void image_viewer_window::setup_ui()
 {
     scene_ = new QGraphicsScene(this);
     view_ = new QGraphicsView(this);
+    view_->setFrameShape(QFrame::NoFrame);
     view_->setScene(scene_);
     view_->setDragMode(QGraphicsView::ScrollHandDrag);
     view_->setRenderHint(QPainter::Antialiasing);
@@ -153,19 +154,16 @@ void image_viewer_window::setup_ui()
     toolbar->setObjectName("preview_toolbar");
     toolbar->setMovable(false);
     toolbar->setFloatable(false);
-    toolbar->setIconSize(QSize(18, 18));
-    toolbar->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    toolbar->setStyleSheet("QToolBar { background: transparent; border: 0; spacing: 2px; padding: 4px; } QToolButton { padding: 6px; }");
-    auto* back_action = toolbar->addAction(QIcon(":/icons/grid.svg"), "图库");
+    auto* back_action = toolbar->addAction(toolbar_icon(":/icons/grid.svg"), "图库");
     back_action->setToolTip("返回图库（Esc）");
     connect(back_action, &QAction::triggered, this, &QWidget::close);
     toolbar->addSeparator();
-    prev_action_ = toolbar->addAction(QIcon(":/icons/previous.svg"), "上一张");
+    prev_action_ = toolbar->addAction(toolbar_icon(":/icons/previous.svg"), "上一张");
     position_label_ = new QLabel(this);
     position_label_->setMargin(4);
     position_label_->setAlignment(Qt::AlignCenter);
     toolbar->addWidget(position_label_);
-    next_action_ = toolbar->addAction(QIcon(":/icons/next.svg"), "下一张");
+    next_action_ = toolbar->addAction(toolbar_icon(":/icons/next.svg"), "下一张");
     prev_action_->setToolTip("上一张（Left / Backspace / 鼠标后退键）");
     next_action_->setToolTip("下一张（Right / Space / 鼠标前进键）");
     connect(prev_action_, &QAction::triggered, this, &image_viewer_window::load_prev_image);
@@ -177,7 +175,7 @@ void image_viewer_window::setup_ui()
     auto* mode_button = new QToolButton(toolbar);
     mode_button->setObjectName("preview_mode");
     mode_button->setText("适应窗口");
-    mode_button->setIcon(QIcon(":/icons/fit.svg"));
+    mode_button->setIcon(toolbar_icon(":/icons/fit.svg"));
     mode_button->setToolButtonStyle(Qt::ToolButtonIconOnly);
     mode_button->setToolTip("适应窗口（Ctrl+0）");
     mode_button->setPopupMode(QToolButton::InstantPopup);
@@ -186,21 +184,21 @@ void image_viewer_window::setup_ui()
     toolbar->addWidget(mode_button);
 
     fit_window_action_ = mode_menu->addAction("适应窗口");
-    fit_window_action_->setIcon(QIcon(":/icons/fit.svg"));
+    fit_window_action_->setIcon(toolbar_icon(":/icons/fit.svg"));
     fit_window_action_->setCheckable(true);
     fit_window_action_->setShortcut(QKeySequence("Ctrl+0"));
     view_mode_group_->addAction(fit_window_action_);
     connect(fit_window_action_, &QAction::triggered, this, &image_viewer_window::set_fit_window_mode);
 
     actual_size_action_ = mode_menu->addAction("1:1");
-    actual_size_action_->setIcon(QIcon(":/icons/actual-size.svg"));
+    actual_size_action_->setIcon(toolbar_icon(":/icons/actual-size.svg"));
     actual_size_action_->setCheckable(true);
     actual_size_action_->setShortcut(QKeySequence("Ctrl+1"));
     view_mode_group_->addAction(actual_size_action_);
     connect(actual_size_action_, &QAction::triggered, this, &image_viewer_window::set_actual_size_mode);
 
     fit_width_action_ = mode_menu->addAction("适应宽度");
-    fit_width_action_->setIcon(QIcon(":/icons/fit-width.svg"));
+    fit_width_action_->setIcon(toolbar_icon(":/icons/fit-width.svg"));
     fit_width_action_->setCheckable(true);
     fit_width_action_->setShortcut(QKeySequence("Ctrl+2"));
     view_mode_group_->addAction(fit_width_action_);
@@ -223,22 +221,17 @@ void image_viewer_window::setup_ui()
     full_screen_action_->setShortcut(QKeySequence(Qt::Key_F11));
     connect(full_screen_action_, &QAction::triggered, this, &image_viewer_window::toggle_full_screen);
 
-    auto* zoom_out_action = toolbar->addAction(QIcon(":/icons/zoom-out.svg"), "缩小");
-    auto* zoom_in_action = toolbar->addAction(QIcon(":/icons/zoom-in.svg"), "放大");
+    auto* zoom_out_action = toolbar->addAction(toolbar_icon(":/icons/zoom-out.svg"), "缩小");
+    auto* zoom_in_action = toolbar->addAction(toolbar_icon(":/icons/zoom-in.svg"), "放大");
     zoom_out_action->setShortcut(QKeySequence::ZoomOut);
     zoom_in_action->setShortcut(QKeySequence::ZoomIn);
     connect(zoom_out_action, &QAction::triggered, this, &image_viewer_window::zoom_out);
     connect(zoom_in_action, &QAction::triggered, this, &image_viewer_window::zoom_in);
-    for (auto* action : {prev_action_, next_action_, zoom_out_action, zoom_in_action})
-    {
-        auto* button = qobject_cast<QToolButton*>(toolbar->widgetForAction(action));
-        button->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    }
     rotate_left_action_ = new QAction("左转", this);
     rotate_left_action_->setShortcut(QKeySequence("Ctrl+L"));
     connect(rotate_left_action_, &QAction::triggered, this, &image_viewer_window::rotate_left);
 
-    rotate_right_action_ = toolbar->addAction(QIcon(":/icons/rotate-right.svg"), "右转");
+    rotate_right_action_ = toolbar->addAction(toolbar_icon(":/icons/rotate-right.svg"), "右转");
     rotate_right_action_->setShortcut(QKeySequence("Ctrl+R"));
     connect(rotate_right_action_, &QAction::triggered, this, &image_viewer_window::rotate_right);
 
@@ -250,14 +243,13 @@ void image_viewer_window::setup_ui()
     flip_vertical_action_->setShortcut(QKeySequence("Ctrl+Shift+H"));
     connect(flip_vertical_action_, &QAction::triggered, this, &image_viewer_window::flip_vertical);
 
-    slideshow_action_ = toolbar->addAction(QIcon(":/icons/play.svg"), "幻灯片");
+    slideshow_action_ = toolbar->addAction(toolbar_icon(":/icons/play.svg"), "幻灯片");
     slideshow_action_->setCheckable(true);
     slideshow_action_->setShortcut(QKeySequence(Qt::Key_F5));
     slideshow_action_->setToolTip("播放幻灯片（F5）");
-    qobject_cast<QToolButton*>(toolbar->widgetForAction(slideshow_action_))->setToolButtonStyle(Qt::ToolButtonIconOnly);
     connect(slideshow_action_, &QAction::toggled, this, [this](bool playing)
     {
-        slideshow_action_->setIcon(QIcon(playing ? ":/icons/pause.svg" : ":/icons/play.svg"));
+        slideshow_action_->setIcon(toolbar_icon(playing ? ":/icons/pause.svg" : ":/icons/play.svg"));
         slideshow_action_->setToolTip(playing ? "暂停幻灯片（F5）" : "播放幻灯片（F5）");
     });
     connect(slideshow_action_, &QAction::triggered, this, &image_viewer_window::toggle_slideshow);
@@ -267,8 +259,9 @@ void image_viewer_window::setup_ui()
     spacer->setAttribute(Qt::WA_TransparentForMouseEvents);
     toolbar->addWidget(spacer);
     auto* more_button = new QToolButton(toolbar);
+    more_button->setObjectName("more_menu");
     more_button->setText("更多");
-    more_button->setIcon(QIcon(":/icons/more.svg"));
+    more_button->setIcon(toolbar_icon(":/icons/more.svg"));
     more_button->setToolButtonStyle(Qt::ToolButtonIconOnly);
     more_button->setToolTip("更多");
     more_button->setAccessibleName("更多");

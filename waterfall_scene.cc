@@ -185,6 +185,7 @@ bool waterfall_scene::focus_path(const QString& path)
     if (active_items_.contains(index))
     {
         active_items_[index]->setSelected(true);
+        active_items_[index]->setFocus(Qt::OtherFocusReason);
     }
 
     return true;

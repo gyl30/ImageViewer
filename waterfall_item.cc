@@ -21,6 +21,7 @@ static QPixmap& get_placeholder()
 waterfall_item::waterfall_item(QGraphicsItem* parent) : QGraphicsPixmapItem(parent)
 {
     setFlag(QGraphicsItem::ItemIsSelectable);
+    setFlag(QGraphicsItem::ItemIsFocusable);
     setShapeMode(QGraphicsPixmapItem::BoundingRectShape);
     setAcceptHoverEvents(true);
     setPixmap(get_placeholder());
@@ -62,6 +63,7 @@ void waterfall_item::start_request(quint64 id, qreal dpr)
 
 void waterfall_item::reset()
 {
+    clearFocus();
     index_ = -1;
     path_.clear();
     original_size_ = QSize();
@@ -166,11 +168,17 @@ void waterfall_item::paint(QPainter* painter, const QStyleOptionGraphicsItem* op
     painter->setRenderHint(QPainter::Antialiasing);
     const bool selected = isSelected();
     const qreal inset = 1.0 / scale;
-    QPen pen(selected || is_hovered_ ? palette.color(QPalette::Highlight) : palette.color(QPalette::Mid),
-             (selected ? 2.0 : 1.0) / scale);
+    const QColor border = selected ? palette.color(QPalette::Highlight) :
+        (is_hovered_ ? palette.color(QPalette::Text) : palette.color(QPalette::Mid));
+    QPen pen(border, (selected ? 2.0 : 1.0) / scale);
     painter->setPen(pen);
     painter->setBrush(Qt::NoBrush);
     painter->drawRoundedRect(bounds.adjusted(inset, inset, -inset, -inset), radius, radius);
+    if (hasFocus())
+    {
+        painter->setPen(QPen(palette.color(QPalette::Text), inset, Qt::DashLine));
+        painter->drawRoundedRect(bounds.adjusted(4 * inset, 4 * inset, -4 * inset, -4 * inset), radius, radius);
+    }
     painter->restore();
 }
 

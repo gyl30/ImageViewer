@@ -89,13 +89,13 @@ void main_window::setup_ui()
     };
 
     setWindowTitle("ImageViewer");
-    auto* act_open = new QAction(QIcon(":/icons/folder.svg"), "打开", this);
+    auto* act_open = new QAction(toolbar_icon(":/icons/folder.svg"), "打开", this);
     act_open->setToolTip("打开（Ctrl+O）");
     act_open->setShortcut(QKeySequence::Open);
     addAction(act_open);
     connect(act_open, &QAction::triggered, this, &main_window::on_add_folder);
 
-    auto* act_open_file = new QAction(QIcon(":/icons/image.svg"), "打开图片", this);
+    auto* act_open_file = new QAction(toolbar_icon(":/icons/image.svg"), "打开图片", this);
     act_open_file->setShortcut(QKeySequence("Ctrl+Shift+O"));
     addAction(act_open_file);
     connect(act_open_file,
@@ -114,7 +114,7 @@ void main_window::setup_ui()
                 }
             });
 
-    auto* act_open_recent = new QAction(QIcon(":/icons/history.svg"), "最近", this);
+    auto* act_open_recent = new QAction(toolbar_icon(":/icons/history.svg"), "最近", this);
     act_open_recent->setShortcut(QKeySequence("Ctrl+Alt+O"));
     addAction(act_open_recent);
     auto* act_shortcuts = new QAction("快捷键", this);
@@ -152,9 +152,6 @@ void main_window::setup_ui()
     toolbar->setObjectName("browse_toolbar");
     toolbar->setMovable(false);
     toolbar->setFloatable(false);
-    toolbar->setIconSize(QSize(18, 18));
-    toolbar->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    toolbar->setStyleSheet("QToolBar { background: transparent; border: 0; spacing: 4px; padding: 4px; } QToolButton { padding: 6px; }");
     auto* open_button = new QToolButton(toolbar);
     open_button->setToolButtonStyle(Qt::ToolButtonIconOnly);
     open_button->setDefaultAction(act_open);
@@ -174,8 +171,9 @@ void main_window::setup_ui()
     spacer->setAttribute(Qt::WA_TransparentForMouseEvents);
     toolbar->addWidget(spacer);
     auto* more_button = new QToolButton(toolbar);
+    more_button->setObjectName("more_menu");
     more_button->setText("更多");
-    more_button->setIcon(QIcon(":/icons/more.svg"));
+    more_button->setIcon(toolbar_icon(":/icons/more.svg"));
     more_button->setToolButtonStyle(Qt::ToolButtonIconOnly);
     more_button->setToolTip("更多");
     more_button->setAccessibleName("更多");
@@ -183,7 +181,7 @@ void main_window::setup_ui()
     auto* more_menu = new QMenu(more_button);
     more_button->setMenu(more_menu);
     toolbar->addWidget(more_button);
-    auto* sort_menu = more_menu->addMenu(QIcon(":/icons/sort.svg"), "排序");
+    auto* sort_menu = more_menu->addMenu(toolbar_icon(":/icons/sort.svg"), "排序");
 
     sort_group_ = new QActionGroup(this);
     sort_group_->setExclusive(true);
@@ -255,7 +253,7 @@ void main_window::setup_ui()
             });
 
     more_menu->addSeparator();
-    dark_theme_action_ = more_menu->addAction(QIcon(":/icons/theme.svg"), "深色主题");
+    dark_theme_action_ = more_menu->addAction(toolbar_icon(":/icons/theme.svg"), "深色主题");
     dark_theme_action_->setObjectName("dark_theme");
     dark_theme_action_->setCheckable(true);
     connect(dark_theme_action_, &QAction::toggled, this, &main_window::set_dark_theme);
@@ -263,6 +261,7 @@ void main_window::setup_ui()
 
     scene_ = new waterfall_scene(this);
     view_ = new waterfall_view(this);
+    view_->setFrameShape(QFrame::NoFrame);
     view_->setScene(scene_);
     auto* open_selected_action = new QAction("打开所选图片", view_);
     open_selected_action->setShortcuts({QKeySequence(Qt::Key_Return), QKeySequence(Qt::Key_Enter), QKeySequence(Qt::Key_Space)});
@@ -286,6 +285,7 @@ void main_window::setup_ui()
     setAcceptDrops(true);
 
     status_label_ = new QLabel("打开或拖入文件夹，开始浏览图片", this);
+    status_label_->setTextFormat(Qt::PlainText);
     statusBar()->addWidget(status_label_);
     scan_progress_ = new QProgressBar(this);
     scan_progress_->setObjectName("scan_progress");
@@ -295,6 +295,7 @@ void main_window::setup_ui()
     statusBar()->addPermanentWidget(scan_progress_);
 
     info_label_ = new QLabel(this);
+    info_label_->setTextFormat(Qt::PlainText);
     statusBar()->addPermanentWidget(info_label_);
     setMenuWidget(new window_title_bar(this, toolbar));
 }
@@ -515,7 +516,7 @@ void main_window::open_path(const QString& path, bool add_to_recent)
     is_scanning_ = true;
     scan_progress_->setRange(0, 0);
     scan_progress_->show();
-    status_label_->setText("正在查找图片…");
+    update_status_bar();
 
     if (add_to_recent)
     {
@@ -561,7 +562,7 @@ void main_window::show_recent_menu(const QPoint& global_pos)
         {
             label = QString("&%1 %2").arg(index + 1).arg(label);
         }
-        auto* action = menu.addAction(QIcon(info.isDir() ? ":/icons/folder.svg" : ":/icons/image.svg"), label);
+        auto* action = menu.addAction(toolbar_icon(info.isDir() ? ":/icons/folder.svg" : ":/icons/image.svg"), label);
         action->setData(path);
         if (index < 9)
         {
@@ -644,13 +645,17 @@ void main_window::on_scan_all_finished(int total, qint64 duration, int session_i
 
 void main_window::update_status_bar()
 {
+    const QString folder = QDir(current_root_path_).dirName();
+    const QString context = current_root_path_.isEmpty() ? QString() :
+        status_label_->fontMetrics().elidedText(folder, Qt::ElideMiddle, 160) + " · ";
+    status_label_->setToolTip(folder);
     if (is_scanning_)
     {
-        status_label_->setText(QString("正在读取图片信息… %1 张").arg(total_count_));
+        status_label_->setText(context + QString("正在读取图片信息… %1 张").arg(total_count_));
         return;
     }
-    status_label_->setText(total_count_ == 0 ? "此文件夹没有可读取的图片" :
-        QString("%1 张图片 · 扫描 %2 秒").arg(total_count_).arg(scan_duration_ / 1000.0, 0, 'f', 2));
+    status_label_->setText(context + (total_count_ == 0 ? "此文件夹没有可读取的图片" :
+        QString("%1 张图片 · 扫描 %2 秒").arg(total_count_).arg(scan_duration_ / 1000.0, 0, 'f', 2)));
 }
 
 void main_window::on_selection_changed()
@@ -795,24 +800,24 @@ void main_window::closeEvent(QCloseEvent* event)
 void main_window::set_dark_theme(bool enabled)
 {
     QPalette palette = QApplication::style()->standardPalette();
+    const QColor text(enabled ? "#e6ecf5" : "#28374a");
+    const QColor disabled(enabled ? "#68768a" : "#8491a3");
+    const QColor alternate(enabled ? "#282f3a" : "#e7ecf2");
+    palette.setColor(QPalette::Window, QColor(enabled ? "#191d24" : "#f4f6f8"));
+    palette.setColor(QPalette::Base, palette.color(QPalette::Window));
+    palette.setColor(QPalette::AlternateBase, alternate);
+    palette.setColor(QPalette::Text, text);
+    palette.setColor(QPalette::WindowText, text);
+    palette.setColor(QPalette::ButtonText, text);
+    palette.setColor(QPalette::Mid, QColor(enabled ? "#3c4758" : "#ccd5e0"));
+    palette.setColor(QPalette::Highlight, QColor(enabled ? "#65adff" : "#246fc4"));
+    palette.setColor(QPalette::HighlightedText, enabled ? QColor("#10151e") : QColor(Qt::white));
+    palette.setColor(QPalette::Disabled, QPalette::Text, disabled);
+    palette.setColor(QPalette::Disabled, QPalette::ButtonText, disabled);
     if (enabled)
     {
-        const QColor text("#eef1f6");
-        const QColor disabled("#778294");
-        const QColor alternate("#292e37");
-        palette.setColor(QPalette::Window, QColor("#17191e"));
-        palette.setColor(QPalette::Base, QColor("#20232a"));
-        palette.setColor(QPalette::AlternateBase, alternate);
-        palette.setColor(QPalette::Button, QColor("#262b33"));
-        palette.setColor(QPalette::Text, text);
-        palette.setColor(QPalette::WindowText, text);
-        palette.setColor(QPalette::ButtonText, text);
+        palette.setColor(QPalette::Button, QColor("#222831"));
         palette.setColor(QPalette::PlaceholderText, QColor("#a2adbf"));
-        palette.setColor(QPalette::Mid, QColor("#738097"));
-        palette.setColor(QPalette::Highlight, QColor("#4b94ee"));
-        palette.setColor(QPalette::HighlightedText, Qt::white);
-        palette.setColor(QPalette::Disabled, QPalette::Text, disabled);
-        palette.setColor(QPalette::Disabled, QPalette::ButtonText, disabled);
         palette.setColor(QPalette::ToolTipBase, alternate);
         palette.setColor(QPalette::ToolTipText, text);
     }

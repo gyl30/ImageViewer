@@ -38,6 +38,7 @@
 #include <QToolButton>
 #include <QMenu>
 #include <QToolBar>
+#include <QStatusBar>
 #include <QSettings>
 #include <QLibrary>
 #include <QCursor>
@@ -222,6 +223,12 @@ class correctness_test : public QObject
     void custom_header_data();
     void custom_header();
     void header_follows_theme();
+    void popup_indicators_data();
+    void popup_indicators();
+    void directory_context();
+    void toolbar_icons_follow_theme();
+    void card_focus_state();
+    void scene_focus_tracks_path();
     void recent_menu_is_flat();
     void sorting_is_in_more();
     void xcb_header_gestures();
@@ -2218,6 +2225,167 @@ void correctness_test::header_follows_theme()
                      QApplication::palette().color(QPalette::Window).rgb());
         }
     }
+}
+
+void correctness_test::popup_indicators_data()
+{
+    QTest::addColumn<bool>("preview");
+    QTest::addColumn<bool>("mode");
+    QTest::newRow("library-more") << false << false;
+    QTest::newRow("preview-more") << true << false;
+    QTest::newRow("preview-mode") << true << true;
+}
+
+void correctness_test::popup_indicators()
+{
+    QFETCH(bool, preview);
+    QFETCH(bool, mode);
+    std::unique_ptr<QMainWindow> window;
+    if (preview) { window = std::make_unique<image_viewer_window>(); }
+    else { window = std::make_unique<main_window>(); }
+    window->resize(640, 440);
+    window->show();
+    QTest::qWait(30);
+    QToolButton* button = nullptr;
+    for (auto* candidate : window->findChildren<QToolButton*>())
+    {
+        if ((mode && candidate->objectName() == "preview_mode") || (!mode && candidate->text() == "更多"))
+        {
+            button = candidate;
+        }
+    }
+    QVERIFY(button != nullptr && button->menu() != nullptr);
+    button->clearFocus();
+    button->setFixedSize(button->size());
+    const auto with_menu = button->grab().toImage();
+    QMenu* menu = button->menu();
+    button->setMenu(nullptr);
+    const auto without_menu = button->grab().toImage();
+    button->setMenu(menu);
+    const qreal dpr = button->devicePixelRatioF();
+    const QRect bottom(0, with_menu.height() - qRound(6 * dpr), with_menu.width(), qRound(5 * dpr));
+    QCOMPARE(with_menu.copy(bottom), without_menu.copy(bottom));
+    bool opened = false;
+    QTimer::singleShot(0, menu, [&]() { opened = menu->isVisible(); menu->close(); });
+    QTest::mouseClick(button, Qt::LeftButton);
+    QVERIFY(opened);
+}
+
+void correctness_test::directory_context()
+{
+    QTemporaryDir dir;
+    const QString folder = dir.filePath("城市与春天");
+    QVERIFY(QDir().mkdir(folder));
+    main_window window;
+    window.resize(640, 440);
+    window.show();
+    QVERIFY(drop_folder(window, folder));
+    QTRY_VERIFY([&]()
+    {
+        for (auto* label : window.statusBar()->findChildren<QLabel*>())
+        {
+            if (label->text().contains("城市与春天") && label->text().contains("没有")) { return true; }
+        }
+        return false;
+    }());
+    QVERIFY(window.findChildren<QLineEdit*>().isEmpty());
+    QCOMPARE(window.width(), 640);
+    const QString long_folder = dir.filePath("长目录" + QString(40, QChar(0x56fe)));
+    QVERIFY(QDir().mkdir(long_folder));
+    const QString name = QString(60, QChar(0x56fe)) + ".png";
+    const QString path = QDir(long_folder).filePath(name);
+    QImage image(80, 60, QImage::Format_RGB32);
+    image.fill(Qt::blue);
+    QVERIFY(image.save(path));
+    QVERIFY(drop_folder(window, long_folder));
+    auto* scene = window.findChild<waterfall_scene*>();
+    QTRY_COMPARE(scene->last_layout_index_, size_t(1));
+    QVERIFY(scene->focus_path(path));
+    QTest::qWait(50);
+    QCOMPARE(window.width(), 640);
+}
+
+void correctness_test::toolbar_icons_follow_theme()
+{
+    main_window window;
+    auto* toolbar = window.findChild<QToolBar*>("browse_toolbar");
+    auto* theme = window.findChild<QAction*>("dark_theme");
+    QVERIFY(toolbar != nullptr && theme != nullptr);
+    const QIcon icon = toolbar->actions().at(1)->icon();
+    for (bool dark : {false, true, false})
+    {
+        theme->setChecked(dark);
+        for (qreal dpr : {1.0, 1.5, 2.0})
+        {
+            for (auto mode : {QIcon::Normal, QIcon::Disabled})
+            {
+                const QImage image = icon.pixmap(QSize(20, 20), dpr, mode).toImage();
+                QCOMPARE(image.size(), QSize(qRound(20 * dpr), qRound(20 * dpr)));
+                QColor solid;
+                for (int y = 0; y < image.height() && !solid.isValid(); ++y)
+                {
+                    for (int x = 0; x < image.width(); ++x)
+                    {
+                        if (image.pixelColor(x, y).alpha() == 255) { solid = image.pixelColor(x, y); break; }
+                    }
+                }
+                QVERIFY(solid.isValid());
+                const auto group = mode == QIcon::Disabled ? QPalette::Disabled : QPalette::Active;
+                QCOMPARE(solid.rgb(), QApplication::palette().color(group, QPalette::ButtonText).rgb());
+            }
+        }
+    }
+}
+
+void correctness_test::card_focus_state()
+{
+    QGraphicsScene scene;
+    scene.setSceneRect(0, 0, 400, 1200);
+    auto* item = new waterfall_item();
+    scene.addItem(item);
+    layout_model model{QSize(200, 150), QRectF(0, 0, 200, 150)};
+    item->bind_model(model, 0, "first.png", 200, 1);
+    QVERIFY(item->flags().testFlag(QGraphicsItem::ItemIsFocusable));
+    QGraphicsView view(&scene);
+    view.resize(400, 300);
+    view.show();
+    view.activateWindow();
+    QVERIFY(QTest::qWaitForWindowActive(&view));
+    view.setFocus();
+    scene.setFocus();
+    item->setSelected(true);
+    item->setFocus();
+    QTRY_VERIFY(item->hasFocus());
+    view.verticalScrollBar()->setValue(0);
+    QTest::keyClick(&view, Qt::Key_Down);
+    QVERIFY(view.verticalScrollBar()->value() > 0);
+    QTest::keyClick(&view, Qt::Key_Up);
+    QCOMPARE(view.verticalScrollBar()->value(), 0);
+    const QImage focused = view.viewport()->grab().toImage();
+    item->clearFocus();
+    const QImage selected = view.viewport()->grab().toImage();
+    QVERIFY(focused != selected);
+    item->setFocus();
+    item->reset();
+    item->bind_model(model, 1, "second.png", 200, 2);
+    QVERIFY(!item->hasFocus());
+}
+
+void correctness_test::scene_focus_tracks_path()
+{
+    waterfall_scene scene;
+    waterfall_view view;
+    view.setScene(&scene);
+    view.resize(440, 400);
+    view.show();
+    scene.add_images({{"first.png", QSize(200, 150)}, {"second.png", QSize(200, 150)}});
+    scene.layout_models(440);
+    QTRY_COMPARE(scene.last_layout_index_, size_t(2));
+    QVERIFY(scene.focus_path("first.png"));
+    scene.active_items_[0]->setFocus();
+    QCOMPARE(scene.focusItem(), static_cast<QGraphicsItem*>(scene.active_items_[0]));
+    QVERIFY(scene.focus_path("second.png"));
+    QCOMPARE(scene.focusItem(), static_cast<QGraphicsItem*>(scene.active_items_[1]));
 }
 
 void correctness_test::recent_menu_is_flat()
