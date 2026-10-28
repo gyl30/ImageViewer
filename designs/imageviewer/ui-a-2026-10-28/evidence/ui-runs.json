@@ -1,0 +1,138 @@
+[
+  {
+    "version": "before",
+    "repeat": 0,
+    "warmup": true,
+    "exit_code": 0,
+    "binary_sha256": "cb4fea7db4867b5e55ea889b2fb00551adf018fbb926b4ce8d74203eb4fdb32d",
+    "command": [
+      "xvfb-run",
+      "-a",
+      "-s",
+      "-screen 0 2560x1600x24",
+      "/tmp/iv-ui-a-20261028/imageviewer_ui_review",
+      "--ui",
+      "/tmp/iv-ui-review-20261028/示例图库",
+      "/tmp/iv-ui-a-20261028/ui-runs/before-0"
+    ]
+  },
+  {
+    "version": "after",
+    "repeat": 0,
+    "warmup": true,
+    "exit_code": 0,
+    "binary_sha256": "54e267778e7669c69e5bbc099304d0dc014f2269584dccaca1de1926994b6c10",
+    "command": [
+      "xvfb-run",
+      "-a",
+      "-s",
+      "-screen 0 2560x1600x24",
+      "/tmp/iv-ui-a-20261028/after/imageviewer_ui_review",
+      "--ui",
+      "/tmp/iv-ui-review-20261028/示例图库",
+      "/tmp/iv-ui-a-20261028/ui-runs/after-0"
+    ]
+  },
+  {
+    "version": "after",
+    "repeat": 1,
+    "warmup": false,
+    "exit_code": 0,
+    "binary_sha256": "54e267778e7669c69e5bbc099304d0dc014f2269584dccaca1de1926994b6c10",
+    "command": [
+      "xvfb-run",
+      "-a",
+      "-s",
+      "-screen 0 2560x1600x24",
+      "/tmp/iv-ui-a-20261028/after/imageviewer_ui_review",
+      "--ui",
+      "/tmp/iv-ui-review-20261028/示例图库",
+      "/tmp/iv-ui-a-20261028/ui-runs/after-1"
+    ]
+  },
+  {
+    "version": "before",
+    "repeat": 1,
+    "warmup": false,
+    "exit_code": 0,
+    "binary_sha256": "cb4fea7db4867b5e55ea889b2fb00551adf018fbb926b4ce8d74203eb4fdb32d",
+    "command": [
+      "xvfb-run",
+      "-a",
+      "-s",
+      "-screen 0 2560x1600x24",
+      "/tmp/iv-ui-a-20261028/imageviewer_ui_review",
+      "--ui",
+      "/tmp/iv-ui-review-20261028/示例图库",
+      "/tmp/iv-ui-a-20261028/ui-runs/before-1"
+    ]
+  },
+  {
+    "version": "before",
+    "repeat": 2,
+    "warmup": false,
+    "exit_code": 0,
+    "binary_sha256": "cb4fea7db4867b5e55ea889b2fb00551adf018fbb926b4ce8d74203eb4fdb32d",
+    "command": [
+      "xvfb-run",
+      "-a",
+      "-s",
+      "-screen 0 2560x1600x24",
+      "/tmp/iv-ui-a-20261028/imageviewer_ui_review",
+      "--ui",
+      "/tmp/iv-ui-review-20261028/示例图库",
+      "/tmp/iv-ui-a-20261028/ui-runs/before-2"
+    ]
+  },
+  {
+    "version": "after",
+    "repeat": 2,
+    "warmup": false,
+    "exit_code": 0,
+    "binary_sha256": "54e267778e7669c69e5bbc099304d0dc014f2269584dccaca1de1926994b6c10",
+    "command": [
+      "xvfb-run",
+      "-a",
+      "-s",
+      "-screen 0 2560x1600x24",
+      "/tmp/iv-ui-a-20261028/after/imageviewer_ui_review",
+      "--ui",
+      "/tmp/iv-ui-review-20261028/示例图库",
+      "/tmp/iv-ui-a-20261028/ui-runs/after-2"
+    ]
+  },
+  {
+    "version": "after",
+    "repeat": 3,
+    "warmup": false,
+    "exit_code": 0,
+    "binary_sha256": "54e267778e7669c69e5bbc099304d0dc014f2269584dccaca1de1926994b6c10",
+    "command": [
+      "xvfb-run",
+      "-a",
+      "-s",
+      "-screen 0 2560x1600x24",
+      "/tmp/iv-ui-a-20261028/after/imageviewer_ui_review",
+      "--ui",
+      "/tmp/iv-ui-review-20261028/示例图库",
+      "/tmp/iv-ui-a-20261028/ui-runs/after-3"
+    ]
+  },
+  {
+    "version": "before",
+    "repeat": 3,
+    "warmup": false,
+    "exit_code": 0,
+    "binary_sha256": "cb4fea7db4867b5e55ea889b2fb00551adf018fbb926b4ce8d74203eb4fdb32d",
+    "command": [
+      "xvfb-run",
+      "-a",
+      "-s",
+      "-screen 0 2560x1600x24",
+      "/tmp/iv-ui-a-20261028/imageviewer_ui_review",
+      "--ui",
+      "/tmp/iv-ui-review-20261028/示例图库",
+      "/tmp/iv-ui-a-20261028/ui-runs/before-3"
+    ]
+  }
+]

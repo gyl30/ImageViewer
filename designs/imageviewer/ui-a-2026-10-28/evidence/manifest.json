@@ -1,0 +1,283 @@
+{
+  "recorded_at": "2026-10-28T13:18:41.987280+00:00",
+  "baseline": "b98713e78437f5067e821b6093dc2ffe71b9abdf",
+  "working_tree_changes_committed": false,
+  "pushed": false,
+  "selected_scheme": "A",
+  "scheme_b_in_production": false,
+  "source_sha256": {
+    "main_window.cc": "ddf34ed5274ca52f8b0e47eb4e03f465a176ee9c0d2cd6ed1b4c8f2c974d5f66",
+    "main_window.h": "96aa00b399afb8af67853be9709c73df678638706d046bc3f9b2b8b29eb8fe3b",
+    "image_viewer_window.cc": "c603d3342d69e9bd99a905b11c72d7200c3bdcb7ea6e125bc487f23ca907e723",
+    "image_viewer_window.h": "ace7aa7981bd585e4394e1884025be0dd8a81d8abe282bbac1f4397765fbea3e",
+    "waterfall_item.cc": "d1c8f146a282cc0e3376e6aaf9fe43998d36584801201de630118980f9ff178b",
+    "waterfall_item.h": "6c340f45aa7aa23b3673c502b5a614ca3a83e203958618c01364121ed9b23100",
+    "window_title_bar.cc": "c24d0e6ba705097beb77ed4463b844a8c38e22c73aac38f61ab95589a8b2c979",
+    "window_title_bar.h": "b2594813b012afdab80f552f317d5653f3b69b9fef5d227ddd87ad54e6fe7d83",
+    "waterfall_scene.cc": "50da5b6955163f5fb02c7e186286bf358eeafed15b2f5f7834940b80209a8905",
+    "waterfall_scene.h": "39c0a7357114eaf0f4fbfad29adc8f2e9cb972a9be508fbbe1742bd0d59a960f",
+    "file_scanner.cc": "be774fa6710dcc129c89525ae99bd7dfa75c180ae7f7fc82bf3cb7fb15ff6c92",
+    "file_scanner.h": "6f941db363f4b86844c8f33b72e89296387040d6cffd929ac397621e93862712",
+    "image_loader.cc": "e8690c32ebd5dc30b1dbe19514f0ce575c321a474cf5aad0516a4a6d346bb511",
+    "image_loader.h": "c6accb751f1751968063ab74b18720a41602e6c4060c8a1b6147d3fcca1da8bb",
+    "waterfall_view.cc": "bfff6abac128c21ab9c27b101487ee43d37cbdeecd0b63901b82c4520aec8b51",
+    "waterfall_view.h": "6e80db7531a916f9789025734ccd320dddefc349186bff628c6c041c2553fe43",
+    "common_types.h": "89f4981d2e129fea70a51713fc5660a055cb27ae7875d97d6002a70333b2662b",
+    "CMakeLists.txt": "14a35b63b146e484772f82e55f050f0c980be312d8b13048beaa319eb9ebc2d4",
+    "tests/correctness_test.cc": "9f056c4534e8fb171245e0f4dab44e2e0a6aa8e22c6a0f231975b8bede9f381f",
+    "tools/performance_probe.cc": "b42d3dcbb297e4fe86cbb2cfc700cdc654c4a4b1a355ac613013a32362b6a9b3",
+    "tools/benchmark.py": "f85ae61580a9c8d1472512f526e2b688166e259b2b8cf43f469edb8b8358f731"
+  },
+  "binaries_sha256": {
+    "build/ImageViewer": "f797380a7420b126a8891e0ed6394a49a5812d645f52f70a4883d8b8f7f437c8",
+    "/tmp/iv-header-build/imageviewer_tests": "7e09365d3aaed4cc0939209d3f9ba323ee34dabc73b8399a12aced44aeab0b93",
+    "/tmp/iv-ergonomics-qt64/build/imageviewer_tests": "d0f7e18e5b443a569462228d611eece7c1ccd456803ade5cad00fc2c38b478ca",
+    "/tmp/iv-header-build/imageviewer_benchmark": "54e267778e7669c69e5bbc099304d0dc014f2269584dccaca1de1926994b6c10",
+    "/tmp/iv-ui-a-20261028/imageviewer_ui_review": "cb4fea7db4867b5e55ea889b2fb00551adf018fbb926b4ce8d74203eb4fdb32d"
+  },
+  "pre_a": {
+    "description": "b98713e布局加已验证的滚轮及标题栏公共修复；历史候选程序使用baseline选项，不执行A/B装饰",
+    "binary_matches_previous_manifest": true,
+    "generated_probe_sha256": "288b26af9d781790cff830d3995a1d51be52ccadf1da72a3c2950539009fbc01",
+    "source_snapshot": "evidence/before-source.json",
+    "patch_from_baseline": "evidence/pre-a-source.patch",
+    "historical_source_generator": "../ui-review-2026-10-28/run_candidates.py"
+  },
+  "tests": {
+    "qt69": {
+      "passed": 118,
+      "failed": 0,
+      "skipped": 1,
+      "log": "evidence/qt69-full.txt"
+    },
+    "qt64": {
+      "passed": 118,
+      "failed": 0,
+      "skipped": 1,
+      "log": "evidence/qt64-full.txt"
+    },
+    "gui_100": {
+      "passed": 41,
+      "failed": 0,
+      "skipped": 0,
+      "log": "evidence/gui-1.txt"
+    },
+    "gui_150": {
+      "passed": 41,
+      "failed": 0,
+      "skipped": 0,
+      "log": "evidence/gui-1.5.txt"
+    },
+    "gui_200": {
+      "passed": 41,
+      "failed": 0,
+      "skipped": 0,
+      "log": "evidence/gui-2.txt"
+    }
+  },
+  "qa_build": {
+    "qt": "6.9.3",
+    "compiler": "GCC11",
+    "type": "Release",
+    "full_suite_platform": "offscreen",
+    "gui_display": "Xvfb + xcb",
+    "gui_scale_factors": [
+      1,
+      1.5,
+      2
+    ]
+  },
+  "minimum_qt_build": {
+    "qt": "6.4.2",
+    "compiler": "GCC12",
+    "type": "Release",
+    "distribution": "Debian12",
+    "platform": "offscreen",
+    "builder": "sha256:acffb6f76dc1a78a96e95770851133996f4f1e64560ddf05f11306cf3fb53b94"
+  },
+  "user_build": {
+    "path": "build/ImageViewer",
+    "qt": "6.9.3",
+    "compiler": "GCC16.2",
+    "type": "Release",
+    "contains_only_selected_ui": true
+  },
+  "dataset": {
+    "existing_root": "/tmp/iv-dataset",
+    "scales": [
+      10000,
+      100000,
+      300000
+    ],
+    "ui_alias": "/tmp/iv-ui-review-20261028/示例图库",
+    "ui_images": 10000,
+    "originals_modified": false,
+    "gallery_copied": false
+  },
+  "ui_protocol": {
+    "warmup_runs_per_version": 1,
+    "measured_runs_per_version": 3,
+    "order": "before/after交替",
+    "render_frames_per_phase": 60,
+    "idle_sample_ms_per_phase": 500,
+    "rss_before_render_buffer": true,
+    "peak_includes_screenshot_and_probe": true,
+    "render_is_whole_window_not_scroll_fps": true,
+    "not_isolated_from_other_desktop_processes": true,
+    "raw_runs": "evidence/ui-runs.json",
+    "aggregate": "evidence/measurements.json"
+  },
+  "scale_protocol": {
+    "runner": "tools/benchmark.py",
+    "scenario": "profile",
+    "display": "Xvfb + xcb, 100%, 1280x800",
+    "cache_states": [
+      "cold application thumbnail cache",
+      "warm application thumbnail cache"
+    ],
+    "kernel_page_cache_dropped": false,
+    "not_device_cold_disk": true,
+    "runs": {
+      "scale-before-10000-cold.json": {
+        "sha256": "ffe4bcc9fdb6c2595c216be0d691c05483e41e50c1a3a9d70df7f66c6f46add5",
+        "executable_sha256": "cb4fea7db4867b5e55ea889b2fb00551adf018fbb926b4ce8d74203eb4fdb32d",
+        "probe_sha256": "288b26af9d781790cff830d3995a1d51be52ccadf1da72a3c2950539009fbc01"
+      },
+      "scale-before-10000-warm.json": {
+        "sha256": "12fd9141c20fe8ec3f9658aa11afa3156270348bef0083eff88ef37970f7bc92",
+        "executable_sha256": "cb4fea7db4867b5e55ea889b2fb00551adf018fbb926b4ce8d74203eb4fdb32d",
+        "probe_sha256": "288b26af9d781790cff830d3995a1d51be52ccadf1da72a3c2950539009fbc01"
+      },
+      "scale-before-100000-cold.json": {
+        "sha256": "311d1fe5ac2118d1361307eb0ace29bfc41e34d5e797a48a52fb48464288f0ea",
+        "executable_sha256": "cb4fea7db4867b5e55ea889b2fb00551adf018fbb926b4ce8d74203eb4fdb32d",
+        "probe_sha256": "288b26af9d781790cff830d3995a1d51be52ccadf1da72a3c2950539009fbc01"
+      },
+      "scale-before-100000-warm.json": {
+        "sha256": "4d01726618863092978a802c77d7c0169282891183d37dc535f97c53f8fcbdb1",
+        "executable_sha256": "cb4fea7db4867b5e55ea889b2fb00551adf018fbb926b4ce8d74203eb4fdb32d",
+        "probe_sha256": "288b26af9d781790cff830d3995a1d51be52ccadf1da72a3c2950539009fbc01"
+      },
+      "scale-before-300000-cold.json": {
+        "sha256": "cc3e2bfad4ddaa641bbd71ccd2856175711eb6283a950b732fa375e77f029da1",
+        "executable_sha256": "cb4fea7db4867b5e55ea889b2fb00551adf018fbb926b4ce8d74203eb4fdb32d",
+        "probe_sha256": "288b26af9d781790cff830d3995a1d51be52ccadf1da72a3c2950539009fbc01"
+      },
+      "scale-before-300000-warm.json": {
+        "sha256": "3d2c6628e0fe214503e3e3d97daa5a2796b1e27ab6dc778c6150320811fe2e15",
+        "executable_sha256": "cb4fea7db4867b5e55ea889b2fb00551adf018fbb926b4ce8d74203eb4fdb32d",
+        "probe_sha256": "288b26af9d781790cff830d3995a1d51be52ccadf1da72a3c2950539009fbc01"
+      },
+      "scale-after-10000-cold.json": {
+        "sha256": "7b12bbe4611ac78765cfedafe231f9102349effddab208f4d10ef29d11cdd544",
+        "executable_sha256": "54e267778e7669c69e5bbc099304d0dc014f2269584dccaca1de1926994b6c10",
+        "probe_sha256": "b42d3dcbb297e4fe86cbb2cfc700cdc654c4a4b1a355ac613013a32362b6a9b3"
+      },
+      "scale-after-10000-warm.json": {
+        "sha256": "33ca4c036613fde0f68d5d72d756e4236a3dbccd31662f594c70f840e3022072",
+        "executable_sha256": "54e267778e7669c69e5bbc099304d0dc014f2269584dccaca1de1926994b6c10",
+        "probe_sha256": "b42d3dcbb297e4fe86cbb2cfc700cdc654c4a4b1a355ac613013a32362b6a9b3"
+      },
+      "scale-after-100000-cold.json": {
+        "sha256": "ec184d4179804c48bbb67420055afc86db4ecbc6caf3642153c501719752f103",
+        "executable_sha256": "54e267778e7669c69e5bbc099304d0dc014f2269584dccaca1de1926994b6c10",
+        "probe_sha256": "b42d3dcbb297e4fe86cbb2cfc700cdc654c4a4b1a355ac613013a32362b6a9b3"
+      },
+      "scale-after-100000-warm.json": {
+        "sha256": "2f8e7401c9ad8f72a17110e82b5238af8b14f50c16e53a9807779e74a53e4766",
+        "executable_sha256": "54e267778e7669c69e5bbc099304d0dc014f2269584dccaca1de1926994b6c10",
+        "probe_sha256": "b42d3dcbb297e4fe86cbb2cfc700cdc654c4a4b1a355ac613013a32362b6a9b3"
+      },
+      "scale-after-300000-cold.json": {
+        "sha256": "cf6701eeaa21a7f1fe3f8c9b224759669c05d47ccc0deb1d10bda2c001c45e54",
+        "executable_sha256": "54e267778e7669c69e5bbc099304d0dc014f2269584dccaca1de1926994b6c10",
+        "probe_sha256": "b42d3dcbb297e4fe86cbb2cfc700cdc654c4a4b1a355ac613013a32362b6a9b3"
+      },
+      "scale-after-300000-warm.json": {
+        "sha256": "200bdba2e8fa0625b61ab7487ed923468f3d94ca179ac505324aa2d61e3b893f",
+        "executable_sha256": "54e267778e7669c69e5bbc099304d0dc014f2269584dccaca1de1926994b6c10",
+        "probe_sha256": "b42d3dcbb297e4fe86cbb2cfc700cdc654c4a4b1a355ac613013a32362b6a9b3"
+      }
+    }
+  },
+  "screenshots": {
+    "screens/before-dark.png": {
+      "sha256": "afb7a81b81c368d751aadf831d11bdae503935af343a375d9cb2cf29d130c97a",
+      "width": 1100,
+      "height": 760
+    },
+    "screens/dark.png": {
+      "sha256": "93052c2869c6d4b7657ec2f62087ab1af91531a7a3c3d4b4d4810b20b93647b1",
+      "width": 1100,
+      "height": 760
+    },
+    "screens/empty.png": {
+      "sha256": "bdbd5465ee9d87e28e8e207795da4fcd7ac9ebedd5a5d46318d5571c936b3980",
+      "width": 1100,
+      "height": 760
+    },
+    "screens/light.png": {
+      "sha256": "3be69c548677184d3b1eebbd6951a9dd88d27d3f8fcc8b2adccdd3b5283b4db3",
+      "width": 1100,
+      "height": 760
+    },
+    "screens/narrow.png": {
+      "sha256": "51b1c7d37f0aefbf9aba8ea79a4cebefecf88b2f2746eecd93a8c904fdb57f7f",
+      "width": 640,
+      "height": 480
+    },
+    "screens/preview.png": {
+      "sha256": "17bfaadcc25e209c9f8ba166447151207a0f6394a31b307a86674df1aff8a2cc",
+      "width": 1200,
+      "height": 800
+    },
+    "screens/preview_narrow.png": {
+      "sha256": "ff915392d6cb916cc8dc864b513e9fa66c2d6884377cbf7c426085aeebdf4ecb",
+      "width": 640,
+      "height": 480
+    }
+  },
+  "constraints": {
+    "thumbnail_budget_bytes": 67108864,
+    "queue_limit": 64,
+    "protected_paths_unchanged": [
+      "image_loader.cc",
+      "image_loader.h",
+      "file_scanner.cc",
+      "file_scanner.h",
+      "waterfall_view.cc",
+      "waterfall_view.h",
+      "common_types.h",
+      "CMakeLists.txt",
+      "packaging",
+      "cmake",
+      ".github"
+    ],
+    "new_full_image_cache": false,
+    "new_neighbor_preloading": false,
+    "new_persistent_refresh_timer": false,
+    "new_thumbnail_strip": false
+  },
+  "background_constraint": {
+    "all_gui_after_user_request_in_virtual_display": true,
+    "user_desktop_mouse_used_after_request": false,
+    "browser_verification_headless": true
+  },
+  "not_verified": [
+    "实体跨屏",
+    "动态硬件DPI",
+    "物理窗口管理器拖动",
+    "真实触控板手感",
+    "原生Wayland",
+    "本次UI的新增长时间稳定性"
+  ],
+  "release_packages_rebuilt": false,
+  "license_configuration_changed": false,
+  "browser_verification": {
+    "report": "evidence/browser.json",
+    "sha256": "342ab5ee072d4035a66e217fa2993ad8f0fe81c2b3a6363d87eb697bfc1d2f95",
+    "headless": true,
+    "checks": 18,
+    "horizontal_overflow": false
+  }
+}

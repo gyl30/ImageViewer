@@ -1,0 +1,256 @@
+{
+  "dataset_images": 10000,
+  "display": "独立Xvfb，xcb，100%",
+  "baseline_includes_common_fixes": true,
+  "render_frames_per_phase": 60,
+  "rss_sampled_before_render_surface": true,
+  "peak_includes_benchmark_and_screenshots": true,
+  "summary": [
+    {
+      "variant": "baseline",
+      "label": "基线布局＋公共修正",
+      "runs": 3,
+      "peak_rss_mib_median": 145.99609375,
+      "peak_rss_mib_range": [
+        145.92578125,
+        149.6875
+      ],
+      "idle_cpu_percent_median": 0.17560000000000855,
+      "active_items_max": 22,
+      "phases": {
+        "light": {
+          "render_median_ms": 1.817908,
+          "render_range_ms": [
+            1.791251,
+            1.872519
+          ],
+          "rss_mib_median": 126.96875,
+          "pss_mib_median": 77.7861328125,
+          "widgets": 26,
+          "filmstrip_cells": 0
+        },
+        "dark": {
+          "render_median_ms": 1.574767,
+          "render_range_ms": [
+            1.353794,
+            1.893098
+          ],
+          "rss_mib_median": 130.9609375,
+          "pss_mib_median": 80.994140625,
+          "widgets": 26,
+          "filmstrip_cells": 0
+        },
+        "narrow": {
+          "render_median_ms": 0.425535,
+          "render_range_ms": [
+            0.357747,
+            0.482993
+          ],
+          "rss_mib_median": 132.69921875,
+          "pss_mib_median": 83.7421875,
+          "widgets": 26,
+          "filmstrip_cells": 0
+        },
+        "preview": {
+          "render_median_ms": 0.329387,
+          "render_range_ms": [
+            0.326799,
+            0.330554
+          ],
+          "rss_mib_median": 141.4140625,
+          "pss_mib_median": 89.5673828125,
+          "widgets": 33,
+          "filmstrip_cells": 0
+        },
+        "preview_narrow": {
+          "render_median_ms": 0.187239,
+          "render_range_ms": [
+            0.186037,
+            0.188677
+          ],
+          "rss_mib_median": 140.08203125,
+          "pss_mib_median": 88.8232421875,
+          "widgets": 33,
+          "filmstrip_cells": 0
+        },
+        "empty": {
+          "render_median_ms": 0.233403,
+          "render_range_ms": [
+            0.230227,
+            0.233804
+          ],
+          "rss_mib_median": 138.59375,
+          "pss_mib_median": 87.2734375,
+          "widgets": 60,
+          "filmstrip_cells": 0
+        }
+      },
+      "dark_render_median_ms": 1.574767,
+      "preview_render_median_ms": 0.329387
+    },
+    {
+      "variant": "a",
+      "label": "A · 极简图库",
+      "runs": 3,
+      "peak_rss_mib_median": 148.94921875,
+      "peak_rss_mib_range": [
+        146.41796875,
+        149.921875
+      ],
+      "idle_cpu_percent_median": 0.194399999999996,
+      "active_items_max": 22,
+      "phases": {
+        "light": {
+          "render_median_ms": 1.721262,
+          "render_range_ms": [
+            1.668112,
+            1.790202
+          ],
+          "rss_mib_median": 127.21484375,
+          "pss_mib_median": 77.9765625,
+          "widgets": 27,
+          "filmstrip_cells": 0
+        },
+        "dark": {
+          "render_median_ms": 1.665507,
+          "render_range_ms": [
+            1.643044,
+            1.675232
+          ],
+          "rss_mib_median": 137.3359375,
+          "pss_mib_median": 87.33984375,
+          "widgets": 27,
+          "filmstrip_cells": 0
+        },
+        "narrow": {
+          "render_median_ms": 0.567541,
+          "render_range_ms": [
+            0.402279,
+            0.694967
+          ],
+          "rss_mib_median": 136.0390625,
+          "pss_mib_median": 87.052734375,
+          "widgets": 27,
+          "filmstrip_cells": 0
+        },
+        "preview": {
+          "render_median_ms": 0.353623,
+          "render_range_ms": [
+            0.349074,
+            0.373324
+          ],
+          "rss_mib_median": 144.7734375,
+          "pss_mib_median": 92.8974609375,
+          "widgets": 33,
+          "filmstrip_cells": 0
+        },
+        "preview_narrow": {
+          "render_median_ms": 0.215744,
+          "render_range_ms": [
+            0.215134,
+            0.217772
+          ],
+          "rss_mib_median": 143.44140625,
+          "pss_mib_median": 92.1533203125,
+          "widgets": 33,
+          "filmstrip_cells": 0
+        },
+        "empty": {
+          "render_median_ms": 0.250857,
+          "render_range_ms": [
+            0.248967,
+            0.284954
+          ],
+          "rss_mib_median": 138.78515625,
+          "pss_mib_median": 87.4365234375,
+          "widgets": 61,
+          "filmstrip_cells": 0
+        }
+      },
+      "dark_render_median_ms": 1.665507,
+      "preview_render_median_ms": 0.353623
+    },
+    {
+      "variant": "b",
+      "label": "B · 增强导航",
+      "runs": 3,
+      "peak_rss_mib_median": 146.3828125,
+      "peak_rss_mib_range": [
+        146.34765625,
+        146.56640625
+      ],
+      "idle_cpu_percent_median": 0.15359999999999446,
+      "active_items_max": 22,
+      "phases": {
+        "light": {
+          "render_median_ms": 1.640122,
+          "render_range_ms": [
+            1.403691,
+            1.703741
+          ],
+          "rss_mib_median": 127.265625,
+          "pss_mib_median": 77.96875,
+          "widgets": 27,
+          "filmstrip_cells": 0
+        },
+        "dark": {
+          "render_median_ms": 1.663501,
+          "render_range_ms": [
+            1.410544,
+            1.78451
+          ],
+          "rss_mib_median": 131.16015625,
+          "pss_mib_median": 81.162109375,
+          "widgets": 27,
+          "filmstrip_cells": 0
+        },
+        "narrow": {
+          "render_median_ms": 0.589575,
+          "render_range_ms": [
+            0.553429,
+            0.652367
+          ],
+          "rss_mib_median": 132.96875,
+          "pss_mib_median": 83.9228515625,
+          "widgets": 27,
+          "filmstrip_cells": 0
+        },
+        "preview": {
+          "render_median_ms": 0.416169,
+          "render_range_ms": [
+            0.414321,
+            0.431595
+          ],
+          "rss_mib_median": 141.765625,
+          "pss_mib_median": 89.7705078125,
+          "widgets": 43,
+          "filmstrip_cells": 7
+        },
+        "preview_narrow": {
+          "render_median_ms": 0.269639,
+          "render_range_ms": [
+            0.2587,
+            0.511426
+          ],
+          "rss_mib_median": 141.73046875,
+          "pss_mib_median": 90.1611328125,
+          "widgets": 43,
+          "filmstrip_cells": 7
+        },
+        "empty": {
+          "render_median_ms": 0.254408,
+          "render_range_ms": [
+            0.23966,
+            0.259742
+          ],
+          "rss_mib_median": 139.30078125,
+          "pss_mib_median": 87.6787109375,
+          "widgets": 71,
+          "filmstrip_cells": 7
+        }
+      },
+      "dark_render_median_ms": 1.663501,
+      "preview_render_median_ms": 0.416169
+    }
+  ]
+}

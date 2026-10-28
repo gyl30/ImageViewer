@@ -1,0 +1,196 @@
+{
+  "binary_sha256": "cb4fea7db4867b5e55ea889b2fb00551adf018fbb926b4ce8d74203eb4fdb32d",
+  "variants_share_wheel_fix": true,
+  "runs": [
+    {
+      "variant": "baseline",
+      "repeat": 0,
+      "exit_code": 0,
+      "warmup": true,
+      "wall_seconds": 6.844855887989979,
+      "command": [
+        "xvfb-run",
+        "-a",
+        "-s",
+        "-screen 0 2560x1600x24",
+        "/tmp/iv-ui-review-20261028/build/imageviewer_ui_review",
+        "--ui",
+        "/tmp/iv-ui-review-20261028/示例图库",
+        "/tmp/iv-ui-review-20261028/final-runs/baseline-0"
+      ],
+      "log_bytes": 318,
+      "metrics": "/tmp/iv-ui-review-20261028/final-runs/baseline-0/review-metrics.json"
+    },
+    {
+      "variant": "baseline",
+      "repeat": 1,
+      "exit_code": 0,
+      "warmup": false,
+      "wall_seconds": 6.688180390978232,
+      "command": [
+        "xvfb-run",
+        "-a",
+        "-s",
+        "-screen 0 2560x1600x24",
+        "/tmp/iv-ui-review-20261028/build/imageviewer_ui_review",
+        "--ui",
+        "/tmp/iv-ui-review-20261028/示例图库",
+        "/tmp/iv-ui-review-20261028/final-runs/baseline-1"
+      ],
+      "log_bytes": 318,
+      "metrics": "/tmp/iv-ui-review-20261028/final-runs/baseline-1/review-metrics.json"
+    },
+    {
+      "variant": "a",
+      "repeat": 1,
+      "exit_code": 0,
+      "warmup": false,
+      "wall_seconds": 6.74437183898408,
+      "command": [
+        "xvfb-run",
+        "-a",
+        "-s",
+        "-screen 0 2560x1600x24",
+        "/tmp/iv-ui-review-20261028/build/imageviewer_ui_review",
+        "--ui",
+        "/tmp/iv-ui-review-20261028/示例图库",
+        "/tmp/iv-ui-review-20261028/final-runs/a-1"
+      ],
+      "log_bytes": 318,
+      "metrics": "/tmp/iv-ui-review-20261028/final-runs/a-1/review-metrics.json"
+    },
+    {
+      "variant": "b",
+      "repeat": 1,
+      "exit_code": 0,
+      "warmup": false,
+      "wall_seconds": 6.688940023013856,
+      "command": [
+        "xvfb-run",
+        "-a",
+        "-s",
+        "-screen 0 2560x1600x24",
+        "/tmp/iv-ui-review-20261028/build/imageviewer_ui_review",
+        "--ui",
+        "/tmp/iv-ui-review-20261028/示例图库",
+        "/tmp/iv-ui-review-20261028/final-runs/b-1"
+      ],
+      "log_bytes": 318,
+      "metrics": "/tmp/iv-ui-review-20261028/final-runs/b-1/review-metrics.json"
+    },
+    {
+      "variant": "a",
+      "repeat": 2,
+      "exit_code": 0,
+      "warmup": false,
+      "wall_seconds": 6.737872998986859,
+      "command": [
+        "xvfb-run",
+        "-a",
+        "-s",
+        "-screen 0 2560x1600x24",
+        "/tmp/iv-ui-review-20261028/build/imageviewer_ui_review",
+        "--ui",
+        "/tmp/iv-ui-review-20261028/示例图库",
+        "/tmp/iv-ui-review-20261028/final-runs/a-2"
+      ],
+      "log_bytes": 318,
+      "metrics": "/tmp/iv-ui-review-20261028/final-runs/a-2/review-metrics.json"
+    },
+    {
+      "variant": "b",
+      "repeat": 2,
+      "exit_code": 0,
+      "warmup": false,
+      "wall_seconds": 6.729471422964707,
+      "command": [
+        "xvfb-run",
+        "-a",
+        "-s",
+        "-screen 0 2560x1600x24",
+        "/tmp/iv-ui-review-20261028/build/imageviewer_ui_review",
+        "--ui",
+        "/tmp/iv-ui-review-20261028/示例图库",
+        "/tmp/iv-ui-review-20261028/final-runs/b-2"
+      ],
+      "log_bytes": 318,
+      "metrics": "/tmp/iv-ui-review-20261028/final-runs/b-2/review-metrics.json"
+    },
+    {
+      "variant": "baseline",
+      "repeat": 2,
+      "exit_code": 0,
+      "warmup": false,
+      "wall_seconds": 6.717088248988148,
+      "command": [
+        "xvfb-run",
+        "-a",
+        "-s",
+        "-screen 0 2560x1600x24",
+        "/tmp/iv-ui-review-20261028/build/imageviewer_ui_review",
+        "--ui",
+        "/tmp/iv-ui-review-20261028/示例图库",
+        "/tmp/iv-ui-review-20261028/final-runs/baseline-2"
+      ],
+      "log_bytes": 318,
+      "metrics": "/tmp/iv-ui-review-20261028/final-runs/baseline-2/review-metrics.json"
+    },
+    {
+      "variant": "b",
+      "repeat": 3,
+      "exit_code": 0,
+      "warmup": false,
+      "wall_seconds": 6.762000621994957,
+      "command": [
+        "xvfb-run",
+        "-a",
+        "-s",
+        "-screen 0 2560x1600x24",
+        "/tmp/iv-ui-review-20261028/build/imageviewer_ui_review",
+        "--ui",
+        "/tmp/iv-ui-review-20261028/示例图库",
+        "/tmp/iv-ui-review-20261028/final-runs/b-3"
+      ],
+      "log_bytes": 318,
+      "metrics": "/tmp/iv-ui-review-20261028/final-runs/b-3/review-metrics.json"
+    },
+    {
+      "variant": "baseline",
+      "repeat": 3,
+      "exit_code": 0,
+      "warmup": false,
+      "wall_seconds": 6.7427939920453355,
+      "command": [
+        "xvfb-run",
+        "-a",
+        "-s",
+        "-screen 0 2560x1600x24",
+        "/tmp/iv-ui-review-20261028/build/imageviewer_ui_review",
+        "--ui",
+        "/tmp/iv-ui-review-20261028/示例图库",
+        "/tmp/iv-ui-review-20261028/final-runs/baseline-3"
+      ],
+      "log_bytes": 318,
+      "metrics": "/tmp/iv-ui-review-20261028/final-runs/baseline-3/review-metrics.json"
+    },
+    {
+      "variant": "a",
+      "repeat": 3,
+      "exit_code": 0,
+      "warmup": false,
+      "wall_seconds": 6.756241409981158,
+      "command": [
+        "xvfb-run",
+        "-a",
+        "-s",
+        "-screen 0 2560x1600x24",
+        "/tmp/iv-ui-review-20261028/build/imageviewer_ui_review",
+        "--ui",
+        "/tmp/iv-ui-review-20261028/示例图库",
+        "/tmp/iv-ui-review-20261028/final-runs/a-3"
+      ],
+      "log_bytes": 318,
+      "metrics": "/tmp/iv-ui-review-20261028/final-runs/a-3/review-metrics.json"
+    }
+  ]
+}

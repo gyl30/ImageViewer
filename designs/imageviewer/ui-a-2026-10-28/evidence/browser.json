@@ -1,0 +1,191 @@
+{
+  "browser": "system Google Chrome 153.0.8010.52",
+  "headless": true,
+  "url": "http://127.0.0.1:4311/imageviewer/ui-a-2026-10-28/index.html",
+  "served_html_matches_local": true,
+  "checks": [
+    {
+      "viewport_width": 1440,
+      "theme": "light",
+      "state": "light",
+      "image_size": [
+        1100,
+        760
+      ],
+      "horizontal_overflow": false
+    },
+    {
+      "viewport_width": 1440,
+      "theme": "light",
+      "state": "dark",
+      "image_size": [
+        1100,
+        760
+      ],
+      "horizontal_overflow": false
+    },
+    {
+      "viewport_width": 1440,
+      "theme": "light",
+      "state": "preview",
+      "image_size": [
+        1200,
+        800
+      ],
+      "horizontal_overflow": false
+    },
+    {
+      "viewport_width": 1440,
+      "theme": "light",
+      "state": "empty",
+      "image_size": [
+        1100,
+        760
+      ],
+      "horizontal_overflow": false
+    },
+    {
+      "viewport_width": 1440,
+      "theme": "light",
+      "state": "narrow",
+      "image_size": [
+        640,
+        480
+      ],
+      "horizontal_overflow": false
+    },
+    {
+      "viewport_width": 1440,
+      "theme": "light",
+      "state": "preview_narrow",
+      "image_size": [
+        640,
+        480
+      ],
+      "horizontal_overflow": false
+    },
+    {
+      "viewport_width": 1280,
+      "theme": "dark",
+      "state": "light",
+      "image_size": [
+        1100,
+        760
+      ],
+      "horizontal_overflow": false
+    },
+    {
+      "viewport_width": 1280,
+      "theme": "dark",
+      "state": "dark",
+      "image_size": [
+        1100,
+        760
+      ],
+      "horizontal_overflow": false
+    },
+    {
+      "viewport_width": 1280,
+      "theme": "dark",
+      "state": "preview",
+      "image_size": [
+        1200,
+        800
+      ],
+      "horizontal_overflow": false
+    },
+    {
+      "viewport_width": 1280,
+      "theme": "dark",
+      "state": "empty",
+      "image_size": [
+        1100,
+        760
+      ],
+      "horizontal_overflow": false
+    },
+    {
+      "viewport_width": 1280,
+      "theme": "dark",
+      "state": "narrow",
+      "image_size": [
+        640,
+        480
+      ],
+      "horizontal_overflow": false
+    },
+    {
+      "viewport_width": 1280,
+      "theme": "dark",
+      "state": "preview_narrow",
+      "image_size": [
+        640,
+        480
+      ],
+      "horizontal_overflow": false
+    },
+    {
+      "viewport_width": 640,
+      "theme": "light",
+      "state": "light",
+      "image_size": [
+        1100,
+        760
+      ],
+      "horizontal_overflow": false
+    },
+    {
+      "viewport_width": 640,
+      "theme": "light",
+      "state": "dark",
+      "image_size": [
+        1100,
+        760
+      ],
+      "horizontal_overflow": false
+    },
+    {
+      "viewport_width": 640,
+      "theme": "light",
+      "state": "preview",
+      "image_size": [
+        1200,
+        800
+      ],
+      "horizontal_overflow": false
+    },
+    {
+      "viewport_width": 640,
+      "theme": "light",
+      "state": "empty",
+      "image_size": [
+        1100,
+        760
+      ],
+      "horizontal_overflow": false
+    },
+    {
+      "viewport_width": 640,
+      "theme": "light",
+      "state": "narrow",
+      "image_size": [
+        640,
+        480
+      ],
+      "horizontal_overflow": false
+    },
+    {
+      "viewport_width": 640,
+      "theme": "light",
+      "state": "preview_narrow",
+      "image_size": [
+        640,
+        480
+      ],
+      "horizontal_overflow": false
+    }
+  ],
+  "footer_links_http_200": true,
+  "page_errors": [],
+  "qt_visual_evidence": "screens/*.png来自真实Qt窗口；本页是截图查看器"
+}

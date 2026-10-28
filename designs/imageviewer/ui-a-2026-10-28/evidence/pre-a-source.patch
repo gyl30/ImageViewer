@@ -1,0 +1,161 @@
+diff --git a/image_viewer_window.cc b/image_viewer_window.cc
+index 8b2c1d3..739dfe5 100644
+--- a/image_viewer_window.cc
++++ b/image_viewer_window.cc
+@@ -155,7 +155,7 @@ void image_viewer_window::setup_ui()
+     toolbar->setFloatable(false);
+     toolbar->setIconSize(QSize(18, 18));
+     toolbar->setToolButtonStyle(Qt::ToolButtonIconOnly);
+-    toolbar->setStyleSheet("QToolBar { background: palette(window); border: 0; spacing: 2px; padding: 4px; } QToolButton { padding: 6px; }");
++    toolbar->setStyleSheet("QToolBar { background: transparent; border: 0; spacing: 2px; padding: 4px; } QToolButton { padding: 6px; }");
+     auto* back_action = toolbar->addAction(QIcon(":/icons/grid.svg"), "图库");
+     back_action->setToolTip("返回图库（Esc）");
+     connect(back_action, &QAction::triggered, this, &QWidget::close);
+@@ -834,10 +834,11 @@ bool image_viewer_window::eventFilter(QObject* watched, QEvent* event)
+     if (watched == view_->viewport() && event->type() == QEvent::Wheel)
+     {
+         auto* wheel_event = static_cast<QWheelEvent*>(event);
++        const QPoint delta = wheel_event->angleDelta().isNull() ? wheel_event->pixelDelta() : wheel_event->angleDelta();
+ 
+-        if ((wheel_event->modifiers() & Qt::ControlModifier) != 0U)
++        if ((wheel_event->modifiers() & Qt::ControlModifier) != 0U && delta.y() != 0)
+         {
+-            if (wheel_event->angleDelta().y() > 0)
++            if (delta.y() > 0)
+             {
+                 zoom_in();
+             }
+diff --git a/main_window.cc b/main_window.cc
+index 35a4565..b8a0b27 100644
+--- a/main_window.cc
++++ b/main_window.cc
+@@ -154,7 +154,7 @@ void main_window::setup_ui()
+     toolbar->setFloatable(false);
+     toolbar->setIconSize(QSize(18, 18));
+     toolbar->setToolButtonStyle(Qt::ToolButtonIconOnly);
+-    toolbar->setStyleSheet("QToolBar { background: palette(window); border: 0; spacing: 4px; padding: 4px; } QToolButton { padding: 6px; }");
++    toolbar->setStyleSheet("QToolBar { background: transparent; border: 0; spacing: 4px; padding: 4px; } QToolButton { padding: 6px; }");
+     auto* open_button = new QToolButton(toolbar);
+     open_button->setToolButtonStyle(Qt::ToolButtonIconOnly);
+     open_button->setDefaultAction(act_open);
+diff --git a/tests/correctness_test.cc b/tests/correctness_test.cc
+index 3890de4..74b19e9 100644
+--- a/tests/correctness_test.cc
++++ b/tests/correctness_test.cc
+@@ -215,10 +215,13 @@ class correctness_test : public QObject
+     void open_selected_with_keyboard_data();
+     void open_selected_with_keyboard();
+     void viewer_mouse_navigation();
++    void viewer_wheel_zoom_data();
++    void viewer_wheel_zoom();
+     void compact_sort_controls();
+     void compact_preview_controls();
+     void custom_header_data();
+     void custom_header();
++    void header_follows_theme();
+     void recent_menu_is_flat();
+     void sorting_is_in_more();
+     void xcb_header_gestures();
+@@ -2002,6 +2005,57 @@ void correctness_test::open_selected_with_keyboard()
+     QCOMPARE(viewer->current_image_path(), path);
+ }
+ 
++void correctness_test::viewer_wheel_zoom_data()
++{
++    QTest::addColumn<QPoint>("angle");
++    QTest::addColumn<QPoint>("pixels");
++    QTest::addColumn<int>("phase");
++    QTest::addColumn<bool>("control");
++    QTest::addColumn<double>("factor");
++    QTest::newRow("angle-up") << QPoint(0, 120) << QPoint() << int(Qt::NoScrollPhase) << true << 1.2;
++    QTest::newRow("angle-down") << QPoint(0, -120) << QPoint() << int(Qt::NoScrollPhase) << true << 1.0 / 1.2;
++    QTest::newRow("horizontal-left") << QPoint(-120, 0) << QPoint() << int(Qt::NoScrollPhase) << true << 1.0;
++    QTest::newRow("horizontal-right") << QPoint(120, 0) << QPoint() << int(Qt::NoScrollPhase) << true << 1.0;
++    QTest::newRow("zero-begin") << QPoint() << QPoint() << int(Qt::ScrollBegin) << true << 1.0;
++    QTest::newRow("zero-end") << QPoint() << QPoint() << int(Qt::ScrollEnd) << true << 1.0;
++    QTest::newRow("zero-update") << QPoint() << QPoint() << int(Qt::ScrollUpdate) << true << 1.0;
++    QTest::newRow("pixel-up") << QPoint() << QPoint(0, 12) << int(Qt::ScrollUpdate) << true << 1.2;
++    QTest::newRow("pixel-down") << QPoint() << QPoint(0, -12) << int(Qt::ScrollUpdate) << true << 1.0 / 1.2;
++    QTest::newRow("pixel-horizontal") << QPoint() << QPoint(12, 0) << int(Qt::ScrollUpdate) << true << 1.0;
++    QTest::newRow("pan-angle") << QPoint(0, 120) << QPoint() << int(Qt::NoScrollPhase) << false << 1.0;
++    QTest::newRow("pan-pixel") << QPoint() << QPoint(0, 12) << int(Qt::ScrollUpdate) << false << 1.0;
++    QTest::newRow("angle-priority") << QPoint(0, 120) << QPoint(0, -12) << int(Qt::ScrollUpdate) << true << 1.2;
++    QTest::newRow("diagonal") << QPoint(120, 120) << QPoint() << int(Qt::ScrollUpdate) << true << 1.2;
++}
++
++void correctness_test::viewer_wheel_zoom()
++{
++    QFETCH(QPoint, angle);
++    QFETCH(QPoint, pixels);
++    QFETCH(int, phase);
++    QFETCH(bool, control);
++    QFETCH(double, factor);
++    QTemporaryDir dir;
++    QImage image(80, 60, QImage::Format_RGB32);
++    image.fill(Qt::cyan);
++    const QString path = dir.filePath("image.png");
++    QVERIFY(image.save(path));
++    image_viewer_window viewer;
++    viewer.resize(700, 520);
++    viewer.show();
++    viewer.set_image_path(path);
++    QTRY_VERIFY(viewer.windowTitle().startsWith("Viewer -"));
++    auto* view = viewer.findChild<QGraphicsView*>();
++    const qreal before = view->transform().m11();
++    const QPointF center = view->viewport()->rect().center();
++    QWheelEvent wheel(center, view->viewport()->mapToGlobal(center.toPoint()), pixels, angle,
++                      Qt::NoButton, control ? Qt::ControlModifier : Qt::NoModifier,
++                      static_cast<Qt::ScrollPhase>(phase), false);
++    QApplication::sendEvent(view->viewport(), &wheel);
++    QCOMPARE(view->transform().m11() / before, factor);
++    QCOMPARE(viewer.current_image_path(), path);
++}
++
+ void correctness_test::viewer_mouse_navigation()
+ {
+     image_viewer_window viewer;
+@@ -2141,6 +2195,31 @@ void correctness_test::custom_header()
+     QVERIFY(!window->isVisible());
+ }
+ 
++void correctness_test::header_follows_theme()
++{
++    main_window library;
++    image_viewer_window preview(&library);
++    library.resize(640, 440);
++    preview.resize(640, 440);
++    library.show();
++    preview.show();
++    auto* theme = library.findChild<QAction*>("dark_theme");
++    QVERIFY(theme != nullptr);
++    for (bool dark : {false, true, false})
++    {
++        theme->setChecked(dark);
++        QCoreApplication::processEvents();
++        for (QMainWindow* window : {static_cast<QMainWindow*>(&library), static_cast<QMainWindow*>(&preview)})
++        {
++            auto* header = window->findChild<QWidget*>("window_title_bar");
++            QVERIFY(header != nullptr);
++            const QImage image = header->grab().toImage();
++            QCOMPARE(image.pixelColor(image.width() / 2, qRound(2 * header->devicePixelRatioF())).rgb(),
++                     QApplication::palette().color(QPalette::Window).rgb());
++        }
++    }
++}
++
+ void correctness_test::recent_menu_is_flat()
+ {
+     QTemporaryDir dir;
+diff --git a/window_title_bar.cc b/window_title_bar.cc
+index 8eb9361..d57b36c 100644
+--- a/window_title_bar.cc
++++ b/window_title_bar.cc
+@@ -20,7 +20,7 @@ window_title_bar::window_title_bar(QMainWindow* owner, QToolBar* toolbar)
+     setObjectName("window_title_bar");
+     owner->setWindowFlag(Qt::FramelessWindowHint);
+     owner->setMouseTracking(true);
+-    setStyleSheet("QFrame#window_title_bar { background: palette(window); border-bottom: 1px solid palette(mid); }");
++    setAutoFillBackground(true);
+     auto* layout = new QHBoxLayout(this);
+     layout->setContentsMargins(0, 0, 4, 0);
+     layout->setSpacing(0);

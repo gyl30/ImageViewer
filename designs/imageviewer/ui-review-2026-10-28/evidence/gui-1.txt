@@ -1,0 +1,41 @@
+********* Start testing of correctness_test *********
+Config: Using QtTest library 6.9.3, Qt 6.9.3 (x86_64-little_endian-lp64 shared (dynamic) release build; by GCC 10.3.1 20210422 (Red Hat 10.3.1-1)), ubuntu 22.04
+PASS   : correctness_test::initTestCase()
+QWARN  : correctness_test::viewer_wheel_zoom(angle-up) qt.accessibility.atspi: Error in contacting registry: "org.freedesktop.DBus.Error.Disconnected" "Not connected to D-Bus server"
+PASS   : correctness_test::viewer_wheel_zoom(angle-up)
+PASS   : correctness_test::viewer_wheel_zoom(angle-down)
+PASS   : correctness_test::viewer_wheel_zoom(horizontal-left)
+PASS   : correctness_test::viewer_wheel_zoom(horizontal-right)
+PASS   : correctness_test::viewer_wheel_zoom(zero-begin)
+PASS   : correctness_test::viewer_wheel_zoom(zero-end)
+PASS   : correctness_test::viewer_wheel_zoom(zero-update)
+PASS   : correctness_test::viewer_wheel_zoom(pixel-up)
+PASS   : correctness_test::viewer_wheel_zoom(pixel-down)
+PASS   : correctness_test::viewer_wheel_zoom(pixel-horizontal)
+PASS   : correctness_test::viewer_wheel_zoom(pan-angle)
+PASS   : correctness_test::viewer_wheel_zoom(pan-pixel)
+PASS   : correctness_test::viewer_wheel_zoom(angle-priority)
+PASS   : correctness_test::viewer_wheel_zoom(diagonal)
+PASS   : correctness_test::header_follows_theme()
+PASS   : correctness_test::viewer_keeps_window_geometry()
+PASS   : correctness_test::viewer_rotation_shortcut()
+PASS   : correctness_test::open_selected_with_keyboard(return)
+PASS   : correctness_test::open_selected_with_keyboard(enter)
+PASS   : correctness_test::open_selected_with_keyboard(space)
+PASS   : correctness_test::viewer_mouse_navigation()
+PASS   : correctness_test::compact_sort_controls()
+QINFO  : correctness_test::compact_preview_controls() Preview toolbar QSize(455, 43) window QSize(640, 440) DPR 1
+PASS   : correctness_test::compact_preview_controls()
+PASS   : correctness_test::custom_header(library)
+PASS   : correctness_test::custom_header(preview)
+PASS   : correctness_test::recent_menu_is_flat()
+PASS   : correctness_test::sorting_is_in_more()
+QINFO  : correctness_test::desktop_interactions() Desktop "xcb" DPR 1
+PASS   : correctness_test::desktop_interactions()
+PASS   : correctness_test::theme_keeps_scene_items()
+PASS   : correctness_test::dpr_refresh_keeps_image()
+PASS   : correctness_test::dpr_reuses_existing_pixels()
+PASS   : correctness_test::relayout_keeps_anchor()
+PASS   : correctness_test::cleanupTestCase()
+Totals: 34 passed, 0 failed, 0 skipped, 0 blacklisted, 4589ms
+********* Finished testing of correctness_test *********

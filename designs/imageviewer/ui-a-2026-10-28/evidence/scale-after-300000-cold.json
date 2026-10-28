@@ -1,0 +1,704 @@
+{
+  "clear_disk_at_end": false,
+  "dataset": "/tmp/iv-dataset/300000",
+  "dpr": 1,
+  "explicit_render_ms_0_frames": 0,
+  "first_batch_ms": 991,
+  "first_thumbnail_ms": 1001,
+  "first_visible_ms": 1001,
+  "idle_cpu_ms_500ms": 0.6479999999999961,
+  "latency": {
+    "callback_to_paint": {
+      "count": 88,
+      "max_ms": 1.63929,
+      "mean_ms": 0.24682970454545455,
+      "over_1000ms": 0,
+      "p50_ms_upper": 1,
+      "p95_ms_upper": 1,
+      "p99_ms_upper": 2
+    },
+    "gui_timer_delay": {
+      "count": 254,
+      "max_ms": 20.454157,
+      "mean_ms": 2.477847094488189,
+      "over_1000ms": 0,
+      "p50_ms_upper": 5,
+      "p95_ms_upper": 6,
+      "p99_ms_upper": 6
+    },
+    "pending_paint": 0,
+    "pending_tasks": 0,
+    "queue": {
+      "count": 88,
+      "max_ms": 39.823073,
+      "mean_ms": 10.082078693181819,
+      "over_1000ms": 0,
+      "p50_ms_upper": 4,
+      "p95_ms_upper": 35,
+      "p99_ms_upper": 40
+    },
+    "submit_to_callback": {
+      "count": 88,
+      "max_ms": 42.011042,
+      "mean_ms": 17.25050131818182,
+      "over_1000ms": 0,
+      "p50_ms_upper": 11,
+      "p95_ms_upper": 42,
+      "p99_ms_upper": 43
+    },
+    "submit_to_paint": {
+      "count": 88,
+      "max_ms": 42.108711,
+      "mean_ms": 17.497331022727273,
+      "over_1000ms": 0,
+      "p50_ms_upper": 11,
+      "p95_ms_upper": 43,
+      "p99_ms_upper": 43
+    },
+    "worker_to_callback": {
+      "count": 88,
+      "max_ms": 14.072971,
+      "mean_ms": 7.168422625,
+      "over_1000ms": 0,
+      "p50_ms_upper": 8,
+      "p95_ms_upper": 11,
+      "p99_ms_upper": 15
+    }
+  },
+  "loader_tid": 1225864,
+  "max_active_items": 29,
+  "max_queue_sampled": 20,
+  "pid": 1225854,
+  "platform": "xcb",
+  "qt": "6.9.3",
+  "samples": [
+    {
+      "active_items": 0,
+      "active_pixmap_logical_bytes": 0,
+      "cache_budget_bytes": 67108864,
+      "cache_logical_bytes": 0,
+      "cancelled_write_bytes": 32768,
+      "cpu_ms": 146.091,
+      "decoded_count": 0,
+      "disk_cache_bytes": 0,
+      "disk_cache_files": 0,
+      "elapsed_ms": 0,
+      "failed_results": 0,
+      "file_descriptors": 16,
+      "latency": {
+        "callback_to_paint": {
+          "count": 0,
+          "max_ms": 0,
+          "mean_ms": 0,
+          "over_1000ms": 0,
+          "p50_ms_upper": 0,
+          "p95_ms_upper": 0,
+          "p99_ms_upper": 0
+        },
+        "gui_timer_delay": {
+          "count": 0,
+          "max_ms": 0,
+          "mean_ms": 0,
+          "over_1000ms": 0,
+          "p50_ms_upper": 0,
+          "p95_ms_upper": 0,
+          "p99_ms_upper": 0
+        },
+        "pending_paint": 0,
+        "pending_tasks": 0,
+        "queue": {
+          "count": 0,
+          "max_ms": 0,
+          "mean_ms": 0,
+          "over_1000ms": 0,
+          "p50_ms_upper": 0,
+          "p95_ms_upper": 0,
+          "p99_ms_upper": 0
+        },
+        "submit_to_callback": {
+          "count": 0,
+          "max_ms": 0,
+          "mean_ms": 0,
+          "over_1000ms": 0,
+          "p50_ms_upper": 0,
+          "p95_ms_upper": 0,
+          "p99_ms_upper": 0
+        },
+        "submit_to_paint": {
+          "count": 0,
+          "max_ms": 0,
+          "mean_ms": 0,
+          "over_1000ms": 0,
+          "p50_ms_upper": 0,
+          "p95_ms_upper": 0,
+          "p99_ms_upper": 0
+        },
+        "worker_to_callback": {
+          "count": 0,
+          "max_ms": 0,
+          "mean_ms": 0,
+          "over_1000ms": 0,
+          "p50_ms_upper": 0,
+          "p95_ms_upper": 0,
+          "p99_ms_upper": 0
+        }
+      },
+      "loader_cpu_ms": 0,
+      "major_faults": 0,
+      "metadata_capacity_bytes": 0,
+      "metadata_path_bytes": 0,
+      "minor_faults": 10943,
+      "model_count": 0,
+      "peak_rss_kib": 121044,
+      "phase": "empty",
+      "pool_items": 20,
+      "prefetch_results": 0,
+      "pss_kib": 73495,
+      "queue_tasks": 0,
+      "rchar": 666866,
+      "read_bytes": 0,
+      "rss_kib": 121044,
+      "rusage_peak_rss_kib": 119204,
+      "scan_cpu_ms": 0,
+      "source_counts": {
+        "decoded": 0,
+        "disk": 0,
+        "failed": 0,
+        "memory": 0
+      },
+      "stale_results": 0,
+      "syscr": 739,
+      "syscw": 372,
+      "threads": 7,
+      "timestamp_utc": "2026-10-28T12:53:52.472Z",
+      "total_items": 20,
+      "viewer_visible": false,
+      "visible_results": 0,
+      "wchar": 307970,
+      "write_bytes": 344064
+    },
+    {
+      "active_items": 20,
+      "active_pixmap_logical_bytes": 3786120,
+      "cache_budget_bytes": 67108864,
+      "cache_logical_bytes": 3786120,
+      "cancelled_write_bytes": 32768,
+      "cpu_ms": 2942.306,
+      "decoded_count": 20,
+      "disk_cache_bytes": 352870,
+      "disk_cache_files": 20,
+      "elapsed_ms": 2765,
+      "failed_results": 0,
+      "file_descriptors": 25,
+      "latency": {
+        "callback_to_paint": {
+          "count": 20,
+          "max_ms": 0.834435,
+          "mean_ms": 0.42836255,
+          "over_1000ms": 0,
+          "p50_ms_upper": 1,
+          "p95_ms_upper": 1,
+          "p99_ms_upper": 1
+        },
+        "gui_timer_delay": {
+          "count": 171,
+          "max_ms": 5.79888,
+          "mean_ms": 2.4283256549707604,
+          "over_1000ms": 0,
+          "p50_ms_upper": 5,
+          "p95_ms_upper": 5,
+          "p99_ms_upper": 6
+        },
+        "pending_paint": 0,
+        "pending_tasks": 0,
+        "queue": {
+          "count": 20,
+          "max_ms": 39.823073,
+          "mean_ms": 24.82820315,
+          "over_1000ms": 0,
+          "p50_ms_upper": 26,
+          "p95_ms_upper": 39,
+          "p99_ms_upper": 40
+        },
+        "submit_to_callback": {
+          "count": 20,
+          "max_ms": 42.011042,
+          "mean_ms": 30.14723065,
+          "over_1000ms": 0,
+          "p50_ms_upper": 27,
+          "p95_ms_upper": 42,
+          "p99_ms_upper": 43
+        },
+        "submit_to_paint": {
+          "count": 20,
+          "max_ms": 42.108711,
+          "mean_ms": 30.5755932,
+          "over_1000ms": 0,
+          "p50_ms_upper": 28,
+          "p95_ms_upper": 43,
+          "p99_ms_upper": 43
+        },
+        "worker_to_callback": {
+          "count": 20,
+          "max_ms": 10.405235,
+          "mean_ms": 5.3190275,
+          "over_1000ms": 0,
+          "p50_ms_upper": 5,
+          "p95_ms_upper": 11,
+          "p99_ms_upper": 11
+        }
+      },
+      "loader_cpu_ms": 33.524282,
+      "major_faults": 0,
+      "metadata_capacity_bytes": 20400000,
+      "metadata_path_bytes": 27000000,
+      "minor_faults": 34256,
+      "model_count": 300000,
+      "peak_rss_kib": 198036,
+      "phase": "ready",
+      "pool_items": 0,
+      "prefetch_results": 0,
+      "pss_kib": 138631,
+      "queue_tasks": 0,
+      "rchar": 1231162485,
+      "read_bytes": 0,
+      "rss_kib": 187392,
+      "rusage_peak_rss_kib": 198036,
+      "scan_cpu_ms": 2541.092008,
+      "source_counts": {
+        "decoded": 20,
+        "disk": 0,
+        "failed": 0,
+        "memory": 0
+      },
+      "stale_results": 0,
+      "syscr": 601692,
+      "syscw": 4626,
+      "threads": 16,
+      "timestamp_utc": "2026-10-28T12:53:55.740Z",
+      "total_items": 20,
+      "viewer_visible": false,
+      "visible_results": 20,
+      "wchar": 740960,
+      "write_bytes": 729088
+    },
+    {
+      "active_items": 24,
+      "active_pixmap_logical_bytes": 4616248,
+      "cache_budget_bytes": 67108864,
+      "cache_logical_bytes": 11788632,
+      "cancelled_write_bytes": 32768,
+      "cpu_ms": 3029.401,
+      "decoded_count": 63,
+      "disk_cache_bytes": 1103562,
+      "disk_cache_files": 63,
+      "elapsed_ms": 3275,
+      "failed_results": 0,
+      "file_descriptors": 25,
+      "latency": {
+        "callback_to_paint": {
+          "count": 63,
+          "max_ms": 1.63929,
+          "mean_ms": 0.28761966666666666,
+          "over_1000ms": 0,
+          "p50_ms_upper": 1,
+          "p95_ms_upper": 2,
+          "p99_ms_upper": 2
+        },
+        "gui_timer_delay": {
+          "count": 203,
+          "max_ms": 5.79888,
+          "mean_ms": 2.40945763546798,
+          "over_1000ms": 0,
+          "p50_ms_upper": 4,
+          "p95_ms_upper": 5,
+          "p99_ms_upper": 6
+        },
+        "pending_paint": 0,
+        "pending_tasks": 0,
+        "queue": {
+          "count": 63,
+          "max_ms": 39.823073,
+          "mean_ms": 9.118676777777777,
+          "over_1000ms": 0,
+          "p50_ms_upper": 3,
+          "p95_ms_upper": 36,
+          "p99_ms_upper": 40
+        },
+        "submit_to_callback": {
+          "count": 63,
+          "max_ms": 42.011042,
+          "mean_ms": 16.88051403174603,
+          "over_1000ms": 0,
+          "p50_ms_upper": 11,
+          "p95_ms_upper": 42,
+          "p99_ms_upper": 43
+        },
+        "submit_to_paint": {
+          "count": 63,
+          "max_ms": 42.108711,
+          "mean_ms": 17.1681336984127,
+          "over_1000ms": 0,
+          "p50_ms_upper": 11,
+          "p95_ms_upper": 43,
+          "p99_ms_upper": 43
+        },
+        "worker_to_callback": {
+          "count": 63,
+          "max_ms": 14.072971,
+          "mean_ms": 7.761837253968254,
+          "over_1000ms": 0,
+          "p50_ms_upper": 9,
+          "p95_ms_upper": 11,
+          "p99_ms_upper": 15
+        }
+      },
+      "loader_cpu_ms": 99.136169,
+      "major_faults": 0,
+      "metadata_capacity_bytes": 20400000,
+      "metadata_path_bytes": 27000000,
+      "minor_faults": 36272,
+      "model_count": 300000,
+      "peak_rss_kib": 198036,
+      "phase": "scroll_1",
+      "pool_items": 4,
+      "prefetch_results": 0,
+      "pss_kib": 146699,
+      "queue_tasks": 0,
+      "rchar": 1233561192,
+      "read_bytes": 0,
+      "rss_kib": 195460,
+      "rusage_peak_rss_kib": 198036,
+      "scan_cpu_ms": 2541.092008,
+      "source_counts": {
+        "decoded": 63,
+        "disk": 0,
+        "failed": 0,
+        "memory": 0
+      },
+      "stale_results": 0,
+      "syscr": 602099,
+      "syscw": 5021,
+      "threads": 16,
+      "timestamp_utc": "2026-10-28T12:53:56.250Z",
+      "total_items": 28,
+      "viewer_visible": false,
+      "visible_results": 63,
+      "wchar": 1506700,
+      "write_bytes": 1560576
+    },
+    {
+      "active_items": 20,
+      "active_pixmap_logical_bytes": 3689000,
+      "cache_budget_bytes": 67108864,
+      "cache_logical_bytes": 16166056,
+      "cancelled_write_bytes": 32768,
+      "cpu_ms": 3111.565,
+      "decoded_count": 88,
+      "disk_cache_bytes": 1501024,
+      "disk_cache_files": 88,
+      "elapsed_ms": 4082,
+      "failed_results": 0,
+      "file_descriptors": 25,
+      "latency": {
+        "callback_to_paint": {
+          "count": 88,
+          "max_ms": 1.63929,
+          "mean_ms": 0.24682970454545455,
+          "over_1000ms": 0,
+          "p50_ms_upper": 1,
+          "p95_ms_upper": 1,
+          "p99_ms_upper": 2
+        },
+        "gui_timer_delay": {
+          "count": 253,
+          "max_ms": 9.934987,
+          "mean_ms": 2.406794486166008,
+          "over_1000ms": 0,
+          "p50_ms_upper": 5,
+          "p95_ms_upper": 5,
+          "p99_ms_upper": 6
+        },
+        "pending_paint": 0,
+        "pending_tasks": 0,
+        "queue": {
+          "count": 88,
+          "max_ms": 39.823073,
+          "mean_ms": 10.082078693181819,
+          "over_1000ms": 0,
+          "p50_ms_upper": 4,
+          "p95_ms_upper": 35,
+          "p99_ms_upper": 40
+        },
+        "submit_to_callback": {
+          "count": 88,
+          "max_ms": 42.011042,
+          "mean_ms": 17.25050131818182,
+          "over_1000ms": 0,
+          "p50_ms_upper": 11,
+          "p95_ms_upper": 42,
+          "p99_ms_upper": 43
+        },
+        "submit_to_paint": {
+          "count": 88,
+          "max_ms": 42.108711,
+          "mean_ms": 17.497331022727273,
+          "over_1000ms": 0,
+          "p50_ms_upper": 11,
+          "p95_ms_upper": 43,
+          "p99_ms_upper": 43
+        },
+        "worker_to_callback": {
+          "count": 88,
+          "max_ms": 14.072971,
+          "mean_ms": 7.168422625,
+          "over_1000ms": 0,
+          "p50_ms_upper": 8,
+          "p95_ms_upper": 11,
+          "p99_ms_upper": 15
+        }
+      },
+      "loader_cpu_ms": 138.192695,
+      "major_faults": 0,
+      "metadata_capacity_bytes": 20400000,
+      "metadata_path_bytes": 27000000,
+      "minor_faults": 41683,
+      "model_count": 300000,
+      "peak_rss_kib": 213100,
+      "phase": "resized",
+      "pool_items": 21,
+      "prefetch_results": 0,
+      "pss_kib": 164151,
+      "queue_tasks": 0,
+      "rchar": 1234897649,
+      "read_bytes": 0,
+      "rss_kib": 213100,
+      "rusage_peak_rss_kib": 209768,
+      "scan_cpu_ms": 2541.092008,
+      "source_counts": {
+        "decoded": 88,
+        "disk": 0,
+        "failed": 0,
+        "memory": 0
+      },
+      "stale_results": 0,
+      "syscr": 602344,
+      "syscw": 5294,
+      "threads": 16,
+      "timestamp_utc": "2026-10-28T12:53:57.056Z",
+      "total_items": 41,
+      "viewer_visible": false,
+      "visible_results": 88,
+      "wchar": 1917330,
+      "write_bytes": 2002944
+    },
+    {
+      "active_items": 0,
+      "active_pixmap_logical_bytes": 0,
+      "cache_budget_bytes": 67108864,
+      "cache_logical_bytes": 0,
+      "cancelled_write_bytes": 32768,
+      "cpu_ms": 3133.602,
+      "decoded_count": 88,
+      "disk_cache_bytes": 1501024,
+      "disk_cache_files": 88,
+      "elapsed_ms": 4128,
+      "failed_results": 0,
+      "file_descriptors": 25,
+      "latency": {
+        "callback_to_paint": {
+          "count": 88,
+          "max_ms": 1.63929,
+          "mean_ms": 0.24682970454545455,
+          "over_1000ms": 0,
+          "p50_ms_upper": 1,
+          "p95_ms_upper": 1,
+          "p99_ms_upper": 2
+        },
+        "gui_timer_delay": {
+          "count": 254,
+          "max_ms": 20.454157,
+          "mean_ms": 2.477847094488189,
+          "over_1000ms": 0,
+          "p50_ms_upper": 5,
+          "p95_ms_upper": 6,
+          "p99_ms_upper": 6
+        },
+        "pending_paint": 0,
+        "pending_tasks": 0,
+        "queue": {
+          "count": 88,
+          "max_ms": 39.823073,
+          "mean_ms": 10.082078693181819,
+          "over_1000ms": 0,
+          "p50_ms_upper": 4,
+          "p95_ms_upper": 35,
+          "p99_ms_upper": 40
+        },
+        "submit_to_callback": {
+          "count": 88,
+          "max_ms": 42.011042,
+          "mean_ms": 17.25050131818182,
+          "over_1000ms": 0,
+          "p50_ms_upper": 11,
+          "p95_ms_upper": 42,
+          "p99_ms_upper": 43
+        },
+        "submit_to_paint": {
+          "count": 88,
+          "max_ms": 42.108711,
+          "mean_ms": 17.497331022727273,
+          "over_1000ms": 0,
+          "p50_ms_upper": 11,
+          "p95_ms_upper": 43,
+          "p99_ms_upper": 43
+        },
+        "worker_to_callback": {
+          "count": 88,
+          "max_ms": 14.072971,
+          "mean_ms": 7.168422625,
+          "over_1000ms": 0,
+          "p50_ms_upper": 8,
+          "p95_ms_upper": 11,
+          "p99_ms_upper": 15
+        }
+      },
+      "loader_cpu_ms": 138.192695,
+      "major_faults": 0,
+      "metadata_capacity_bytes": 0,
+      "metadata_path_bytes": 0,
+      "minor_faults": 41683,
+      "model_count": 0,
+      "peak_rss_kib": 209768,
+      "phase": "cleared",
+      "pool_items": 41,
+      "prefetch_results": 0,
+      "pss_kib": 103807,
+      "queue_tasks": 0,
+      "rchar": 1234904027,
+      "read_bytes": 0,
+      "rss_kib": 152760,
+      "rusage_peak_rss_kib": 209768,
+      "scan_cpu_ms": 2541.092008,
+      "source_counts": {
+        "decoded": 88,
+        "disk": 0,
+        "failed": 0,
+        "memory": 0
+      },
+      "stale_results": 0,
+      "syscr": 602379,
+      "syscw": 5304,
+      "threads": 16,
+      "timestamp_utc": "2026-10-28T12:53:57.102Z",
+      "total_items": 41,
+      "viewer_visible": false,
+      "visible_results": 88,
+      "wchar": 1917538,
+      "write_bytes": 2002944
+    }
+  ],
+  "scan_ms": 2544,
+  "screens": [
+    {
+      "dpr": 1,
+      "geometry": [
+        2560,
+        1600
+      ],
+      "logical_dpi": 96,
+      "name": "screen"
+    }
+  ],
+  "viewport_logical_px": [
+    1270,
+    717
+  ],
+  "window_logical_px": [
+    1280,
+    800
+  ],
+  "revision": "b98713e78437f5067e821b6093dc2ffe71b9abdf",
+  "runner_sha256": "f85ae61580a9c8d1472512f526e2b688166e259b2b8cf43f469edb8b8358f731",
+  "probe_sha256": "b42d3dcbb297e4fe86cbb2cfc700cdc654c4a4b1a355ac613013a32362b6a9b3",
+  "executable_sha256": "54e267778e7669c69e5bbc099304d0dc014f2269584dccaca1de1926994b6c10",
+  "scenario": "profile",
+  "whole_device_delta": {
+    "reads": 0,
+    "reads_merged": 0,
+    "sectors_read": 0,
+    "read_ms": 0,
+    "writes": 72,
+    "writes_merged": 116,
+    "sectors_written": 3888,
+    "write_ms": 297,
+    "inflight": 0,
+    "busy_ms": 61,
+    "weighted_ms": 297
+  },
+  "whole_device_note": "缓存分区，包含其他进程；不是进程或SSD介质独占归因",
+  "source_device_delta": {
+    "reads": 0,
+    "reads_merged": 0,
+    "sectors_read": 0,
+    "read_ms": 0,
+    "writes": 72,
+    "writes_merged": 116,
+    "sectors_written": 3888,
+    "write_ms": 297,
+    "inflight": 0,
+    "busy_ms": 61,
+    "weighted_ms": 297
+  },
+  "source_device": {
+    "major": 259,
+    "minor": 3
+  },
+  "cache_device": {
+    "major": 259,
+    "minor": 3
+  },
+  "system_memory_kib": {
+    "before": {
+      "MemAvailable": 24611772,
+      "Cached": 16179516,
+      "Dirty": 40,
+      "Writeback": 0
+    },
+    "after": {
+      "MemAvailable": 24601400,
+      "Cached": 16181868,
+      "Dirty": 892,
+      "Writeback": 0
+    }
+  },
+  "source_page_sample": {
+    "before": {
+      "files": 256,
+      "pages": 3560,
+      "resident_pages": 3560,
+      "errors": 0,
+      "method": "每127个路径取样，最多256文件，每文件前1MiB；非全库驻留率"
+    },
+    "after": {
+      "files": 256,
+      "pages": 3560,
+      "resident_pages": 3560,
+      "errors": 0,
+      "method": "每127个路径取样，最多256文件，每文件前1MiB；非全库驻留率"
+    }
+  },
+  "advised_drop_file_pages": false,
+  "dataset_definition": {
+    "source": "/home/gyl/Pictures/壁纸/Bliss.jpeg",
+    "sizes": [
+      10000,
+      50000,
+      100000,
+      300000
+    ],
+    "samples": 64,
+    "hardlinks": true,
+    "description": "真实壁纸派生的混合尺寸 JPEG；独立路径，共享内容 inode，不能代表独立冷盘原图 I/O"
+  }
+}

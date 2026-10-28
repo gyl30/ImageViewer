@@ -35,8 +35,36 @@
           }
         }
       ]
+    },
+    "UI候选比较": {
+      "versions": [
+        {
+          "path": "ui-review-2026-10-28/compare.html",
+          "createdAt": "2026-10-28T07:23:13.458Z",
+          "status": "changes-requested",
+          "subtitle": "历史候选：已选择A，正式界面见UI方案A",
+          "viewport": {
+            "width": 1440,
+            "height": 1000
+          }
+        }
+      ]
+    },
+    "UI方案A": {
+      "versions": [
+        {
+          "path": "ui-a-2026-10-28/index.html",
+          "createdAt": "2026-10-28T13:18:42.056Z",
+          "status": "needs-review",
+          "subtitle": "实际Qt界面：主题图标、状态行目录、菜单无三角",
+          "viewport": {
+            "width": 1280,
+            "height": 1000
+          }
+        }
+      ]
     }
   },
   "createdAt": "2026-10-24T12:27:35.110Z",
-  "updatedAt": "2026-10-27T06:42:57.630Z"
+  "updatedAt": "2026-10-28T13:18:42.108Z"
 }

@@ -1,0 +1,24 @@
+********* Start testing of correctness_test *********
+Config: Using QtTest library 6.9.3, Qt 6.9.3 (x86_64-little_endian-lp64 shared (dynamic) release build; by GCC 10.3.1 20210422 (Red Hat 10.3.1-1)), ubuntu 22.04
+PASS   : correctness_test::initTestCase()
+QWARN  : correctness_test::popup_indicators(library-more) This plugin does not support propagateSizeHints()
+FAIL!  : correctness_test::popup_indicators(library-more) Compared values are not the same
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(2266)]
+QWARN  : correctness_test::popup_indicators(preview-more) This plugin does not support propagateSizeHints()
+FAIL!  : correctness_test::popup_indicators(preview-more) Compared values are not the same
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(2266)]
+QWARN  : correctness_test::popup_indicators(preview-mode) This plugin does not support propagateSizeHints()
+FAIL!  : correctness_test::popup_indicators(preview-mode) Compared values are not the same
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(2266)]
+QWARN  : correctness_test::directory_context() This plugin does not support propagateSizeHints()
+FAIL!  : correctness_test::directory_context() '[&]() { for (auto* label : window.statusBar()->findChildren<QLabel*>()) { if (label->text().contains("城市与春天") && label->text().contains("没有")) { return true; } } return false; }()' returned FALSE. ()
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(2282)]
+FAIL!  : correctness_test::toolbar_icons_follow_theme() Compared values are not the same
+   Actual   (solid.rgb())                                              : 4286615718
+   Expected (QApplication::palette().color(QPalette::ButtonText).rgb()): 4278190080
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(2314)]
+FAIL!  : correctness_test::card_focus_state() 'item->flags().testFlag(QGraphicsItem::ItemIsFocusable)' returned FALSE. ()
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(2325)]
+PASS   : correctness_test::cleanupTestCase()
+Totals: 2 passed, 6 failed, 0 skipped, 0 blacklisted, 15522ms
+********* Finished testing of correctness_test *********

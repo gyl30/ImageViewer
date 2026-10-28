@@ -1,0 +1,12 @@
+********* Start testing of correctness_test *********
+Config: Using QtTest library 6.9.3, Qt 6.9.3 (x86_64-little_endian-lp64 shared (dynamic) release build; by GCC 10.3.1 20210422 (Red Hat 10.3.1-1)), ubuntu 22.04
+PASS   : correctness_test::initTestCase()
+QWARN  : correctness_test::popup_indicators(library-more) qt.accessibility.atspi: Error in contacting registry: "org.freedesktop.DBus.Error.Disconnected" "Not connected to D-Bus server"
+PASS   : correctness_test::popup_indicators(library-more)
+PASS   : correctness_test::popup_indicators(preview-more)
+PASS   : correctness_test::popup_indicators(preview-mode)
+PASS   : correctness_test::toolbar_icons_follow_theme()
+PASS   : correctness_test::card_focus_state()
+PASS   : correctness_test::cleanupTestCase()
+Totals: 7 passed, 0 failed, 0 skipped, 0 blacklisted, 116ms
+********* Finished testing of correctness_test *********

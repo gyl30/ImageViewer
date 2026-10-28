@@ -1,0 +1,2 @@
+
+(imageviewer_tests:1105879): dbind-WARNING **: 20:45:29.431: Couldn't connect to accessibility bus: Failed to connect to socket /run/user/1000/at-spi/bus_1: 没有那个文件或目录

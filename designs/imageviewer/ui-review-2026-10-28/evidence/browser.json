@@ -1,0 +1,105 @@
+{
+  "source": "实际Qt截图的比较查看器",
+  "headless": true,
+  "states": [
+    {
+      "state": "light",
+      "images": [
+        {
+          "width": 1100,
+          "height": 760,
+          "source": "screens/a/light.png"
+        },
+        {
+          "width": 1100,
+          "height": 760,
+          "source": "screens/b/light.png"
+        }
+      ]
+    },
+    {
+      "state": "dark",
+      "images": [
+        {
+          "width": 1100,
+          "height": 760,
+          "source": "screens/a/dark.png"
+        },
+        {
+          "width": 1100,
+          "height": 760,
+          "source": "screens/b/dark.png"
+        }
+      ]
+    },
+    {
+      "state": "preview",
+      "images": [
+        {
+          "width": 1200,
+          "height": 800,
+          "source": "screens/a/preview.png"
+        },
+        {
+          "width": 1200,
+          "height": 800,
+          "source": "screens/b/preview.png"
+        }
+      ]
+    },
+    {
+      "state": "empty",
+      "images": [
+        {
+          "width": 1100,
+          "height": 760,
+          "source": "screens/a/empty.png"
+        },
+        {
+          "width": 1100,
+          "height": 760,
+          "source": "screens/b/empty.png"
+        }
+      ]
+    },
+    {
+      "state": "narrow",
+      "images": [
+        {
+          "width": 640,
+          "height": 480,
+          "source": "screens/a/narrow.png"
+        },
+        {
+          "width": 640,
+          "height": 480,
+          "source": "screens/b/narrow.png"
+        }
+      ]
+    },
+    {
+      "state": "preview-narrow",
+      "images": [
+        {
+          "width": 640,
+          "height": 480,
+          "source": "screens/a/preview-narrow.png"
+        },
+        {
+          "width": 640,
+          "height": 480,
+          "source": "screens/b/preview-narrow.png"
+        }
+      ]
+    }
+  ],
+  "page_errors": [],
+  "console_errors": [],
+  "http_errors": [],
+  "url": "http://127.0.0.1:4311/imageviewer/ui-review-2026-10-28/compare.html",
+  "narrow_viewer_width": 640,
+  "narrow_overflow": false,
+  "measurements_rows": 3,
+  "http_503_visible_feedback": true,
+  "network_failure_visible_feedback": true
+}

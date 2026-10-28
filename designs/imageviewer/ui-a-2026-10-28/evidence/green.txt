@@ -1,0 +1,25 @@
+********* Start testing of correctness_test *********
+Config: Using QtTest library 6.9.3, Qt 6.9.3 (x86_64-little_endian-lp64 shared (dynamic) release build; by GCC 10.3.1 20210422 (Red Hat 10.3.1-1)), ubuntu 22.04
+PASS   : correctness_test::initTestCase()
+QWARN  : correctness_test::popup_indicators(library-more) This plugin does not support propagateSizeHints()
+QWARN  : correctness_test::popup_indicators(library-more) This plugin does not support raise()
+QWARN  : correctness_test::popup_indicators(library-more) This plugin does not support grabbing the keyboard
+PASS   : correctness_test::popup_indicators(library-more)
+QWARN  : correctness_test::popup_indicators(preview-more) This plugin does not support propagateSizeHints()
+QWARN  : correctness_test::popup_indicators(preview-more) This plugin does not support raise()
+QWARN  : correctness_test::popup_indicators(preview-more) This plugin does not support grabbing the keyboard
+PASS   : correctness_test::popup_indicators(preview-more)
+QWARN  : correctness_test::popup_indicators(preview-mode) This plugin does not support propagateSizeHints()
+QWARN  : correctness_test::popup_indicators(preview-mode) This plugin does not support raise()
+QWARN  : correctness_test::popup_indicators(preview-mode) This plugin does not support grabbing the keyboard
+PASS   : correctness_test::popup_indicators(preview-mode)
+QWARN  : correctness_test::directory_context() This plugin does not support propagateSizeHints()
+PASS   : correctness_test::directory_context()
+PASS   : correctness_test::toolbar_icons_follow_theme()
+PASS   : correctness_test::card_focus_state()
+QWARN  : correctness_test::header_follows_theme() This plugin does not support propagateSizeHints()
+QWARN  : correctness_test::header_follows_theme() This plugin does not support propagateSizeHints()
+PASS   : correctness_test::header_follows_theme()
+PASS   : correctness_test::cleanupTestCase()
+Totals: 9 passed, 0 failed, 0 skipped, 0 blacklisted, 232ms
+********* Finished testing of correctness_test *********

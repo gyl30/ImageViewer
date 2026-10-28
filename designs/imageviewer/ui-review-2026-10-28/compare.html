@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ImageViewer · Qt 界面方案对比</title>
+  <link rel="icon" href="data:,">
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; color: #263244; background: #e9edf2; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 1600px; margin: auto; padding: 32px; }
+    header { display: flex; justify-content: space-between; align-items: start; gap: 24px; }
+    h1 { margin: 4px 0 12px; font-size: 28px; font-weight: 650; letter-spacing: -.6px; }
+    h2 { margin: 0 0 6px; font-size: 20px; }
+    p { margin: 8px 0; line-height: 1.7; }
+    small, .subtle { color: #607086; }
+    a { color: #215ea6; text-underline-offset: 3px; }
+    .tag { display: inline-block; border: 1px solid #ccd7e4; border-radius: 5px; padding: 3px 8px; font-size: 12px; background: #f7f9fc; }
+    .states { display: flex; flex-wrap: wrap; gap: 6px; margin: 24px 0 18px; }
+    button { font: inherit; color: #34445a; background: #f7f9fb; border: 1px solid #c5d0dd; border-radius: 6px; padding: 8px 14px; cursor: pointer; }
+    button:hover { background: white; }
+    button:focus-visible { outline: 3px solid #81b5f3; outline-offset: 2px; }
+    button[aria-pressed="true"] { background: #263e5e; border-color: #263e5e; color: white; }
+    .boards { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+    article { min-width: 0; background: #f7f9fb; border: 1px solid #cdd6e1; border-radius: 8px; overflow: hidden; }
+    .copy { padding: 20px 22px 16px; }
+    .copy p { font-size: 14px; }
+    figure { margin: 0; padding: 0 12px 12px; }
+    figure img { display: block; max-width: 100%; height: auto; margin: auto; border: 1px solid #bec8d6; }
+    figcaption { font-size: 12px; margin-top: 10px; color: #607086; text-align: center; }
+    .facts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+    section { padding: 22px; margin-top: 22px; background: #f7f9fb; border: 1px solid #cdd6e1; border-radius: 8px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { text-align: left; padding: 12px 10px; border-bottom: 1px solid #dce3eb; vertical-align: top; }
+    th { font-weight: 600; }
+    .table-scroll { overflow: auto; }
+    .baseline { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+    .baseline img { width: 100%; border: 1px solid #cdd6e1; }
+    code { font-family: ui-monospace, monospace; font-size: .9em; }
+    footer { padding: 22px 0 0; font-size: 13px; color: #607086; }
+    @media (max-width: 900px) { main { padding: 18px; } header { display: block; } .boards { grid-template-columns: 1fr; } h1 { font-size: 24px; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <small>IMAGEVIEWER · 本地评审 · 基线 b98713e</small>
+      <h1>Qt 界面方案对比</h1>
+      <p>以下均为实际 Qt Widgets 窗口截图。A/B 是独立候选，未编入正式程序。</p>
+      <p class="subtle">单屏独立 X11 虚拟显示 · 不操作当前桌面 · 图标按钮保留提示 · 不恢复路径栏</p>
+    </div>
+    <a href="review.md">完整审查、来源与验证方法 ↗</a>
+  </header>
+  <nav class="states" aria-label="查看 Qt 状态">
+    <button data-view="light" aria-pressed="false">浅色图库</button>
+    <button data-view="dark" aria-pressed="true">深色图库</button>
+    <button data-view="preview" aria-pressed="false">大图预览</button>
+    <button data-view="empty" aria-pressed="false">空目录</button>
+    <button data-view="narrow" aria-pressed="false">640px 图库</button>
+    <button data-view="preview-narrow" aria-pressed="false">640px 预览</button>
+  </nav>
+  <div class="boards">
+    <article data-screen-label="方案 A · 极简图库">
+      <div class="copy">
+        <h2>A · 极简图库 <span class="tag">优先建议</span></h2>
+        <p>目录短名称放入既有状态行。图库和预览尽量把面积留给图片，不增加常驻图片条。</p>
+        <div class="facts"><span class="tag">新增 1 个上下文标签</span><span class="tag">不新增缩略图控件</span></div>
+      </div>
+      <figure><a id="a-link" href="screens/a/dark.png" target="_blank" rel="noopener"><img id="a-image" src="screens/a/dark.png" alt="方案 A 深色图库的实际 Qt 截图"></a><figcaption>点击图片查看原始像素</figcaption></figure>
+    </article>
+    <article data-screen-label="方案 B · 增强导航">
+      <div class="copy">
+        <h2>B · 增强导航</h2>
+        <p>顶部显示短目录名。预览提供可收起的邻近缩略图，适合连续选片；窄窗口的图片区域会更小。</p>
+        <div class="facts"><span class="tag">最多 7 个缩略图控件</span><span class="tag">复用图库已加载像素</span></div>
+      </div>
+      <figure><a id="b-link" href="screens/b/dark.png" target="_blank" rel="noopener"><img id="b-image" src="screens/b/dark.png" alt="方案 B 深色图库的实际 Qt 截图"></a><figcaption>关闭图片条后清空其图标；不新增解码或预加载请求</figcaption></figure>
+    </article>
+  </div>
+  <section>
+    <h2>先比较取舍</h2>
+    <div class="table-scroll"><table>
+      <thead><tr><th>维度</th><th>A</th><th>B</th></tr></thead>
+      <tbody>
+        <tr><td>图片面积</td><td>保持既有单行工具栏与状态行</td><td>图片条展开时额外占用 84px 逻辑高度</td></tr>
+        <tr><td>定位和选片</td><td>依靠图库选中与既有前后导航</td><td>可见邻近图片可直接点击，便于回看</td></tr>
+        <tr><td>像素与对象</td><td>不增加图片像素容器</td><td>仅 7 个小图图标；隐藏时释放，数量不随图库增长</td></tr>
+        <tr><td>复杂度</td><td>低，适合先落地</td><td>中，需要继续验收随机导航、缺图与 DPI 刷新</td></tr>
+      </tbody>
+    </table></div>
+    <p class="subtle">两套候选都沿用现有窗口、瀑布流和解码逻辑。卡片悬停／选中／键盘焦点的细化，留待选定方案后正式实现和回归。</p>
+  </section>
+  <section>
+    <h2>已确认的公共缺陷</h2>
+    <p>Ctrl+横向或零增量滚轮不再缩小；像素滚动按纵向方向处理。标题栏删除重复背景样式，改用 Qt 调色板填充。</p>
+    <details><summary>查看深色标题栏修正前后（均为基线布局）</summary><div class="baseline"><div><p>修正前</p><img src="screens/baseline-before/dark.png" alt="修正前标题栏为浅色"></div><div><p>公共修正后</p><img src="screens/baseline/dark.png" alt="修正后标题栏跟随深色主题"></div></div></details>
+    <p class="subtle">A/B 的颜色、信息布局和图片条仍是候选，以上公共修正不等于选择了某套新 UI。</p>
+  </section>
+  <section>
+    <h2>同场景资源测量</h2>
+    <p class="subtle">复用既有 benchmark 探针；1 万张已有 JPEG、同一视口、三次独立进程、应用缓存预热。数值用于比较候选成本，不代替 10 万／30 万正式验收。</p>
+    <div class="table-scroll"><table><thead><tr><th>方案</th><th>峰值 RSS</th><th>已加载空闲 CPU</th><th>深色图库绘制</th><th>预览绘制</th></tr></thead><tbody id="metrics"><tr><td colspan="5">测量待完成</td></tr></tbody></table></div>
+  </section>
+  <footer>
+    参考交互资料：<a href="https://github.com/netdcy/FlowVision">FlowVision</a> · <a href="https://github.com/jurplel/qView">qView</a> · <a href="https://github.com/KDE/gwenview">Gwenview</a> · <a href="https://github.com/Ruben2776/PicView">PicView</a> · <a href="https://github.com/luspi/photoqt">PhotoQt</a>。未收录其源码、SVG或视觉素材。<br>
+    截图使用既有测试素材，原图未改动。本轮未推送、未修改发布包或许可证；实体跨屏、动态 DPI 和真实触控板未在虚拟显示中冒充验收。
+  </footer>
+</main>
+<script>
+  const labels = {light:"浅色图库",dark:"深色图库",preview:"大图预览",empty:"空目录",narrow:"640px 图库","preview-narrow":"640px 预览"};
+  document.querySelectorAll("[data-view]").forEach(button => button.addEventListener("click", () => {
+    const view = button.dataset.view;
+    document.querySelectorAll("[data-view]").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+    for (const variant of ["a", "b"]) {
+      const source = "screens/" + variant + "/" + view + ".png";
+      document.getElementById(variant + "-image").src = source;
+      document.getElementById(variant + "-image").alt = "方案 " + variant.toUpperCase() + " " + labels[view] + "的实际 Qt 截图";
+      document.getElementById(variant + "-link").href = source;
+    }
+  }));
+  fetch("evidence/measurements.json").then(response => response.ok ? response.json() : null).then(data => {
+    const body = document.getElementById("metrics");
+    if (data === null) { body.textContent = "测量记录尚未归档"; return; }
+    body.replaceChildren();
+    for (const row of data.summary) {
+      const tr = document.createElement("tr");
+      [row.label, row.peak_rss_mib_median.toFixed(1) + " MiB", row.idle_cpu_percent_median.toFixed(2) + "%（单核）", row.dark_render_median_ms.toFixed(3) + " ms", row.preview_render_median_ms.toFixed(3) + " ms"].forEach(value => {
+        const td = document.createElement("td"); td.textContent = value; tr.append(td);
+      });
+      body.append(tr);
+    }
+  }, error => { document.getElementById("metrics").textContent = "测量读取失败：" + String(error); });
+</script>
+</body>
+</html>

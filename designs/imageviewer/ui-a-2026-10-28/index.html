@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" href="data:,">
+  <title>ImageViewer · 方案 A 实际界面</title>
+  <style>
+    :root { font-family: system-ui, sans-serif; color: #28374a; background: #f4f6f8; }
+    * { box-sizing: border-box; }
+    body { max-width: 1280px; margin: auto; padding: 32px; line-height: 1.65; }
+    header { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    h1 { font-size: clamp(24px, 3vw, 32px); margin: 0; letter-spacing: -.025em; }
+    h2 { font-size: 19px; margin: 0 0 12px; }
+    p { margin: 10px 0 20px; }
+    .tag { font-size: 13px; padding: 3px 10px; border: 1px solid #ccd5e0; border-radius: 20px; }
+    a { color: #246fc4; text-underline-offset: 3px; }
+    nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0 16px; }
+    button { font: inherit; font-size: 14px; border: 1px solid #ccd5e0; border-radius: 6px; padding: 7px 14px; cursor: pointer; background: transparent; color: inherit; }
+    button[aria-pressed="true"] { border-color: #246fc4; background: #246fc4; color: white; }
+    button:focus-visible, a:focus-visible { outline: 2px solid #246fc4; outline-offset: 3px; }
+    figure { margin: 0; }
+    .stage { display: flex; justify-content: center; align-items: flex-start; min-height: 240px; background: #e7ecf2; border: 1px solid #ccd5e0; border-radius: 8px; padding: 16px; }
+    img { display: block; max-width: 100%; height: auto; }
+    figcaption { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 10px 0 28px; font-size: 13px; }
+    .details { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+    .details p { font-size: 14px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { text-align: left; padding: 8px 4px; border-bottom: 1px solid #ccd5e0; }
+    th { font-weight: 600; }
+    .muted { color: #596b80; font-size: 13px; }
+    footer { margin-top: 28px; border-top: 1px solid #ccd5e0; padding-top: 16px; display: flex; flex-wrap: wrap; gap: 12px 24px; font-size: 14px; }
+    #error { color: #a12828; }
+    [hidden] { display: none; }
+    @media (max-width: 720px) { body { padding: 20px; } .details { grid-template-columns: 1fr; gap: 12px; } .stage { padding: 8px; } }
+    @media (prefers-color-scheme: dark) {
+      :root { color: #e6ecf5; background: #191d24; }
+      .stage { background: #11161d; }
+      .stage, .tag, button, th, td, footer { border-color: #3c4758; }
+      a { color: #8cc3ff; }
+      .muted { color: #a1afc1; }
+      #error { color: #ffb1b1; }
+    }
+  </style>
+</head>
+<body>
+  <header><h1>ImageViewer · 方案 A</h1><span class="tag">正式 Qt 实现 · 2026-10-28</span></header>
+  <p>用户已选择极简图库。以下为实际 Qt 窗口截图，包含浅色、深色、预览、空目录及 640px 窄窗口。</p>
+  <nav aria-label="界面状态">
+    <button type="button" data-screen="light" aria-pressed="false">浅色图库</button>
+    <button type="button" data-screen="dark" aria-pressed="true">深色图库</button>
+    <button type="button" data-screen="preview" aria-pressed="false">大图预览</button>
+    <button type="button" data-screen="empty" aria-pressed="false">空目录</button>
+    <button type="button" data-screen="narrow" aria-pressed="false">640px 图库</button>
+    <button type="button" data-screen="preview_narrow" aria-pressed="false">640px 预览</button>
+  </nav>
+  <figure>
+    <div class="stage"><img id="screen" src="screens/dark.png" alt="方案 A 深色图库" width="1100" height="760"></div>
+    <figcaption><span id="caption" aria-live="polite">深色图库 · 1100 × 760</span><a id="original" href="screens/dark.png">查看原始截图</a></figcaption>
+  </figure>
+  <p id="error" role="alert" hidden>截图加载失败，请检查 screens 目录是否与本页一同保存。</p>
+  <div class="details">
+    <section>
+      <h2>本次交互调整</h2>
+      <p>两处“更多”和预览左侧显示方式按钮均隐藏下拉三角，菜单仍可点击。20px 图标、主题颜色、悬停与焦点样式由共享标题栏统一；目录短名称复用原状态行。</p>
+      <p>卡片以中性色悬停、蓝色选中和内侧虚线焦点区分状态。未加入缩略图条、常驻动画、原图缓存或相邻图片预加载。</p>
+      <p class="muted">全部 GUI 检查在独立虚拟 X11 内完成，不占用用户鼠标。实体跨屏、动态硬件 DPI 和真实触控板手感仍未新增验证。</p>
+    </section>
+    <section>
+      <h2>同场景验证</h2>
+      <table>
+        <thead><tr><th>指标</th><th>实施前</th><th>正式 A</th></tr></thead>
+        <tbody>
+          <tr><td>30万张冷缓存峰值 RSS</td><td>208.0 MiB</td><td>208.1 MiB</td></tr>
+          <tr><td>UI 空闲单核 CPU 中位数</td><td>0.156%</td><td>0.152%</td></tr>
+          <tr><td>深色整窗绘制中位数</td><td>1.451 ms</td><td>1.641 ms</td></tr>
+          <tr><td>图库／预览 QWidget 子对象</td><td>26／33</td><td>26／33</td></tr>
+        </tbody>
+      </table>
+      <p class="muted">没有显著资源改善的结论。深色强制整窗合成增加约 0.190ms；实测短段滚动未见明显 CPU 或 I/O 回归。整窗合成不等于实际滚动帧率。</p>
+    </section>
+  </div>
+  <footer>
+    <a href="notes.md">完整实施与验收记录</a>
+    <a href="evidence/measurements.json">前后测量数据</a>
+    <a href="evidence/manifest.json">源码、程序与截图校验</a>
+    <a href="../ui-review-2026-10-28/compare.html">历史 A/B 候选比较</a>
+  </footer>
+  <script>
+    const states = {
+      light: ['浅色图库', 1100, 760], dark: ['深色图库', 1100, 760],
+      preview: ['大图预览', 1200, 800], empty: ['空目录', 1100, 760],
+      narrow: ['640px 图库', 640, 480], preview_narrow: ['640px 预览', 640, 480]
+    };
+    const screen = document.querySelector('#screen');
+    const error = document.querySelector('#error');
+    screen.addEventListener('error', () => { error.hidden = false; });
+    screen.addEventListener('load', () => { error.hidden = true; });
+    document.querySelectorAll('button[data-screen]').forEach(button => {
+      button.addEventListener('click', () => {
+        const key = button.dataset.screen;
+        const [label, width, height] = states[key];
+        document.querySelectorAll('button[data-screen]').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+        screen.width = width;
+        screen.height = height;
+        screen.alt = `方案 A ${label}`;
+        screen.src = `screens/${key}.png`;
+        document.querySelector('#caption').textContent = `${label} · ${width} × ${height}`;
+        document.querySelector('#original').href = screen.src;
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+********* Start testing of correctness_test *********
+Config: Using QtTest library 6.9.3, Qt 6.9.3 (x86_64-little_endian-lp64 shared (dynamic) release build; by GCC 10.3.1 20210422 (Red Hat 10.3.1-1)), ubuntu 22.04
+PASS   : correctness_test::initTestCase()
+QWARN  : correctness_test::viewer_wheel_zoom(angle-up) This plugin does not support propagateSizeHints()
+PASS   : correctness_test::viewer_wheel_zoom(angle-up)
+QWARN  : correctness_test::viewer_wheel_zoom(angle-down) This plugin does not support propagateSizeHints()
+PASS   : correctness_test::viewer_wheel_zoom(angle-down)
+QWARN  : correctness_test::viewer_wheel_zoom(horizontal-left) This plugin does not support propagateSizeHints()
+FAIL!  : correctness_test::viewer_wheel_zoom(horizontal-left) Compared doubles are not the same (fuzzy compare)
+   Actual   (view->transform().m11() / before): 0.833333333333
+   Expected (factor)                          : 1
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(2054)]
+QWARN  : correctness_test::viewer_wheel_zoom(horizontal-right) This plugin does not support propagateSizeHints()
+FAIL!  : correctness_test::viewer_wheel_zoom(horizontal-right) Compared doubles are not the same (fuzzy compare)
+   Actual   (view->transform().m11() / before): 0.833333333333
+   Expected (factor)                          : 1
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(2054)]
+QWARN  : correctness_test::viewer_wheel_zoom(zero-begin) This plugin does not support propagateSizeHints()
+FAIL!  : correctness_test::viewer_wheel_zoom(zero-begin) Compared doubles are not the same (fuzzy compare)
+   Actual   (view->transform().m11() / before): 0.833333333333
+   Expected (factor)                          : 1
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(2054)]
+QWARN  : correctness_test::viewer_wheel_zoom(zero-end) This plugin does not support propagateSizeHints()
+FAIL!  : correctness_test::viewer_wheel_zoom(zero-end) Compared doubles are not the same (fuzzy compare)
+   Actual   (view->transform().m11() / before): 0.833333333333
+   Expected (factor)                          : 1
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(2054)]
+QWARN  : correctness_test::viewer_wheel_zoom(zero-update) This plugin does not support propagateSizeHints()
+FAIL!  : correctness_test::viewer_wheel_zoom(zero-update) Compared doubles are not the same (fuzzy compare)
+   Actual   (view->transform().m11() / before): 0.833333333333
+   Expected (factor)                          : 1
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(2054)]
+QWARN  : correctness_test::viewer_wheel_zoom(pixel-up) This plugin does not support propagateSizeHints()
+FAIL!  : correctness_test::viewer_wheel_zoom(pixel-up) Compared doubles are not the same (fuzzy compare)
+   Actual   (view->transform().m11() / before): 0.833333333333
+   Expected (factor)                          : 1.2
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(2054)]
+QWARN  : correctness_test::viewer_wheel_zoom(pixel-down) This plugin does not support propagateSizeHints()
+PASS   : correctness_test::viewer_wheel_zoom(pixel-down)
+QWARN  : correctness_test::viewer_wheel_zoom(pixel-horizontal) This plugin does not support propagateSizeHints()
+FAIL!  : correctness_test::viewer_wheel_zoom(pixel-horizontal) Compared doubles are not the same (fuzzy compare)
+   Actual   (view->transform().m11() / before): 0.833333333333
+   Expected (factor)                          : 1
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(2054)]
+QWARN  : correctness_test::viewer_wheel_zoom(pan-angle) This plugin does not support propagateSizeHints()
+PASS   : correctness_test::viewer_wheel_zoom(pan-angle)
+QWARN  : correctness_test::viewer_wheel_zoom(pan-pixel) This plugin does not support propagateSizeHints()
+PASS   : correctness_test::viewer_wheel_zoom(pan-pixel)
+QWARN  : correctness_test::viewer_wheel_zoom(angle-priority) This plugin does not support propagateSizeHints()
+PASS   : correctness_test::viewer_wheel_zoom(angle-priority)
+QWARN  : correctness_test::viewer_wheel_zoom(diagonal) This plugin does not support propagateSizeHints()
+PASS   : correctness_test::viewer_wheel_zoom(diagonal)
+PASS   : correctness_test::cleanupTestCase()
+Totals: 9 passed, 7 failed, 0 skipped, 0 blacklisted, 824ms
+********* Finished testing of correctness_test *********

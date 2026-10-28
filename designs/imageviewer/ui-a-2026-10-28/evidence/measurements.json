@@ -1,0 +1,96 @@
+[
+  {
+    "version": "before",
+    "peak_rss_mib": 147.40625,
+    "peak_rss_range": [
+      146.5546875,
+      149.23828125
+    ],
+    "idle_core_cpu_percent": 0.15579999999999927,
+    "phases": {
+      "light": {
+        "render_median_ms": 1.905704,
+        "rss_mib_median": 127.0,
+        "pss_mib_median": 79.7294921875,
+        "widgets": 26
+      },
+      "dark": {
+        "render_median_ms": 1.45124,
+        "rss_mib_median": 131.0625,
+        "pss_mib_median": 83.0009765625,
+        "widgets": 26
+      },
+      "narrow": {
+        "render_median_ms": 0.51099,
+        "rss_mib_median": 133.99609375,
+        "pss_mib_median": 86.9443359375,
+        "widgets": 26
+      },
+      "preview": {
+        "render_median_ms": 0.33332,
+        "rss_mib_median": 142.69921875,
+        "pss_mib_median": 92.7626953125,
+        "widgets": 33
+      },
+      "preview_narrow": {
+        "render_median_ms": 0.185731,
+        "rss_mib_median": 141.3671875,
+        "pss_mib_median": 92.078125,
+        "widgets": 33
+      },
+      "empty": {
+        "render_median_ms": 0.230471,
+        "rss_mib_median": 139.65625,
+        "pss_mib_median": 90.3095703125,
+        "widgets": 60
+      }
+    }
+  },
+  {
+    "version": "after",
+    "peak_rss_mib": 146.0078125,
+    "peak_rss_range": [
+      145.73046875,
+      149.21875
+    ],
+    "idle_core_cpu_percent": 0.15159999999996215,
+    "phases": {
+      "light": {
+        "render_median_ms": 1.85563,
+        "rss_mib_median": 127.0703125,
+        "pss_mib_median": 79.802734375,
+        "widgets": 26
+      },
+      "dark": {
+        "render_median_ms": 1.640954,
+        "rss_mib_median": 131.1328125,
+        "pss_mib_median": 83.1240234375,
+        "widgets": 26
+      },
+      "narrow": {
+        "render_median_ms": 0.663067,
+        "rss_mib_median": 132.8828125,
+        "pss_mib_median": 85.8837890625,
+        "widgets": 26
+      },
+      "preview": {
+        "render_median_ms": 0.346067,
+        "rss_mib_median": 141.5234375,
+        "pss_mib_median": 91.6396484375,
+        "widgets": 33
+      },
+      "preview_narrow": {
+        "render_median_ms": 0.21732,
+        "rss_mib_median": 140.19140625,
+        "pss_mib_median": 90.955078125,
+        "widgets": 33
+      },
+      "empty": {
+        "render_median_ms": 0.267689,
+        "rss_mib_median": 138.4921875,
+        "pss_mib_median": 89.2734375,
+        "widgets": 60
+      }
+    }
+  }
+]

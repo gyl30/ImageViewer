@@ -1,0 +1,12 @@
+[1/15] Automatic MOC and UIC for target ImageViewer
+[2/14] Automatic MOC and UIC for target imageviewer_tests
+[3/13] Automatic MOC and UIC for target imageviewer_benchmark
+[4/12] Building CXX object CMakeFiles/ImageViewer.dir/waterfall_scene.cc.o
+[5/12] Building CXX object CMakeFiles/ImageViewer.dir/window_title_bar.cc.o
+[6/12] Linking CXX executable ImageViewer
+[7/12] Building CXX object CMakeFiles/imageviewer_tests.dir/waterfall_scene.cc.o
+[8/12] Building CXX object CMakeFiles/imageviewer_tests.dir/window_title_bar.cc.o
+[9/12] Linking CXX executable imageviewer_tests
+[10/12] Building CXX object CMakeFiles/imageviewer_benchmark.dir/waterfall_scene.cc.o
+[11/12] Building CXX object CMakeFiles/imageviewer_benchmark.dir/window_title_bar.cc.o
+[12/12] Linking CXX executable imageviewer_benchmark

@@ -1,0 +1,144 @@
+{
+  "recorded_at": "2026-10-28T07:33:10.449946+00:00",
+  "baseline": "b98713e78437f5067e821b6093dc2ffe71b9abdf",
+  "working_tree_changes_committed": false,
+  "pushed": false,
+  "candidate_ui_in_production": false,
+  "public_fixes": [
+    "Ctrl纵向滚轮方向和零增量处理",
+    "Qt原生调色板填充标题栏"
+  ],
+  "source_sha256": {
+    "main_window.cc": "dbebe11d803589a26e3eae0f30cffb2176e4e9607ab07a75b6c1cf4b01b47f8c",
+    "main_window.h": "96aa00b399afb8af67853be9709c73df678638706d046bc3f9b2b8b29eb8fe3b",
+    "image_viewer_window.cc": "41f34cd60abe0ca48f898e4824342723b1eb0d26e203bad1561641d16e2cdff1",
+    "image_viewer_window.h": "ace7aa7981bd585e4394e1884025be0dd8a81d8abe282bbac1f4397765fbea3e",
+    "waterfall_item.cc": "5781f67299248ace478bac575cfccb0220ba048ae68d955ac671006c77e09957",
+    "waterfall_item.h": "6c340f45aa7aa23b3673c502b5a614ca3a83e203958618c01364121ed9b23100",
+    "window_title_bar.cc": "a9852954a36ddf8668a974eeda2641511964b85bbc8277fa167d1e560767dffb",
+    "window_title_bar.h": "28fc1c18e99957e4638844fc212fb51d64549070aca9ab0082e2bf3423469950",
+    "file_scanner.cc": "be774fa6710dcc129c89525ae99bd7dfa75c180ae7f7fc82bf3cb7fb15ff6c92",
+    "image_loader.cc": "e8690c32ebd5dc30b1dbe19514f0ce575c321a474cf5aad0516a4a6d346bb511",
+    "waterfall_scene.cc": "77e27d8947e37593540052d67e42fdf43025a74273d5d898e7c2742d6139644f",
+    "waterfall_view.cc": "bfff6abac128c21ab9c27b101487ee43d37cbdeecd0b63901b82c4520aec8b51",
+    "common_types.h": "89f4981d2e129fea70a51713fc5660a055cb27ae7875d97d6002a70333b2662b",
+    "CMakeLists.txt": "14a35b63b146e484772f82e55f050f0c980be312d8b13048beaa319eb9ebc2d4",
+    "tests/correctness_test.cc": "9610d7d7c9a3dac0c9e73b8a7b7423c96c7620b643d59309ab32476eddfec53d"
+  },
+  "candidate_source_sha256": {
+    "review.md": "ab8960fc14475f86cc302ceef3b93abb1061199c8d793fa0e6e4c1ce48b66061",
+    "run_candidates.py": "0994cc9b6e7fbeed5d3bba5a5d4b5860f0848067be5989eff0692cc259e04686",
+    "CMakeLists.txt": "f53abdf0847df34e46173ec025f3b55b54ea60dd4c804c2d048582d3d6ef55ec",
+    "candidate_widgets.cc": "2664081a7999bb29f7480cdb1efacd7fa1a5ca9359a466bd0f5afb1dbd1639ca",
+    "candidate_widgets.h": "4d01521e613160aee04461d14843a851dde093f4e22bbe243602f81ce391f70d",
+    "compare.html": "427aa5d9608cc900eb6c2c84cc386b88bf22cc85aed773511501b7be037b5a1f"
+  },
+  "generated_probe_sha256": "288b26af9d781790cff830d3995a1d51be52ccadf1da72a3c2950539009fbc01",
+  "binaries_sha256": {
+    "build/ImageViewer": "07ff69d0b608a60da5808212e00ca749562e813a2de9eeef9fbac301ceb0fded",
+    "/tmp/iv-header-build/imageviewer_tests": "c02b94c0e8db56de24156870024a7c10a30c7ba5086d31a1f9e0d57eccece8a0",
+    "/tmp/iv-ergonomics-qt64/build/imageviewer_tests": "1cf8b65fe8d9072dc0e5deb4f74f10205302179f35a9f9641350b07d8e0fc8dd",
+    "/tmp/iv-ui-review-20261028/build/imageviewer_ui_review": "cb4fea7db4867b5e55ea889b2fb00551adf018fbb926b4ce8d74203eb4fdb32d"
+  },
+  "baseline_before_screenshot_binary": {
+    "path": "/tmp/iv-header-build/imageviewer_benchmark",
+    "sha256": "0f6b41191dc0fb3e80a60cc8a1528045c448f768fb101b4d14eece66a94d736a",
+    "matches_previous_verified_manifest": true
+  },
+  "tests": {
+    "qt69": {
+      "passed": 111,
+      "failed": 0,
+      "skipped": 1
+    },
+    "qt64": {
+      "passed": 111,
+      "failed": 0,
+      "skipped": 1
+    },
+    "gui_100": {
+      "passed": 34,
+      "failed": 0,
+      "skipped": 0
+    },
+    "gui_150": {
+      "passed": 34,
+      "failed": 0,
+      "skipped": 0
+    },
+    "gui_200": {
+      "passed": 34,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "qt69": {
+    "version": "6.9.3",
+    "compiler": "GCC11",
+    "build_type": "Release",
+    "gui_display": "Xvfb + xcb"
+  },
+  "qt64": {
+    "version": "6.4.2",
+    "compiler": "GCC12",
+    "distribution": "Debian12",
+    "build_type": "Release",
+    "platform": "offscreen",
+    "builder": "sha256:acffb6f76dc1a78a96e95770851133996f4f1e64560ddf05f11306cf3fb53b94"
+  },
+  "user_build": {
+    "compiler": "GCC16.2",
+    "qt": "6.9.3",
+    "build_type": "Release",
+    "contains_candidates": false
+  },
+  "dataset": {
+    "existing_root": "/tmp/iv-dataset/10000",
+    "alias": "/tmp/iv-ui-review-20261028/示例图库",
+    "images": 10000,
+    "originals_modified": false,
+    "gallery_copied": false
+  },
+  "resource_protocol": {
+    "warmup_runs": 1,
+    "measured_runs_per_variant": 3,
+    "cache": "shared application thumbnail cache",
+    "variant_order_rotated": true,
+    "render_frames_per_phase": 60,
+    "loaded_idle_ms": 500,
+    "rss_before_render_buffer": true,
+    "peak_includes_benchmark": true,
+    "whole_window_render_not_scroll_fps": true
+  },
+  "screenshots": {
+    "screens/baseline/dark.png": "d5c08db7c03dc4add635e7baecc6bd469627fa8ba1fcb08adf21f2a835d45809",
+    "screens/b/narrow.png": "3c33d572de53234532f7c68fb294a0625235ed960ea462d329b2e1435af89e13",
+    "screens/b/preview-narrow.png": "d960864890d2c4a853c8dd38e4489f0d430b6204187ea2502a390b0178cb53fa",
+    "screens/b/light.png": "321b8bcc5c1891b57a4d09a16a1999970f29e750d6eb975cc12b2a4f6f6cb711",
+    "screens/b/preview.png": "d96959782935e7440171d1f9214d87f1116ba06ba6fad52af3054d4caf0ad8cc",
+    "screens/b/dark.png": "0cc3f6f6545b8663066220f6997fadf42e5ac8d6610d37b7e62f8bb2e248753c",
+    "screens/b/empty.png": "6c3500e6b81e81ccb750479e1dc524f2380f3aae149a8be0c6c214a342b13750",
+    "screens/a/narrow.png": "0c47442183e7b1739b01d3311c06e2318ce11f6cb8d24e496f3744748a0df1ca",
+    "screens/a/preview-narrow.png": "06468b64243a42a7025a96a905999849b7fbd8e79083f0d8f696e42ff3447fc2",
+    "screens/a/light.png": "d30d58ae12428921efec51bf52e1c0d0964a917ac83b1225e56b5e0618521627",
+    "screens/a/preview.png": "50687c324c67c9548583111ec7b3dd5128b35b87d3bc07bf8333e16ec2a20946",
+    "screens/a/dark.png": "23abee0ddf2ae5efe2bf4c9a7566d2645f68b2b7d96abe827e0edf152af6d6ee",
+    "screens/a/empty.png": "93da51baaee6e0153d40739fc74df882d80718150f7d9c13f09cfdf45d19c753",
+    "screens/baseline-before/dark.png": "55e25bd1dd5d3875e3a1d6a0dc94134ca1cf742e65ceac9a0ed9e4e822906762"
+  },
+  "background_constraint": {
+    "all_gui_after_user_request_in_virtual_display": true,
+    "user_desktop_mouse_used_after_request": false,
+    "browser_verification_headless": true
+  },
+  "not_verified": [
+    "实体多屏",
+    "动态硬件DPI",
+    "物理窗口管理器拖动",
+    "实体触控板手感",
+    "A/B的10万及30万规模性能",
+    "新增长时间稳定性"
+  ],
+  "release_packages_changed": false,
+  "license_configuration_changed": false
+}

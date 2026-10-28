@@ -1,0 +1,10 @@
+********* Start testing of correctness_test *********
+Config: Using QtTest library 6.9.3, Qt 6.9.3 (x86_64-little_endian-lp64 shared (dynamic) release build; by GCC 10.3.1 20210422 (Red Hat 10.3.1-1)), ubuntu 22.04
+PASS   : correctness_test::initTestCase()
+FAIL!  : correctness_test::scene_focus_tracks_path() Compared pointers are not the same
+   Actual   (scene.focusItem())                                  : 0x57ef9827ec00
+   Expected (static_cast<QGraphicsItem*>(scene.active_items_[1])): 0x57ef9827e990
+   Loc: [/home/gyl/example/ImageViewer/tests/correctness_test.cc(2388)]
+PASS   : correctness_test::cleanupTestCase()
+Totals: 2 passed, 1 failed, 0 skipped, 0 blacklisted, 71ms
+********* Finished testing of correctness_test *********

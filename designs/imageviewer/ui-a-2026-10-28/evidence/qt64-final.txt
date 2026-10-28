@@ -1,0 +1,13 @@
+[1/6] Automatic MOC and UIC for target imageviewer_tests
+[2/5] Building CXX object CMakeFiles/imageviewer_tests.dir/tests/correctness_test.cc.o
+[3/5] Building CXX object CMakeFiles/imageviewer_tests.dir/waterfall_scene.cc.o
+[4/5] Building CXX object CMakeFiles/imageviewer_tests.dir/window_title_bar.cc.o
+[5/5] Linking CXX executable imageviewer_tests
+Internal ctest changing into directory: /out/build
+Test project /out/build
+    Start 1: correctness
+1/1 Test #1: correctness ......................   Passed    8.54 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   8.54 sec

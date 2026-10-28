@@ -1,0 +1,14 @@
+[1/4] Automatic MOC for target imageviewer_ui_review
+[2/3] Building CXX object CMakeFiles/imageviewer_ui_review.dir/review_probe.cc.o
+/tmp/iv-ui-review-20261028/build/review_probe.cc: In member function ‘int performance_probe::run(const QString&, const QString&, performance_probe::run_mode)’:
+/tmp/iv-ui-review-20261028/build/review_probe.cc:476:41: warning: ignoring return value of ‘bool QTest::qWaitForWindowExposed(QWidget*, int)’, declared with attribute ‘nodiscard’ [-Wunused-result]
+  476 |             QTest::qWaitForWindowExposed(&window_);
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+In file included from /home/gyl/data/qt/6.9.3/gcc_64/include/QtTest/qtestsystem.h:14,
+                 from /home/gyl/data/qt/6.9.3/gcc_64/include/QtTest/qtest.h:282,
+                 from /home/gyl/data/qt/6.9.3/gcc_64/include/QtTest/QtTest:11,
+                 from /tmp/iv-ui-review-20261028/build/review_probe.cc:25:
+/home/gyl/data/qt/6.9.3/gcc_64/include/QtWidgets/qtestsupport_widgets.h:19:37: note: declared here
+   19 | [[nodiscard]] Q_WIDGETS_EXPORT bool qWaitForWindowExposed(QWidget *widget, int timeout = 5000);
+      |                                     ^~~~~~~~~~~~~~~~~~~~~
+[3/3] Linking CXX executable imageviewer_ui_review
