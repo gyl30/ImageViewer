@@ -20,7 +20,7 @@ window_title_bar::window_title_bar(QMainWindow* owner, QToolBar* toolbar)
     setObjectName("window_title_bar");
     owner->setWindowFlag(Qt::FramelessWindowHint);
     owner->setMouseTracking(true);
-    setStyleSheet("QFrame#window_title_bar { background: palette(window); border-bottom: 1px solid palette(mid); }");
+    setAutoFillBackground(true);
     auto* layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 4, 0);
     layout->setSpacing(0);

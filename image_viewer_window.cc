@@ -155,7 +155,7 @@ void image_viewer_window::setup_ui()
     toolbar->setFloatable(false);
     toolbar->setIconSize(QSize(18, 18));
     toolbar->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    toolbar->setStyleSheet("QToolBar { background: palette(window); border: 0; spacing: 2px; padding: 4px; } QToolButton { padding: 6px; }");
+    toolbar->setStyleSheet("QToolBar { background: transparent; border: 0; spacing: 2px; padding: 4px; } QToolButton { padding: 6px; }");
     auto* back_action = toolbar->addAction(QIcon(":/icons/grid.svg"), "图库");
     back_action->setToolTip("返回图库（Esc）");
     connect(back_action, &QAction::triggered, this, &QWidget::close);
@@ -834,10 +834,11 @@ bool image_viewer_window::eventFilter(QObject* watched, QEvent* event)
     if (watched == view_->viewport() && event->type() == QEvent::Wheel)
     {
         auto* wheel_event = static_cast<QWheelEvent*>(event);
+        const QPoint delta = wheel_event->angleDelta().isNull() ? wheel_event->pixelDelta() : wheel_event->angleDelta();
 
-        if ((wheel_event->modifiers() & Qt::ControlModifier) != 0U)
+        if ((wheel_event->modifiers() & Qt::ControlModifier) != 0U && delta.y() != 0)
         {
-            if (wheel_event->angleDelta().y() > 0)
+            if (delta.y() > 0)
             {
                 zoom_in();
             }

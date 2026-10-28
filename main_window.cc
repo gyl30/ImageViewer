@@ -154,7 +154,7 @@ void main_window::setup_ui()
     toolbar->setFloatable(false);
     toolbar->setIconSize(QSize(18, 18));
     toolbar->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    toolbar->setStyleSheet("QToolBar { background: palette(window); border: 0; spacing: 4px; padding: 4px; } QToolButton { padding: 6px; }");
+    toolbar->setStyleSheet("QToolBar { background: transparent; border: 0; spacing: 4px; padding: 4px; } QToolButton { padding: 6px; }");
     auto* open_button = new QToolButton(toolbar);
     open_button->setToolButtonStyle(Qt::ToolButtonIconOnly);
     open_button->setDefaultAction(act_open);
