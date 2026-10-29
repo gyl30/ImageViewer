@@ -120,7 +120,7 @@ void window_title_bar::update_palette()
         "QToolButton::menu-button { background: transparent; border: 0; width: 12px; }"
         "QToolButton:hover, QToolButton:checked { background: %1; }"
         "QToolButton:focus { border-color: %2; }"
-        "QToolButton#more_menu::menu-indicator, QToolButton#preview_mode::menu-indicator { image: none; }")
+        "QToolButton::menu-indicator, QToolButton::menu-arrow { image: none; }")
         .arg(hover, accent));
     maximize_button_->parentWidget()->setStyleSheet(QString(
         "QToolButton { border: 0; border-radius: 5px; padding: 8px; }"

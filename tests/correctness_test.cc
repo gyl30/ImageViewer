@@ -2230,16 +2230,17 @@ void correctness_test::header_follows_theme()
 void correctness_test::popup_indicators_data()
 {
     QTest::addColumn<bool>("preview");
-    QTest::addColumn<bool>("mode");
-    QTest::newRow("library-more") << false << false;
-    QTest::newRow("preview-more") << true << false;
-    QTest::newRow("preview-mode") << true << true;
+    QTest::addColumn<QString>("text");
+    QTest::newRow("library-more") << false << QString("更多");
+    QTest::newRow("library-open") << false << QString("打开");
+    QTest::newRow("preview-more") << true << QString("更多");
+    QTest::newRow("preview-mode") << true << QString("适应窗口");
 }
 
 void correctness_test::popup_indicators()
 {
     QFETCH(bool, preview);
-    QFETCH(bool, mode);
+    QFETCH(QString, text);
     std::unique_ptr<QMainWindow> window;
     if (preview) { window = std::make_unique<image_viewer_window>(); }
     else { window = std::make_unique<main_window>(); }
@@ -2249,7 +2250,7 @@ void correctness_test::popup_indicators()
     QToolButton* button = nullptr;
     for (auto* candidate : window->findChildren<QToolButton*>())
     {
-        if ((mode && candidate->objectName() == "preview_mode") || (!mode && candidate->text() == "更多"))
+        if (candidate->text() == text)
         {
             button = candidate;
         }
@@ -2265,9 +2266,17 @@ void correctness_test::popup_indicators()
     const qreal dpr = button->devicePixelRatioF();
     const QRect bottom(0, with_menu.height() - qRound(6 * dpr), with_menu.width(), qRound(5 * dpr));
     QCOMPARE(with_menu.copy(bottom), without_menu.copy(bottom));
+    if (button->popupMode() == QToolButton::MenuButtonPopup)
+    {
+        const QRect right(with_menu.width() - qRound(12 * dpr), qRound(2 * dpr),
+                          qRound(10 * dpr), with_menu.height() - qRound(4 * dpr));
+        QCOMPARE(with_menu.copy(right), without_menu.copy(right));
+    }
     bool opened = false;
     QTimer::singleShot(0, menu, [&]() { opened = menu->isVisible(); menu->close(); });
-    QTest::mouseClick(button, Qt::LeftButton);
+    const QPoint click = button->popupMode() == QToolButton::MenuButtonPopup ?
+        QPoint(button->width() - 5, button->height() / 2) : button->rect().center();
+    QTest::mouseClick(button, Qt::LeftButton, Qt::NoModifier, click);
     QVERIFY(opened);
 }
 
