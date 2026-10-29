@@ -62,6 +62,10 @@ jobs:
           $stage = Join-Path $env:RUNNER_TEMP 'ImageViewer-stage'
           cmake --install build --config Release --prefix $stage
           $exe = Join-Path $stage 'bin/ImageViewer.exe'
+          $image = [IO.File]::ReadAllBytes($exe)
+          $peOffset = [BitConverter]::ToInt32($image, 0x3c)
+          $subsystem = [BitConverter]::ToUInt16($image, $peOffset + 92)
+          if ($subsystem -ne 2) { throw "Expected a Windows GUI executable (subsystem 2), got $subsystem" }
           foreach ($plugin in @(
             'platforms/qwindows.dll',
             'imageformats/qwebp.dll',

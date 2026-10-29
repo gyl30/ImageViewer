@@ -34,7 +34,11 @@ set(PROJECT_SOURCES
     resources.qrc
 )
 
-add_executable(ImageViewer ${PROJECT_SOURCES})
+if(WIN32)
+    qt_add_executable(ImageViewer WIN32 ${PROJECT_SOURCES})
+else()
+    qt_add_executable(ImageViewer ${PROJECT_SOURCES})
+endif()
 
 target_link_libraries(ImageViewer PRIVATE Qt6::Widgets Qt6::Core Qt6::Gui Qt6::Concurrent Qt6::Svg)
 target_compile_definitions(ImageViewer PRIVATE IMAGEVIEWER_VERSION="${IMAGEVIEWER_VERSION}")
