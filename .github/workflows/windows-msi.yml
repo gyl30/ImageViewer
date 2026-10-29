@@ -29,11 +29,11 @@ jobs:
         run: |
           cmake --build build --config Release --parallel 2
           ctest --test-dir build -C Release --output-on-failure
-          if ($LASTEXITCODE -ne 0) {
-            $env:QT_QPA_PLATFORM = 'offscreen'
-            & .\build\Release\imageviewer_tests.exe
-            exit 1
-          }
+      - name: 输出 Windows Qt 测试失败用例
+        if: failure()
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: .\build\Release\imageviewer_tests.exe
       - name: 保存 Windows 测试失败日志
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
