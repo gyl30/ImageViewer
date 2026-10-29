@@ -258,16 +258,10 @@ void image_viewer_window::setup_ui()
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     spacer->setAttribute(Qt::WA_TransparentForMouseEvents);
     toolbar->addWidget(spacer);
-    auto* shortcuts_action = new QAction("?", this);
+    auto* shortcuts_action = new QAction("快捷键", this);
     shortcuts_action->setObjectName("show_shortcuts");
     shortcuts_action->setShortcut(QKeySequence(Qt::Key_F1));
     shortcuts_action->setToolTip(QString());
-    toolbar->addAction(shortcuts_action);
-    auto* shortcuts_button = qobject_cast<QToolButton*>(toolbar->widgetForAction(shortcuts_action));
-    shortcuts_button->setObjectName("show_shortcuts");
-    shortcuts_button->setToolButtonStyle(Qt::ToolButtonTextOnly);
-    shortcuts_button->setAccessibleName("快捷键");
-    shortcuts_button->setToolTip(QString());
     auto* more_button = new QToolButton(toolbar);
     more_button->setObjectName("more_menu");
     more_button->setText("更多");
@@ -293,6 +287,7 @@ void image_viewer_window::setup_ui()
 
     more_menu->addSeparator();
     more_menu->addAction(full_screen_action_);
+    more_menu->addAction(shortcuts_action);
     connect(shortcuts_action,
             &QAction::triggered,
             this,

@@ -86,6 +86,23 @@ void main_window::setup_ui()
     addAction(act_open);
     connect(act_open, &QAction::triggered, this, &main_window::on_add_folder);
 
+    auto* act_open_file = new QAction("打开图片", this);
+    act_open_file->setObjectName("open_image");
+    act_open_file->setShortcut(QKeySequence("Ctrl+Shift+O"));
+    addAction(act_open_file);
+    connect(act_open_file, &QAction::triggered, this, [this]()
+    {
+        const QString path = QFileDialog::getOpenFileName(
+            this,
+            "Select Image",
+            last_open_dir_,
+            "Images (*.jpg *.jpeg *.png *.bmp *.gif *.webp)");
+        if (!path.isEmpty())
+        {
+            open_path(path, true);
+        }
+    });
+
     auto* act_open_recent = new QAction("最近", this);
     act_open_recent->setToolTip(QString());
     act_open_recent->setShortcut(QKeySequence("Ctrl+Alt+O"));
@@ -102,6 +119,7 @@ void main_window::setup_ui()
             {
                 show_shortcuts_dialog(this,
                                       {{"图库", "打开文件夹", "Ctrl+O"},
+                                       {"图库", "打开图片（快捷键）", "Ctrl+Shift+O"},
                                        {"图库", "最近打开", "Ctrl+Alt+O"},
                                        {"图库", "打开所选图片", "Enter / Space"},
                                        {"图库", "向上 / 向下滚动", "K / J"},
