@@ -33,13 +33,15 @@ jobs:
         if: failure()
         env:
           QT_QPA_PLATFORM: offscreen
-        run: .\build\Release\imageviewer_tests.exe
+        run: .\build\Release\imageviewer_tests.exe -v1 -o windows-tests.txt,txt
       - name: 保存 Windows 测试失败日志
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: Windows-test-failure-log
-          path: build/Testing/Temporary/LastTest.log
+          path: |
+            build/Testing/Temporary/LastTest.log
+            windows-tests.txt
           if-no-files-found: ignore
           retention-days: 7
       - name: 部署 Qt 运行库并检查启动
