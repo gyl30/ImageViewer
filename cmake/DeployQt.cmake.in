@@ -2,7 +2,7 @@ execute_process(
     COMMAND "@QT_INSTALL_PREFIX@/bin/windeployqt.exe"
         --release --compiler-runtime --no-translations
         --include-plugins qwebp,qsvgicon
-        "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/ImageViewer.exe"
+        "${CMAKE_INSTALL_PREFIX}/@CMAKE_INSTALL_BINDIR@/ImageViewer.exe"
     RESULT_VARIABLE deploy_result
 )
 if(NOT deploy_result EQUAL 0)
