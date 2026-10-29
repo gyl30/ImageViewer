@@ -194,6 +194,7 @@ class correctness_test : public QObject
     void main_close_closes_viewer();
     void scanner_reports_root_error();
     void theme_keeps_scene_items();
+    void status_bar_is_compact_and_centered();
     void theme_styles_menus_and_scrollbars();
     void scroll_updates_during_motion();
     void viewer_error_is_visible();
@@ -1327,6 +1328,30 @@ void correctness_test::theme_keeps_scene_items()
     QVERIFY(QApplication::palette().base().color().lightness() > 128);
     QCOMPARE(theme_button->accessibleName(), QString("切换到深色主题"));
     QCOMPARE(scene->items().size(), items);
+}
+
+void correctness_test::status_bar_is_compact_and_centered()
+{
+    main_window library;
+    image_viewer_window preview(&library);
+    library.resize(800, 600);
+    preview.resize(800, 600);
+    library.show();
+    preview.show();
+    QTRY_COMPARE(library.statusBar()->height(), 28);
+    QTRY_COMPARE(preview.statusBar()->height(), 28);
+
+    for (QMainWindow* window : {static_cast<QMainWindow*>(&library), static_cast<QMainWindow*>(&preview)})
+    {
+        auto* status = window->statusBar();
+        QVERIFY(!status->isSizeGripEnabled());
+        for (auto* label : status->findChildren<QLabel*>())
+        {
+            QVERIFY(label->alignment().testFlag(Qt::AlignVCenter));
+            QCOMPARE(label->margin(), 0);
+            QVERIFY(std::abs(label->geometry().center().y() - status->rect().center().y()) <= 2);
+        }
+    }
 }
 
 void correctness_test::theme_styles_menus_and_scrollbars()

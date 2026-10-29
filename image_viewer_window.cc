@@ -145,9 +145,15 @@ void image_viewer_window::setup_ui()
     setCentralWidget(view_);
 
     image_info_label_ = new QLabel(this);
+    image_info_label_->setObjectName("status_image_info");
+    image_info_label_->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    image_info_label_->setMargin(0);
     statusBar()->addWidget(image_info_label_);
 
     zoom_label_ = new QLabel(this);
+    zoom_label_->setObjectName("status_zoom");
+    zoom_label_->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    zoom_label_->setMargin(0);
     statusBar()->addPermanentWidget(zoom_label_);
 
     auto* toolbar = new QToolBar("预览", this);

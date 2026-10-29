@@ -232,17 +232,24 @@ void main_window::setup_ui()
     setAcceptDrops(true);
 
     status_label_ = new QLabel("打开或拖入文件夹，开始浏览图片", this);
+    status_label_->setObjectName("status_message");
     status_label_->setTextFormat(Qt::PlainText);
+    status_label_->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    status_label_->setMargin(0);
     statusBar()->addWidget(status_label_);
     scan_progress_ = new QProgressBar(this);
     scan_progress_->setObjectName("scan_progress");
     scan_progress_->setMaximumWidth(160);
+    scan_progress_->setFixedHeight(8);
     scan_progress_->setTextVisible(false);
     scan_progress_->hide();
     statusBar()->addPermanentWidget(scan_progress_);
 
     info_label_ = new QLabel(this);
+    info_label_->setObjectName("status_info");
     info_label_->setTextFormat(Qt::PlainText);
+    info_label_->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    info_label_->setMargin(0);
     statusBar()->addPermanentWidget(info_label_);
     setMenuWidget(new window_title_bar(this, toolbar));
     toolbar->setToolButtonStyle(Qt::ToolButtonTextOnly);
@@ -802,6 +809,11 @@ void main_window::set_dark_theme(bool enabled)
         "QMenu::item:selected { background-color: %3; color: %2; }"
         "QMenu::item:disabled { color: %4; }"
         "QMenu::separator { height: 1px; background: %5; margin: 4px 8px; }"
+        "QStatusBar { background-color: %1; color: %2; border-top: 1px solid %5; padding: 0; margin: 0; }"
+        "QStatusBar::item { border: none; }"
+        "QStatusBar QLabel { padding: 0 8px; margin: 0; }"
+        "QStatusBar QProgressBar { background: %1; border: none; border-radius: 4px; margin: 0 8px; padding: 0; }"
+        "QStatusBar QProgressBar::chunk { background-color: %7; border-radius: 4px; }"
         "QScrollBar:vertical { background: %1; width: 10px; margin: 0; border: none; }"
         "QScrollBar:horizontal { background: %1; height: 10px; margin: 0; border: none; }"
         "QScrollBar::handle:vertical { background: %6; min-height: 28px; border-radius: 5px; }"

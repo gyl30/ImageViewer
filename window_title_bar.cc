@@ -103,6 +103,8 @@ window_title_bar::window_title_bar(QMainWindow* owner, QToolBar* toolbar)
     owner->installEventFilter(this);
     toolbar->installEventFilter(this);
     owner->centralWidget()->installEventFilter(this);
+    owner->statusBar()->setSizeGripEnabled(false);
+    owner->statusBar()->setFixedHeight(28);
     owner->statusBar()->installEventFilter(this);
     installEventFilter(this);
     update_palette();
