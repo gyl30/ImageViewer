@@ -858,7 +858,10 @@ void main_window::set_dark_theme(bool enabled)
     const QString border = palette.color(QPalette::Mid).name();
     const QString scrollbar_handle = palette.color(QPalette::Mid).name();
     const QString scrollbar_hover = palette.color(QPalette::Highlight).name();
+    const QString tooltip_background = palette.color(QPalette::ToolTipBase).name();
+    const QString tooltip_text = palette.color(QPalette::ToolTipText).name();
     qApp->setStyleSheet(QStringLiteral(
+        "QToolTip { color: %8; background-color: %9; border: 1px solid %5; padding: 4px; }"
         "QMenu { background-color: %1; color: %2; border: 1px solid %5; padding: 4px; }"
         "QMenu::item { background: transparent; color: %2; padding: 6px 12px; }"
         "QMenu::item:selected { background-color: %3; color: %2; }"
@@ -879,7 +882,9 @@ void main_window::set_dark_theme(bool enabled)
              disabled_text,
              border,
              scrollbar_handle,
-             scrollbar_hover));
+             scrollbar_hover,
+             tooltip_text,
+             tooltip_background));
     for (auto* view : findChildren<QGraphicsView*>())
     {
         view->setBackgroundBrush(palette.base());

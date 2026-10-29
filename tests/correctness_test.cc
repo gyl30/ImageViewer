@@ -37,6 +37,7 @@
 #include <QLineEdit>
 #include <QToolButton>
 #include <QMenu>
+#include <QToolTip>
 #include <QToolBar>
 #include <QStatusBar>
 #include <QSettings>
@@ -1345,6 +1346,23 @@ void correctness_test::theme_styles_menus_and_scrollbars()
     QTRY_VERIFY(scrollbar.isVisible());
     const QImage scrollbar_image = scrollbar.grab().toImage();
     QCOMPARE(scrollbar_image.pixelColor(0, scrollbar_image.height() - 2).rgb(), dark_surface.rgb());
+
+    QToolTip::showText(window.mapToGlobal(QPoint(24, 24)), "提示信息", &window);
+    QTRY_VERIFY(QToolTip::isVisible());
+    QWidget* tooltip = nullptr;
+    for (auto* top_level : QApplication::topLevelWidgets())
+    {
+        if (top_level->windowType() == Qt::ToolTip)
+        {
+            tooltip = top_level;
+            break;
+        }
+    }
+    QVERIFY(tooltip != nullptr);
+    const QImage tooltip_image = tooltip->grab().toImage();
+    const QColor tooltip_surface = QApplication::palette().color(QPalette::ToolTipBase);
+    QCOMPARE(tooltip_image.pixelColor(tooltip_image.width() - 4, tooltip_image.height() / 2).rgb(), tooltip_surface.rgb());
+    QToolTip::hideText();
 }
 
 void correctness_test::scroll_updates_during_motion()
