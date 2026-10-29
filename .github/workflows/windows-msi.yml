@@ -93,6 +93,13 @@ jobs:
           }
       - name: 生成 MSI
         run: cpack --config build/CPackConfig.cmake -C Release -G WIX -B dist --verbose
+      - name: 验证桌面快捷方式
+        shell: pwsh
+        run: |
+          $sources = Get-ChildItem 'dist/_CPack_Packages/win64/WIX' -Filter '*.wxs' -File
+          if (-not ($sources | Select-String -Pattern 'DesktopFolder' -Quiet)) {
+            throw 'MSI does not define the ImageViewer desktop shortcut'
+          }
       - name: 保存 WiX 失败日志
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
