@@ -30,6 +30,7 @@ jobs:
           cmake --build build --config Release --parallel 2
           ctest --test-dir build -C Release --output-on-failure
           if ($LASTEXITCODE -ne 0) {
+            $env:QT_QPA_PLATFORM = 'offscreen'
             & .\build\Release\imageviewer_tests.exe
             exit 1
           }
