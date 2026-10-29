@@ -39,6 +39,9 @@
 #include <QMenu>
 #include <QToolTip>
 #include <QToolBar>
+#include <QTableWidget>
+#include <QDialog>
+#include <QGraphicsSceneContextMenuEvent>
 #include <QStatusBar>
 #include <QSettings>
 #include <QLibrary>
@@ -220,7 +223,7 @@ class correctness_test : public QObject
     void viewer_mouse_navigation();
     void viewer_wheel_zoom_data();
     void viewer_wheel_zoom();
-    void compact_sort_controls();
+    void context_sort_controls();
     void compact_preview_controls();
     void custom_header_data();
     void custom_header();
@@ -229,10 +232,11 @@ class correctness_test : public QObject
     void popup_indicators();
     void directory_context();
     void toolbar_uses_text_buttons();
+    void shortcuts_open_table();
     void card_focus_state();
     void scene_focus_tracks_path();
     void recent_menu_is_flat();
-    void sorting_is_in_toolbar();
+    void sorting_is_in_context_menu();
     void xcb_header_gestures();
 };
 
@@ -1310,17 +1314,18 @@ void correctness_test::theme_keeps_scene_items()
     main_window window;
     auto* theme = window.findChild<QAction*>("dark_theme");
     QVERIFY(theme != nullptr);
-    QVERIFY(theme->icon().isNull());
-    QCOMPARE(theme->text(), QString("深色主题"));
+    QVERIFY(!theme->icon().isNull());
+    QVERIFY(theme->text().isEmpty());
+    auto* theme_button = window.findChild<QToolButton*>("theme_toggle");
     auto* scene = window.findChild<waterfall_scene*>();
     const int items = scene->items().size();
     theme->setChecked(true);
     QVERIFY(QApplication::palette().base().color().lightness() < 128);
-    QCOMPARE(theme->text(), QString("浅色主题"));
+    QCOMPARE(theme_button->accessibleName(), QString("切换到浅色主题"));
     QCOMPARE(scene->items().size(), items);
     theme->setChecked(false);
     QVERIFY(QApplication::palette().base().color().lightness() > 128);
-    QCOMPARE(theme->text(), QString("深色主题"));
+    QCOMPARE(theme_button->accessibleName(), QString("切换到深色主题"));
     QCOMPARE(scene->items().size(), items);
 }
 
@@ -2146,7 +2151,7 @@ void correctness_test::viewer_mouse_navigation()
     QCOMPARE(viewer.current_image_path(), paths[1]);
 }
 
-void correctness_test::compact_sort_controls()
+void correctness_test::context_sort_controls()
 {
     QTemporaryDir dir;
     const QString small = dir.filePath("z-small.png");
@@ -2159,29 +2164,41 @@ void correctness_test::compact_sort_controls()
     main_window window;
     window.resize(640, 480);
     window.show();
-    auto* button = window.findChild<QToolButton*>("sort_options");
-    QVERIFY(button != nullptr && button->menu() != nullptr);
+    QVERIFY(window.findChild<QToolButton*>("sort_options") == nullptr);
     QTest::qWait(50);
-    QVERIFY(button->isVisibleTo(&window));
-    QVERIFY(window.rect().contains(button->mapTo(&window, button->rect().bottomRight())));
+    QVERIFY(window.findChild<QToolButton*>("theme_toggle") != nullptr);
     QVERIFY(drop_folder(window, dir.path()));
     auto* scene = window.findChild<waterfall_scene*>();
     QTRY_COMPARE(scene->get_all_paths().size(), 2);
-    QAction* size_action = nullptr;
-    QAction* reverse_action = nullptr;
-    QMenu* sort = nullptr;
-    sort = button->menu();
-    for (auto* action : sort->actions())
+    auto choose_sort = [scene](const QString& label)
     {
-        if (action->text() == "文件大小") { size_action = action; }
-        if (action->text() == "倒序") { reverse_action = action; }
-    }
-    QVERIFY(size_action != nullptr && reverse_action != nullptr);
-    if (reverse_action->isChecked()) { reverse_action->trigger(); }
-    size_action->trigger();
+        bool found = false;
+        QTimer::singleShot(0, [&]()
+        {
+            auto* menu = qobject_cast<QMenu*>(QApplication::activePopupWidget());
+            QVERIFY(menu != nullptr);
+            auto* sort_menu = menu->actions().first()->menu();
+            QVERIFY(sort_menu != nullptr);
+            for (auto* action : sort_menu->actions())
+            {
+                if (action->text() == label)
+                {
+                    action->trigger();
+                    found = true;
+                    break;
+                }
+            }
+            menu->close();
+        });
+        QGraphicsSceneContextMenuEvent event(QEvent::GraphicsSceneContextMenu);
+        event.setScenePos(QPointF(1, 1));
+        event.setScreenPos(QPoint(40, 40));
+        scene->contextMenuEvent(&event);
+        return found;
+    };
+    QVERIFY(choose_sort("文件大小"));
     QTRY_COMPARE(scene->get_all_paths().value(0), small);
-    QVERIFY(size_action->isChecked());
-    reverse_action->trigger();
+    QVERIFY(choose_sort("倒序"));
     QTRY_COMPARE(scene->get_all_paths().value(0), large);
 }
 
@@ -2240,11 +2257,18 @@ void correctness_test::custom_header()
     for (auto* button : header->findChildren<QToolButton*>())
     {
         if (button->objectName() == "qt_toolbar_ext_button") { continue; }
-        if (preview || button->objectName().startsWith("window_"))
+        if (button->objectName() == "show_shortcuts")
+        {
+            QCOMPARE(button->text(), QString("?"));
+            QCOMPARE(button->toolButtonStyle(), Qt::ToolButtonTextOnly);
+            QVERIFY(button->icon().isNull());
+            QVERIFY(button->toolTip().isEmpty());
+        }
+        else if (preview || button->objectName().startsWith("window_") || button->objectName() == "theme_toggle")
         {
             QCOMPARE(button->toolButtonStyle(), Qt::ToolButtonIconOnly);
             QVERIFY(!button->icon().isNull());
-            QVERIFY(!button->toolTip().isEmpty());
+            if (button->objectName() != "theme_toggle") { QVERIFY(!button->toolTip().isEmpty()); }
         }
         else
         {
@@ -2300,7 +2324,6 @@ void correctness_test::popup_indicators_data()
 {
     QTest::addColumn<bool>("preview");
     QTest::addColumn<QString>("text");
-    QTest::newRow("library-sort") << false << QString("sort_options");
     QTest::newRow("preview-more") << true << QString("更多");
     QTest::newRow("preview-mode") << true << QString("适应窗口");
 }
@@ -2318,8 +2341,7 @@ void correctness_test::popup_indicators()
     QToolButton* button = nullptr;
     for (auto* candidate : window->findChildren<QToolButton*>())
     {
-        if ((!preview && text == "sort_options" && candidate->objectName() == text)
-            || candidate->text() == text)
+        if (candidate->text() == text)
         {
             button = candidate;
         }
@@ -2390,20 +2412,66 @@ void correctness_test::toolbar_uses_text_buttons()
     auto* theme = window.findChild<QAction*>("dark_theme");
     QVERIFY(toolbar != nullptr && theme != nullptr);
     QVERIFY(window.findChild<QToolButton*>("more_menu") == nullptr);
-    QVERIFY(window.findChild<QToolButton*>("sort_options") != nullptr);
+    QVERIFY(window.findChild<QToolButton*>("sort_options") == nullptr);
     QCOMPARE(toolbar->toolButtonStyle(), Qt::ToolButtonTextOnly);
+    auto* theme_button = window.findChild<QToolButton*>("theme_toggle");
+    auto* help_button = window.findChild<QToolButton*>("show_shortcuts");
+    QVERIFY(theme_button != nullptr && help_button != nullptr);
+    QCOMPARE(help_button->text(), QString("?"));
+    QCOMPARE(help_button->toolButtonStyle(), Qt::ToolButtonTextOnly);
+    QCOMPARE(theme_button->toolButtonStyle(), Qt::ToolButtonIconOnly);
+    QVERIFY(!theme_button->icon().isNull());
+    const QIcon app_icon(":/icons/app.svg");
+    QVERIFY(!app_icon.pixmap(64, 64).isNull());
+    theme->setChecked(false);
+    const QImage moon = theme_button->icon().pixmap(24, 24).toImage();
+    theme->setChecked(true);
+    const QImage sun = theme_button->icon().pixmap(24, 24).toImage();
+    QVERIFY(moon != sun);
+    for (auto* action : toolbar->actions()) { QVERIFY(action->text() != "打开图片"); }
     for (bool dark : {false, true, false})
     {
         theme->setChecked(dark);
-        QCOMPARE(theme->text(), dark ? QString("浅色主题") : QString("深色主题"));
+        QVERIFY(theme->text().isEmpty());
+        QVERIFY(!theme_button->icon().isNull());
+        QCOMPARE(theme_button->accessibleName(), dark ? QString("切换到浅色主题") : QString("切换到深色主题"));
         for (auto* button : toolbar->findChildren<QToolButton*>())
         {
             if (button->objectName() == "qt_toolbar_ext_button") { continue; }
+            if (button == theme_button)
+            {
+                QVERIFY(button->toolTip().isEmpty());
+                continue;
+            }
             QCOMPARE(button->toolButtonStyle(), Qt::ToolButtonTextOnly);
             QVERIFY2(button->icon().isNull(), qPrintable(button->objectName() + ": icon remains"));
             QVERIFY2(button->toolTip().isEmpty(), qPrintable(button->objectName() + ": tooltip remains: " + button->toolTip()));
         }
     }
+}
+
+void correctness_test::shortcuts_open_table()
+{
+    main_window window;
+    auto* action = window.findChild<QAction*>("show_shortcuts");
+    QVERIFY(action != nullptr);
+    bool table_seen = false;
+    QTimer::singleShot(0, [&]()
+    {
+        auto* dialog = qobject_cast<QDialog*>(QApplication::activeModalWidget());
+        QVERIFY(dialog != nullptr);
+        auto* table = dialog->findChild<QTableWidget*>();
+        QVERIFY(table != nullptr);
+        QCOMPARE(table->columnCount(), 3);
+        QVERIFY(table->rowCount() >= 10);
+        QCOMPARE(table->horizontalHeaderItem(0)->text(), QString("范围"));
+        QCOMPARE(table->horizontalHeaderItem(1)->text(), QString("操作"));
+        QCOMPARE(table->horizontalHeaderItem(2)->text(), QString("快捷键"));
+        table_seen = true;
+        dialog->reject();
+    });
+    action->trigger();
+    QVERIFY(table_seen);
 }
 
 void correctness_test::card_focus_state()
@@ -2499,15 +2567,28 @@ void correctness_test::recent_menu_is_flat()
     QCOMPARE(paths, QStringList({dir.path(), image_path}));
 }
 
-void correctness_test::sorting_is_in_toolbar()
+void correctness_test::sorting_is_in_context_menu()
 {
     main_window window;
     QVERIFY(window.findChild<QToolButton*>("more_menu") == nullptr);
-    auto* sort_button = window.findChild<QToolButton*>("sort_options");
-    QVERIFY(sort_button != nullptr && sort_button->menu() != nullptr);
-    QStringList names;
-    for (auto* action : sort_button->menu()->actions()) { names.append(action->text()); }
-    QVERIFY(names.contains("文件名") && names.contains("修改时间") && names.contains("文件大小"));
+    QVERIFY(window.findChild<QToolButton*>("sort_options") == nullptr);
+    auto* scene = window.findChild<waterfall_scene*>();
+    QSignalSpy sort_requested(scene, &waterfall_scene::request_sort);
+    QGraphicsSceneContextMenuEvent event(QEvent::GraphicsSceneContextMenu);
+    event.setScenePos(QPointF(1, 1));
+    event.setScreenPos(QPoint(40, 40));
+    QTimer::singleShot(0, [&]()
+    {
+        auto* menu = qobject_cast<QMenu*>(QApplication::activePopupWidget());
+        QVERIFY(menu != nullptr);
+        QVERIFY(menu->actions().first()->menu() != nullptr);
+        QStringList labels;
+        for (auto* action : menu->actions().first()->menu()->actions()) { labels.append(action->text()); }
+        QVERIFY(labels.contains("文件名") && labels.contains("修改时间") && labels.contains("文件大小"));
+        menu->close();
+    });
+    scene->contextMenuEvent(&event);
+    QCOMPARE(sort_requested.size(), 0);
 }
 
 void correctness_test::xcb_header_gestures()

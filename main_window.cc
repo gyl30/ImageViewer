@@ -1,7 +1,6 @@
 #include <QTimer>
 #include <QDebug>
 #include <QAction>
-#include <QActionGroup>
 #include <QKeySequence>
 #include <QFileDialog>
 #include <QDirIterator>
@@ -39,6 +38,7 @@
 #include "image_viewer_window.h"
 #include "file_scanner.h"
 #include "window_title_bar.h"
+#include "shortcut_dialog.h"
 
 main_window::main_window(QWidget* parent) : QMainWindow(parent)
 {
@@ -79,16 +79,6 @@ main_window::~main_window()
 
 void main_window::setup_ui()
 {
-    auto rescan_current_folder =
-        [this]()
-    {
-        if (current_root_path_.isEmpty())
-        {
-            return;
-        }
-        open_path(current_root_path_, false);
-    };
-
     setWindowTitle("ImageViewer");
     auto* act_open = new QAction("打开", this);
     act_open->setToolTip(QString());
@@ -96,31 +86,12 @@ void main_window::setup_ui()
     addAction(act_open);
     connect(act_open, &QAction::triggered, this, &main_window::on_add_folder);
 
-    auto* act_open_file = new QAction("打开图片", this);
-    act_open_file->setToolTip(QString());
-    act_open_file->setShortcut(QKeySequence("Ctrl+Shift+O"));
-    addAction(act_open_file);
-    connect(act_open_file,
-            &QAction::triggered,
-            this,
-            [this]()
-            {
-                QString path = QFileDialog::getOpenFileName(
-                    this,
-                    "Select Image",
-                    last_open_dir_,
-                    "Images (*.jpg *.jpeg *.png *.bmp *.gif *.webp)");
-                if (!path.isEmpty())
-                {
-                    open_path(path, true);
-                }
-            });
-
     auto* act_open_recent = new QAction("最近", this);
     act_open_recent->setToolTip(QString());
     act_open_recent->setShortcut(QKeySequence("Ctrl+Alt+O"));
     addAction(act_open_recent);
-    auto* act_shortcuts = new QAction("快捷键", this);
+    auto* act_shortcuts = new QAction("?", this);
+    act_shortcuts->setObjectName("show_shortcuts");
     act_shortcuts->setToolTip(QString());
     act_shortcuts->setShortcut(QKeySequence(Qt::Key_F1));
     addAction(act_shortcuts);
@@ -129,30 +100,26 @@ void main_window::setup_ui()
             this,
             [this]()
             {
-                QMessageBox::information(
-                    this,
-                    "快捷键",
-                    "主窗口:\n"
-                    "Ctrl+O 打开文件夹\n"
-                    "Ctrl+Shift+O 打开图片\n"
-                    "Ctrl+Alt+O 打开最近项\n"
-                    "Enter/Space 打开所选图片\n"
-                    "j/k 向下/向上滚动，g/G 到顶部/底部\n"
-                    "Alt+1..9 打开最近菜单中的对应项目\n"
-                    "F1 查看快捷键\n\n"
-                    "预览窗口:\n"
-                    "h/l 上一张/下一张（兼容 Left/Right）\n"
-                    "q 返回图库，f 全屏\n"
-                    "+/- 放大/缩小，0 适应窗口\n"
-                    "Space/Backspace 下一张/上一张\n"
-                    "鼠标侧键 后退/前进翻图\n"
-                    "Ctrl+滚轮 缩放\n"
-                    "Ctrl+0 适应窗口\n"
-                    "Ctrl+1 1:1\n"
-                    "Ctrl+2 适应宽度\n"
-                    "F11 全屏\n"
-                    "F5 幻灯片\n"
-                    "Esc 退出全屏或返回图库");
+                show_shortcuts_dialog(this,
+                                      {{"图库", "打开文件夹", "Ctrl+O"},
+                                       {"图库", "最近打开", "Ctrl+Alt+O"},
+                                       {"图库", "打开所选图片", "Enter / Space"},
+                                       {"图库", "向上 / 向下滚动", "K / J"},
+                                       {"图库", "滚动到顶部 / 底部", "G / Shift+G"},
+                                       {"图库", "打开最近列表中的项目", "Alt+1…9"},
+                                       {"通用", "显示快捷键", "问号按钮 / F1"},
+                                       {"预览", "上一张 / 下一张", "H / L 或 ← / →"},
+                                       {"预览", "返回图库", "Q / Esc"},
+                                       {"预览", "放大 / 缩小", "+ / - 或 Ctrl+滚轮"},
+                                       {"预览", "适应窗口 / 1:1 / 适应宽度", "Ctrl+0 / 1 / 2"},
+                                       {"预览", "上一张 / 下一张", "Backspace / Space"},
+                                       {"预览", "首张 / 末张", "Home / End"},
+                                       {"预览", "后退 / 前进翻图", "鼠标侧键"},
+                                       {"预览", "左转 / 右转", "Ctrl+L / Ctrl+R"},
+                                       {"预览", "水平 / 垂直翻转", "Ctrl+H / Ctrl+Shift+H"},
+                                       {"预览", "幻灯片", "F5"},
+                                       {"预览", "全屏", "F11 / F"},
+                                       {"预览", "移到回收站", "Delete"}});
             });
 
     auto* toolbar = new QToolBar("浏览", this);
@@ -162,9 +129,6 @@ void main_window::setup_ui()
     toolbar->addAction(act_open);
     toolbar->widgetForAction(act_open)->setAccessibleName("打开");
     toolbar->widgetForAction(act_open)->setToolTip(QString());
-    toolbar->addAction(act_open_file);
-    toolbar->widgetForAction(act_open_file)->setAccessibleName("打开图片");
-    toolbar->widgetForAction(act_open_file)->setToolTip(QString());
     toolbar->addAction(act_open_recent);
     auto* recent_button = toolbar->widgetForAction(act_open_recent);
     recent_button->setObjectName("recent_files");
@@ -174,87 +138,18 @@ void main_window::setup_ui()
     {
         show_recent_menu(recent_button->mapToGlobal(QPoint(0, recent_button->height())));
     });
-    auto* sort_button = new QToolButton(toolbar);
-    sort_button->setObjectName("sort_options");
-    sort_button->setText("排序");
-    sort_button->setToolButtonStyle(Qt::ToolButtonTextOnly);
-    sort_button->setToolTip(QString());
-    sort_button->setAccessibleName("排序方式");
-    sort_button->setPopupMode(QToolButton::InstantPopup);
-    auto* sort_menu = new QMenu(sort_button);
-    sort_button->setMenu(sort_menu);
-    toolbar->addWidget(sort_button);
+    auto* spacer = new QWidget(toolbar);
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    spacer->setAttribute(Qt::WA_TransparentForMouseEvents);
+    toolbar->addWidget(spacer);
 
-    sort_group_ = new QActionGroup(this);
-    sort_group_->setExclusive(true);
+    toolbar->addAction(act_shortcuts);
+    auto* shortcuts_button = qobject_cast<QToolButton*>(toolbar->widgetForAction(act_shortcuts));
+    shortcuts_button->setObjectName("show_shortcuts");
+    shortcuts_button->setAccessibleName("快捷键");
+    shortcuts_button->setToolTip(QString());
 
-    sort_name_action_ = sort_menu->addAction("文件名");
-    sort_name_action_->setCheckable(true);
-    sort_name_action_->setChecked(true);
-    sort_group_->addAction(sort_name_action_);
-    connect(sort_name_action_,
-            &QAction::triggered,
-            this,
-            [this, rescan_current_folder]()
-            {
-                if (current_sort_mode_ == scan_sort_mode::file_name)
-                {
-                    return;
-                }
-                current_sort_mode_ = scan_sort_mode::file_name;
-                rescan_current_folder();
-            });
-
-    sort_time_action_ = sort_menu->addAction("修改时间");
-    sort_time_action_->setCheckable(true);
-    sort_group_->addAction(sort_time_action_);
-    connect(sort_time_action_,
-            &QAction::triggered,
-            this,
-            [this, rescan_current_folder]()
-            {
-                if (current_sort_mode_ == scan_sort_mode::modified_time)
-                {
-                    return;
-                }
-                current_sort_mode_ = scan_sort_mode::modified_time;
-                rescan_current_folder();
-            });
-
-    sort_size_action_ = sort_menu->addAction("文件大小");
-    sort_size_action_->setCheckable(true);
-    sort_group_->addAction(sort_size_action_);
-    connect(sort_size_action_,
-            &QAction::triggered,
-            this,
-            [this, rescan_current_folder]()
-            {
-                if (current_sort_mode_ == scan_sort_mode::file_size)
-                {
-                    return;
-                }
-                current_sort_mode_ = scan_sort_mode::file_size;
-                rescan_current_folder();
-            });
-
-    sort_menu->addSeparator();
-    sort_desc_action_ = sort_menu->addAction("倒序");
-    sort_desc_action_->setCheckable(true);
-    connect(sort_desc_action_,
-            &QAction::triggered,
-            this,
-            [this, rescan_current_folder]()
-            {
-                const bool descending = sort_desc_action_ != nullptr && sort_desc_action_->isChecked();
-                if (sort_descending_ == descending)
-                {
-                    return;
-                }
-                sort_descending_ = descending;
-                rescan_current_folder();
-            });
-
-    dark_theme_action_ = new QAction("深色主题", this);
+    dark_theme_action_ = new QAction(this);
     dark_theme_action_->setObjectName("dark_theme");
     dark_theme_action_->setCheckable(true);
     dark_theme_action_->setToolTip(QString());
@@ -263,16 +158,10 @@ void main_window::setup_ui()
     if (auto* theme_button = qobject_cast<QToolButton*>(toolbar->widgetForAction(dark_theme_action_)))
     {
         theme_button->setObjectName("theme_toggle");
-        theme_button->setAccessibleName(dark_theme_action_->text());
+        theme_button->setAccessibleName("切换明暗主题");
+        theme_button->setToolButtonStyle(Qt::ToolButtonIconOnly);
         theme_button->setToolTip(QString());
     }
-    toolbar->addAction(act_shortcuts);
-    toolbar->widgetForAction(act_shortcuts)->setAccessibleName("快捷键");
-    toolbar->widgetForAction(act_shortcuts)->setToolTip(QString());
-    auto* spacer = new QWidget(toolbar);
-    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    spacer->setAttribute(Qt::WA_TransparentForMouseEvents);
-    toolbar->addWidget(spacer);
 
     scene_ = new waterfall_scene(this);
     view_ = new waterfall_view(this);
@@ -343,6 +232,10 @@ void main_window::setup_ui()
     {
         button->setToolButtonStyle(Qt::ToolButtonTextOnly);
     }
+    if (auto* theme_button = findChild<QToolButton*>("theme_toggle"))
+    {
+        theme_button->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    }
 }
 
 void main_window::setup_worker()
@@ -405,6 +298,21 @@ void main_window::setup_connections()
     connect(scene_, &waterfall_scene::request_reveal_path, this, &main_window::on_reveal_path);
     connect(scene_, &waterfall_scene::request_move_to_trash, this, &main_window::on_move_path_to_trash);
     connect(scene_, &waterfall_scene::request_clear_thumbnail_cache, image_loader_, &image_loader::clear_cache);
+    connect(scene_, &waterfall_scene::request_sort, this, [this](int mode, bool descending)
+    {
+        const auto new_mode = static_cast<scan_sort_mode>(mode);
+        if (new_mode == current_sort_mode_ && descending == sort_descending_)
+        {
+            return;
+        }
+        current_sort_mode_ = new_mode;
+        sort_descending_ = descending;
+        scene_->set_sort_state(mode, descending);
+        if (!current_root_path_.isEmpty())
+        {
+            open_path(current_root_path_, false);
+        }
+    });
     connect(scene_,
             &waterfall_scene::request_clear_thumbnail_cache,
             this,
@@ -444,22 +352,7 @@ void main_window::load_settings()
     }
 
     sort_descending_ = settings.value("main_window/sort_descending", false).toBool();
-    if (sort_name_action_ != nullptr)
-    {
-        sort_name_action_->setChecked(current_sort_mode_ == scan_sort_mode::file_name);
-    }
-    if (sort_time_action_ != nullptr)
-    {
-        sort_time_action_->setChecked(current_sort_mode_ == scan_sort_mode::modified_time);
-    }
-    if (sort_size_action_ != nullptr)
-    {
-        sort_size_action_->setChecked(current_sort_mode_ == scan_sort_mode::file_size);
-    }
-    if (sort_desc_action_ != nullptr)
-    {
-        sort_desc_action_->setChecked(sort_descending_);
-    }
+    scene_->set_sort_state(static_cast<int>(current_sort_mode_), sort_descending_);
 
     QString saved_dir = settings.value("main_window/last_open_dir", QDir::homePath()).toString();
     if (QFileInfo::exists(saved_dir))
@@ -844,8 +737,8 @@ void main_window::closeEvent(QCloseEvent* event)
 
 void main_window::set_dark_theme(bool enabled)
 {
-    const QString theme_label = enabled ? "浅色主题" : "深色主题";
-    dark_theme_action_->setText(theme_label);
+    const QString theme_label = enabled ? "切换到浅色主题" : "切换到深色主题";
+    dark_theme_action_->setIcon(toolbar_icon(enabled ? ":/icons/sun.svg" : ":/icons/theme.svg"));
     dark_theme_action_->setToolTip(QString());
     if (auto* theme_button = findChild<QToolButton*>("theme_toggle"))
     {

@@ -24,7 +24,6 @@
 #include <QLabel>
 #include <QMouseEvent>
 #include <QInputDialog>
-#include <QMessageBox>
 #include <QMovie>
 #include <QSettings>
 #include <QStatusBar>
@@ -32,6 +31,7 @@
 #include "common_types.h"
 #include "image_viewer_window.h"
 #include "window_title_bar.h"
+#include "shortcut_dialog.h"
 
 namespace
 {
@@ -258,6 +258,16 @@ void image_viewer_window::setup_ui()
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     spacer->setAttribute(Qt::WA_TransparentForMouseEvents);
     toolbar->addWidget(spacer);
+    auto* shortcuts_action = new QAction("?", this);
+    shortcuts_action->setObjectName("show_shortcuts");
+    shortcuts_action->setShortcut(QKeySequence(Qt::Key_F1));
+    shortcuts_action->setToolTip(QString());
+    toolbar->addAction(shortcuts_action);
+    auto* shortcuts_button = qobject_cast<QToolButton*>(toolbar->widgetForAction(shortcuts_action));
+    shortcuts_button->setObjectName("show_shortcuts");
+    shortcuts_button->setToolButtonStyle(Qt::ToolButtonTextOnly);
+    shortcuts_button->setAccessibleName("快捷键");
+    shortcuts_button->setToolTip(QString());
     auto* more_button = new QToolButton(toolbar);
     more_button->setObjectName("more_menu");
     more_button->setText("更多");
@@ -283,34 +293,25 @@ void image_viewer_window::setup_ui()
 
     more_menu->addSeparator();
     more_menu->addAction(full_screen_action_);
-    auto* shortcuts_action = more_menu->addAction("快捷键");
-    shortcuts_action->setShortcut(QKeySequence(Qt::Key_F1));
     connect(shortcuts_action,
             &QAction::triggered,
             this,
             [this]()
             {
-                QMessageBox::information(
-                    this,
-                    "快捷键",
-                    "H/L 上一张/下一张（兼容 Left/Right）\n"
-                    "Q 返回图库，F 全屏\n"
-                    "+/- 放大/缩小，0 适应窗口\n"
-                    "Space 下一张，Backspace 上一张\n"
-                    "Home/End 跳到首张/末张\n"
-                    "鼠标侧键 后退/前进翻图\n"
-                    "Ctrl+滚轮 缩放\n"
-                    "Ctrl+0 适应窗口\n"
-                    "Ctrl+1 1:1\n"
-                    "Ctrl+2 适应宽度\n"
-                    "Delete 移到回收站\n"
-                    "Ctrl+L 左转\n"
-                    "Ctrl+R 右转\n"
-                    "Ctrl+H 水平翻转\n"
-                    "Ctrl+Shift+H 垂直翻转\n"
-                    "F5 幻灯片\n"
-                    "F11 全屏\n"
-                    "Esc 退出全屏或返回图库");
+                show_shortcuts_dialog(this,
+                                      {{"预览", "上一张 / 下一张", "H / L 或 ← / →"},
+                                       {"预览", "返回图库", "Q / Esc"},
+                                       {"预览", "放大 / 缩小", "+ / - 或 Ctrl+滚轮"},
+                                       {"预览", "适应窗口 / 1:1 / 适应宽度", "Ctrl+0 / 1 / 2"},
+                                       {"预览", "上一张 / 下一张", "Backspace / Space"},
+                                       {"预览", "首张 / 末张", "Home / End"},
+                                       {"预览", "后退 / 前进翻图", "鼠标侧键"},
+                                       {"预览", "移到回收站", "Delete"},
+                                       {"预览", "左转 / 右转", "Ctrl+L / Ctrl+R"},
+                                       {"预览", "水平 / 垂直翻转", "Ctrl+H / Ctrl+Shift+H"},
+                                       {"预览", "幻灯片", "F5"},
+                                       {"预览", "全屏", "F11 / F"},
+                                       {"预览", "显示快捷键", "问号按钮 / F1"}});
             });
 
     addAction(fit_window_action_);

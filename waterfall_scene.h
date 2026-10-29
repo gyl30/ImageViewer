@@ -32,6 +32,7 @@ class waterfall_scene : public QGraphicsScene
     void update_viewport(const QRectF& visible_rect);
     bool focus_path(const QString& path);
     void set_recent_paths(const QStringList& recent_folder_paths, const QStringList& recent_image_paths);
+    void set_sort_state(int mode, bool descending);
     void set_empty_text(const QString& text);
     [[nodiscard]] QStringList get_all_paths() const;
 
@@ -46,6 +47,7 @@ class waterfall_scene : public QGraphicsScene
     void request_reveal_path(QString path);
     void request_move_to_trash(QString path);
     void request_clear_thumbnail_cache();
+    void request_sort(int mode, bool descending);
 
    public slots:
     void on_image_loaded(quint64 id, const QString& path, const QImage& image, int session_id);
@@ -75,6 +77,8 @@ class waterfall_scene : public QGraphicsScene
     std::vector<int> col_heights_;
     size_t last_layout_index_ = 0;
     int current_session_id_ = 0;
+    int sort_mode_ = 0;
+    bool sort_descending_ = false;
     int layout_generation_ = 0;
     quint64 request_counter_ = 0;
 

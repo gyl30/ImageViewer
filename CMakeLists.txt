@@ -29,6 +29,7 @@ set(PROJECT_SOURCES
     waterfall_view.cc
     file_scanner.cc
     main_window.cc
+    shortcut_dialog.cc
     image_viewer_window.cc
     window_title_bar.cc
     resources.qrc
@@ -52,7 +53,7 @@ if(WIN32)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     install(FILES packaging/io.github.gyl30.ImageViewer.desktop
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
-    install(FILES icons/image.svg
+    install(FILES icons/app.svg
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/scalable/apps
         RENAME io.github.gyl30.ImageViewer.svg)
     install(FILES packaging/copyright
@@ -70,6 +71,7 @@ if(BUILD_TESTING)
         image_viewer_window.cc
         file_scanner.cc
         main_window.cc
+        shortcut_dialog.cc
         waterfall_view.cc
         window_title_bar.cc
         resources.qrc
@@ -84,6 +86,7 @@ if(BUILD_TESTING)
             tools/performance_probe.cc
             image_loader.cc waterfall_item.cc waterfall_scene.cc waterfall_view.cc
             file_scanner.cc main_window.cc image_viewer_window.cc
+            shortcut_dialog.cc
             window_title_bar.cc
             resources.qrc
         )

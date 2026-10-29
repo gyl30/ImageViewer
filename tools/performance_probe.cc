@@ -635,21 +635,14 @@ class performance_probe : public QObject
         QCollator collator(QLocale(QLocale::English));
         collator.setNumericMode(true);
         collator.setCaseSensitivity(Qt::CaseInsensitive);
-        const QList<QAction*> sort_actions{window_.sort_name_action_, window_.sort_time_action_, window_.sort_size_action_};
-        for (int mode = 0; mode < sort_actions.size(); ++mode)
+        for (int mode = 0; mode < 3; ++mode)
         {
             for (bool descending : {false, true})
             {
-                if (!sort_actions[mode]->isChecked())
+                if (static_cast<int>(window_.current_sort_mode_) != mode || window_.sort_descending_ != descending)
                 {
                     scan_done_ = false;
-                    sort_actions[mode]->trigger();
-                    if (!wait_idle()) { return 3; }
-                }
-                if (window_.sort_desc_action_->isChecked() != descending)
-                {
-                    scan_done_ = false;
-                    window_.sort_desc_action_->trigger();
+                    window_.scene_->request_sort(mode, descending);
                     if (!wait_idle()) { return 3; }
                 }
                 const auto paths = window_.scene_->get_all_paths();

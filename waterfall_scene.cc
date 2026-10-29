@@ -13,6 +13,7 @@
 #include <QDebug>
 #include <QPainter>
 #include <QPalette>
+#include <QActionGroup>
 #include <QtConcurrent>
 #include "common_types.h"
 #include "waterfall_scene.h"
@@ -560,6 +561,12 @@ QStringList waterfall_scene::get_all_paths() const
     return image_paths_;
 }
 
+void waterfall_scene::set_sort_state(int mode, bool descending)
+{
+    sort_mode_ = mode;
+    sort_descending_ = descending;
+}
+
 void waterfall_scene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem* item = itemAt(event->scenePos(), QTransform());
@@ -577,6 +584,31 @@ void waterfall_scene::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
     auto* wf_item = dynamic_cast<waterfall_item*>(item);
 
     QMenu menu;
+
+    QMenu* sort_menu = menu.addMenu("排序");
+    QActionGroup sort_group(&menu);
+    sort_group.setExclusive(true);
+    const QStringList sort_names{"文件名", "修改时间", "文件大小"};
+    for (int mode = 0; mode < sort_names.size(); ++mode)
+    {
+        QAction* action = sort_menu->addAction(sort_names.at(mode));
+        action->setCheckable(true);
+        action->setChecked(sort_mode_ == mode);
+        sort_group.addAction(action);
+        connect(action, &QAction::triggered, this, [this, mode]()
+        {
+            emit request_sort(mode, sort_descending_);
+        });
+    }
+    sort_menu->addSeparator();
+    QAction* descending = sort_menu->addAction("倒序");
+    descending->setCheckable(true);
+    descending->setChecked(sort_descending_);
+    connect(descending, &QAction::triggered, this, [this](bool checked)
+    {
+        emit request_sort(sort_mode_, checked);
+    });
+    menu.addSeparator();
 
     if (wf_item != nullptr)
     {
