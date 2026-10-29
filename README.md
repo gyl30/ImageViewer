@@ -50,6 +50,10 @@ cmake --build build --target ImageViewer --parallel 4
 运行回归测试时使用 `-DBUILD_TESTING=ON`，构建 `imageviewer_tests` 后执行 `ctest --test-dir build --output-on-failure`。
 测试和 benchmark 不会被安装进正式包。
 
+## macOS CI 构建
+
+GitHub Actions 为 Intel (`x86_64`) 和 Apple Silicon (`arm64`) 分别构建并测试 Qt 应用，生成包含 Qt 运行库的 `.app` ZIP 工件。它们用于 CI 下载验收；当前没有 Developer ID 签名或公证，不作为已签名的正式 macOS 发布包。
+
 ## 发布与支持范围
 
 - [Linux 构建、打包、安装验收流程](docs/linux-release.md)
@@ -58,7 +62,7 @@ cmake --build build --target ImageViewer --parallel 4
 
 已完成的真实桌面验收范围是 Linux/Xorg 单屏及静态 100%/150%/200% DPI，基于 Qt 6.9.3。
 本轮发行包使用系统 Qt，具体版本与包验收结果以发布报告为准，不将旧性能数字外推为新包保证。
-真实跨屏、动态硬件 DPI、原生 Wayland、其他架构和其他发行版尚未承诺支持。
+真实跨屏、动态硬件 DPI、原生 Wayland 和其他 Linux 架构/发行版尚未承诺支持。macOS x86_64 与 arm64 目前由 CI 构建、运行测试并检查打包启动，尚未完成真实 Mac 设备验收。
 大图解码可能产生明显临时内存峰值，64 MiB 缩略图缓存预算不是整个进程的内存上限。
 
 ## 许可证

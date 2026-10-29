@@ -1,0 +1,77 @@
+name: macOS
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: macOS ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15-intel
+            arch: x86_64
+          - runner: macos-15
+            arch: arm64
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: 安装 Qt
+        uses: jurplel/install-qt-action@b344308e4483fc892e0d27b3cd1b173ebdd95f06 # v4.5.0
+        with:
+          version: 6.9.3
+          arch: clang_64
+          modules: qtimageformats
+      - name: 检查原生 runner 架构
+        run: |
+          actual=$(uname -m)
+          test "$actual" = "${{ matrix.arch }}" || {
+            echo "Expected ${{ matrix.arch }} runner, got $actual" >&2
+            exit 1
+          }
+      - name: 配置、构建并运行 Qt 测试
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
+          cmake --build build --parallel 3
+          ctest --test-dir build --output-on-failure
+      - name: 部署 Qt 并检查应用
+        run: |
+          app="$PWD/build/ImageViewer.app"
+          test -d "$app"
+          macdeployqt "$app" -always-overwrite
+          binary="$app/Contents/MacOS/ImageViewer"
+          architectures=$(lipo -archs "$binary")
+          test "$architectures" = "${{ matrix.arch }}" || {
+            echo "Expected ${{ matrix.arch }} binary, got $architectures" >&2
+            exit 1
+          }
+          for plugin in \
+            platforms/libqcocoa.dylib \
+            imageformats/libqwebp.dylib \
+            iconengines/libqsvgicon.dylib; do
+            test -f "$app/Contents/PlugIns/$plugin" || {
+              echo "Missing deployed Qt plugin: $plugin" >&2
+              exit 1
+            }
+          done
+          env -u QT_PLUGIN_PATH -u DYLD_LIBRARY_PATH "$binary" --version
+          mkdir -p dist
+          ditto -c -k --sequesterRsrc --keepParent \
+            "$app" "dist/ImageViewer-macos-${{ matrix.arch }}.zip"
+      - name: 上传 macOS 应用
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ImageViewer-macos-${{ matrix.arch }}
+          path: dist/ImageViewer-macos-${{ matrix.arch }}.zip
+          if-no-files-found: error
+          retention-days: 14

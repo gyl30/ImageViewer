@@ -41,11 +41,25 @@ else()
     qt_add_executable(ImageViewer ${PROJECT_SOURCES})
 endif()
 
+if(APPLE)
+    set_target_properties(ImageViewer PROPERTIES
+        MACOSX_BUNDLE TRUE
+        MACOSX_BUNDLE_GUI_IDENTIFIER "io.github.gyl30.ImageViewer"
+        MACOSX_BUNDLE_BUNDLE_NAME "ImageViewer"
+        MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
+        MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
+    )
+endif()
+
 target_link_libraries(ImageViewer PRIVATE Qt6::Widgets Qt6::Core Qt6::Gui Qt6::Concurrent Qt6::Svg)
 target_compile_definitions(ImageViewer PRIVATE IMAGEVIEWER_VERSION="${IMAGEVIEWER_VERSION}")
 
 include(GNUInstallDirs)
-install(TARGETS ImageViewer RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+if(APPLE)
+    install(TARGETS ImageViewer BUNDLE DESTINATION .)
+else()
+    install(TARGETS ImageViewer RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif()
 if(WIN32)
     get_filename_component(QT_INSTALL_PREFIX "${Qt6_DIR}/../../.." ABSOLUTE)
     configure_file(cmake/DeployQt.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/DeployQt.cmake @ONLY)
