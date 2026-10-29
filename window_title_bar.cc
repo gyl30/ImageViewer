@@ -115,7 +115,7 @@ void window_title_bar::update_palette()
     const QString hover = palette.color(QPalette::AlternateBase).name();
     const QString accent = palette.color(QPalette::Highlight).name();
     toolbar_->setStyleSheet(QString(
-        "QToolBar { background: transparent; border: 0; spacing: 2px; padding: 4px; }"
+        "QToolBar { background: transparent; border: 0; spacing: 2px; padding: 4px 2px; }"
         "QToolButton { padding: 6px; border: 1px solid transparent; border-radius: 5px; }"
         "QToolButton::menu-button { background: transparent; border: 0; width: 12px; }"
         "QToolButton:hover, QToolButton:checked { background: %1; }"
