@@ -43,17 +43,8 @@ include(GNUInstallDirs)
 install(TARGETS ImageViewer RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 if(WIN32)
     get_filename_component(QT_INSTALL_PREFIX "${Qt6_DIR}/../../.." ABSOLUTE)
-    install(CODE "
-        execute_process(
-            COMMAND \"${QT_INSTALL_PREFIX}/bin/windeployqt.exe\"
-                --release --compiler-runtime --no-translations
-                --include-plugins qwebp,qsvgicon
-                \"\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/ImageViewer.exe\"
-            RESULT_VARIABLE deploy_result)
-        if(NOT deploy_result EQUAL 0)
-            message(FATAL_ERROR \"windeployqt failed with exit code \\${deploy_result}\")
-        endif()
-    ")
+    configure_file(cmake/DeployQt.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/DeployQt.cmake @ONLY)
+    install(SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/DeployQt.cmake)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     install(FILES packaging/io.github.gyl30.ImageViewer.desktop
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
