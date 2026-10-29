@@ -93,6 +93,19 @@ jobs:
           }
       - name: 生成 MSI
         run: cpack --config build/CPackConfig.cmake -C Release -G WIX -B dist --verbose
+      - name: 验证 MSI 仅使用基本进度界面
+        shell: pwsh
+        run: |
+          $msi = (Resolve-Path 'dist/imageviewer-0.1.0-win64.msi').Path
+          $installer = New-Object -ComObject WindowsInstaller.Installer
+          $database = $installer.OpenDatabase($msi, 0)
+          $view = $database.OpenView("SELECT Value FROM Property WHERE Property='LIMITUI'")
+          $view.Execute()
+          $record = $view.Fetch()
+          if (-not $record -or $record.StringData(1) -ne '1') {
+            throw 'MSI does not cap its UI at the basic progress level'
+          }
+          $view.Close()
       - name: 验证 MSI 安装与桌面快捷方式
         shell: pwsh
         run: |
@@ -102,7 +115,12 @@ jobs:
             New-Item -ItemType Directory -Path $desktop -Force | Out-Null
           }
           $shortcut = Join-Path $desktop 'ImageViewer.lnk'
-          $install = Start-Process msiexec.exe -ArgumentList "/i `"$msi`" /qn /norestart /L*v `"$env:RUNNER_TEMP\imageviewer-install.log`"" -Wait -PassThru
+          $install = Start-Process msiexec.exe -ArgumentList "/i `"$msi`" /norestart /L*v `"$env:RUNNER_TEMP\imageviewer-install.log`"" -PassThru
+          if (-not $install.WaitForExit(120000)) {
+            $install.Kill()
+            throw 'MSI install did not finish without user interaction'
+          }
+          $install.Refresh()
           if ($install.ExitCode -notin @(0, 3010)) { throw "MSI install failed with exit code $($install.ExitCode)" }
           if (-not (Test-Path $shortcut)) { throw "Desktop shortcut was not created: $shortcut" }
           $link = (New-Object -ComObject WScript.Shell).CreateShortcut($shortcut)
