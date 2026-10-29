@@ -228,11 +228,11 @@ class correctness_test : public QObject
     void popup_indicators_data();
     void popup_indicators();
     void directory_context();
-    void toolbar_icons_follow_theme();
+    void toolbar_uses_text_buttons();
     void card_focus_state();
     void scene_focus_tracks_path();
     void recent_menu_is_flat();
-    void sorting_is_in_more();
+    void sorting_is_in_toolbar();
     void xcb_header_gestures();
 };
 
@@ -1310,14 +1310,17 @@ void correctness_test::theme_keeps_scene_items()
     main_window window;
     auto* theme = window.findChild<QAction*>("dark_theme");
     QVERIFY(theme != nullptr);
-    QVERIFY(!theme->icon().pixmap(18, 18).isNull());
+    QVERIFY(theme->icon().isNull());
+    QCOMPARE(theme->text(), QString("深色主题"));
     auto* scene = window.findChild<waterfall_scene*>();
     const int items = scene->items().size();
     theme->setChecked(true);
     QVERIFY(QApplication::palette().base().color().lightness() < 128);
+    QCOMPARE(theme->text(), QString("浅色主题"));
     QCOMPARE(scene->items().size(), items);
     theme->setChecked(false);
     QVERIFY(QApplication::palette().base().color().lightness() > 128);
+    QCOMPARE(theme->text(), QString("深色主题"));
     QCOMPARE(scene->items().size(), items);
 }
 
@@ -2156,12 +2159,8 @@ void correctness_test::compact_sort_controls()
     main_window window;
     window.resize(640, 480);
     window.show();
-    QToolButton* button = nullptr;
-    for (auto* candidate : window.findChildren<QToolButton*>())
-    {
-        if (candidate->text() == "更多") { button = candidate; }
-    }
-    QVERIFY(button != nullptr);
+    auto* button = window.findChild<QToolButton*>("sort_options");
+    QVERIFY(button != nullptr && button->menu() != nullptr);
     QTest::qWait(50);
     QVERIFY(button->isVisibleTo(&window));
     QVERIFY(window.rect().contains(button->mapTo(&window, button->rect().bottomRight())));
@@ -2171,11 +2170,7 @@ void correctness_test::compact_sort_controls()
     QAction* size_action = nullptr;
     QAction* reverse_action = nullptr;
     QMenu* sort = nullptr;
-    for (auto* action : button->menu()->actions())
-    {
-        if (action->text() == "排序") { sort = action->menu(); }
-    }
-    QVERIFY(sort != nullptr);
+    sort = button->menu();
     for (auto* action : sort->actions())
     {
         if (action->text() == "文件大小") { size_action = action; }
@@ -2245,9 +2240,19 @@ void correctness_test::custom_header()
     for (auto* button : header->findChildren<QToolButton*>())
     {
         if (button->objectName() == "qt_toolbar_ext_button") { continue; }
-        QCOMPARE(button->toolButtonStyle(), Qt::ToolButtonIconOnly);
-        QVERIFY(!button->icon().isNull());
-        QVERIFY(!button->toolTip().isEmpty());
+        if (preview || button->objectName().startsWith("window_"))
+        {
+            QCOMPARE(button->toolButtonStyle(), Qt::ToolButtonIconOnly);
+            QVERIFY(!button->icon().isNull());
+            QVERIFY(!button->toolTip().isEmpty());
+        }
+        else
+        {
+            QCOMPARE(button->toolButtonStyle(), Qt::ToolButtonTextOnly);
+            QVERIFY2(button->icon().isNull(), qPrintable(button->objectName() + ": icon remains"));
+            QVERIFY2(button->toolTip().isEmpty(), qPrintable(button->objectName() + ": tooltip remains: " + button->toolTip()));
+            QVERIFY(!button->accessibleName().isEmpty());
+        }
     }
     auto* maximize = header->findChild<QToolButton*>("window_maximize");
     auto* minimize = header->findChild<QToolButton*>("window_minimize");
@@ -2295,8 +2300,7 @@ void correctness_test::popup_indicators_data()
 {
     QTest::addColumn<bool>("preview");
     QTest::addColumn<QString>("text");
-    QTest::newRow("library-more") << false << QString("更多");
-    QTest::newRow("library-open") << false << QString("打开");
+    QTest::newRow("library-sort") << false << QString("sort_options");
     QTest::newRow("preview-more") << true << QString("更多");
     QTest::newRow("preview-mode") << true << QString("适应窗口");
 }
@@ -2314,7 +2318,8 @@ void correctness_test::popup_indicators()
     QToolButton* button = nullptr;
     for (auto* candidate : window->findChildren<QToolButton*>())
     {
-        if (candidate->text() == text)
+        if ((!preview && text == "sort_options" && candidate->objectName() == text)
+            || candidate->text() == text)
         {
             button = candidate;
         }
@@ -2378,34 +2383,25 @@ void correctness_test::directory_context()
     QCOMPARE(window.width(), 640);
 }
 
-void correctness_test::toolbar_icons_follow_theme()
+void correctness_test::toolbar_uses_text_buttons()
 {
     main_window window;
     auto* toolbar = window.findChild<QToolBar*>("browse_toolbar");
     auto* theme = window.findChild<QAction*>("dark_theme");
     QVERIFY(toolbar != nullptr && theme != nullptr);
-    const QIcon icon = toolbar->actions().at(1)->icon();
+    QVERIFY(window.findChild<QToolButton*>("more_menu") == nullptr);
+    QVERIFY(window.findChild<QToolButton*>("sort_options") != nullptr);
+    QCOMPARE(toolbar->toolButtonStyle(), Qt::ToolButtonTextOnly);
     for (bool dark : {false, true, false})
     {
         theme->setChecked(dark);
-        for (qreal dpr : {1.0, 1.5, 2.0})
+        QCOMPARE(theme->text(), dark ? QString("浅色主题") : QString("深色主题"));
+        for (auto* button : toolbar->findChildren<QToolButton*>())
         {
-            for (auto mode : {QIcon::Normal, QIcon::Disabled})
-            {
-                const QImage image = icon.pixmap(QSize(20, 20), dpr, mode).toImage();
-                QCOMPARE(image.size(), QSize(qRound(20 * dpr), qRound(20 * dpr)));
-                QColor solid;
-                for (int y = 0; y < image.height() && !solid.isValid(); ++y)
-                {
-                    for (int x = 0; x < image.width(); ++x)
-                    {
-                        if (image.pixelColor(x, y).alpha() == 255) { solid = image.pixelColor(x, y); break; }
-                    }
-                }
-                QVERIFY(solid.isValid());
-                const auto group = mode == QIcon::Disabled ? QPalette::Disabled : QPalette::Active;
-                QCOMPARE(solid.rgb(), QApplication::palette().color(group, QPalette::ButtonText).rgb());
-            }
+            if (button->objectName() == "qt_toolbar_ext_button") { continue; }
+            QCOMPARE(button->toolButtonStyle(), Qt::ToolButtonTextOnly);
+            QVERIFY2(button->icon().isNull(), qPrintable(button->objectName() + ": icon remains"));
+            QVERIFY2(button->toolTip().isEmpty(), qPrintable(button->objectName() + ": tooltip remains: " + button->toolTip()));
         }
     }
 }
@@ -2503,24 +2499,14 @@ void correctness_test::recent_menu_is_flat()
     QCOMPARE(paths, QStringList({dir.path(), image_path}));
 }
 
-void correctness_test::sorting_is_in_more()
+void correctness_test::sorting_is_in_toolbar()
 {
     main_window window;
-    QToolButton* more = nullptr;
-    for (auto* button : window.findChildren<QToolButton*>())
-    {
-        if (button->text() == "更多") { more = button; }
-    }
-    QVERIFY(more != nullptr && more->menu() != nullptr);
-    QMenu* sort = nullptr;
-    for (auto* action : more->menu()->actions())
-    {
-        if (action->text() == "排序") { sort = action->menu(); }
-    }
-    QVERIFY(sort != nullptr);
-    QVERIFY(window.findChild<QToolButton*>("sort_options") == nullptr);
+    QVERIFY(window.findChild<QToolButton*>("more_menu") == nullptr);
+    auto* sort_button = window.findChild<QToolButton*>("sort_options");
+    QVERIFY(sort_button != nullptr && sort_button->menu() != nullptr);
     QStringList names;
-    for (auto* action : sort->actions()) { names.append(action->text()); }
+    for (auto* action : sort_button->menu()->actions()) { names.append(action->text()); }
     QVERIFY(names.contains("文件名") && names.contains("修改时间") && names.contains("文件大小"));
 }
 

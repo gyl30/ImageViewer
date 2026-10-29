@@ -90,13 +90,14 @@ void main_window::setup_ui()
     };
 
     setWindowTitle("ImageViewer");
-    auto* act_open = new QAction(toolbar_icon(":/icons/folder.svg"), "打开", this);
-    act_open->setToolTip("打开（Ctrl+O）");
+    auto* act_open = new QAction("打开", this);
+    act_open->setToolTip(QString());
     act_open->setShortcut(QKeySequence::Open);
     addAction(act_open);
     connect(act_open, &QAction::triggered, this, &main_window::on_add_folder);
 
-    auto* act_open_file = new QAction(toolbar_icon(":/icons/image.svg"), "打开图片", this);
+    auto* act_open_file = new QAction("打开图片", this);
+    act_open_file->setToolTip(QString());
     act_open_file->setShortcut(QKeySequence("Ctrl+Shift+O"));
     addAction(act_open_file);
     connect(act_open_file,
@@ -115,10 +116,12 @@ void main_window::setup_ui()
                 }
             });
 
-    auto* act_open_recent = new QAction(toolbar_icon(":/icons/history.svg"), "最近", this);
+    auto* act_open_recent = new QAction("最近", this);
+    act_open_recent->setToolTip(QString());
     act_open_recent->setShortcut(QKeySequence("Ctrl+Alt+O"));
     addAction(act_open_recent);
     auto* act_shortcuts = new QAction("快捷键", this);
+    act_shortcuts->setToolTip(QString());
     act_shortcuts->setShortcut(QKeySequence(Qt::Key_F1));
     addAction(act_shortcuts);
     connect(act_shortcuts,
@@ -156,36 +159,31 @@ void main_window::setup_ui()
     toolbar->setObjectName("browse_toolbar");
     toolbar->setMovable(false);
     toolbar->setFloatable(false);
-    auto* open_button = new QToolButton(toolbar);
-    open_button->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    open_button->setDefaultAction(act_open);
-    open_button->setPopupMode(QToolButton::MenuButtonPopup);
-    auto* open_menu = new QMenu(open_button);
-    open_menu->addAction(act_open_file);
-    open_button->setMenu(open_menu);
-    toolbar->addWidget(open_button);
+    toolbar->addAction(act_open);
+    toolbar->widgetForAction(act_open)->setAccessibleName("打开");
+    toolbar->widgetForAction(act_open)->setToolTip(QString());
+    toolbar->addAction(act_open_file);
+    toolbar->widgetForAction(act_open_file)->setAccessibleName("打开图片");
+    toolbar->widgetForAction(act_open_file)->setToolTip(QString());
     toolbar->addAction(act_open_recent);
     auto* recent_button = toolbar->widgetForAction(act_open_recent);
+    recent_button->setObjectName("recent_files");
+    recent_button->setAccessibleName("最近");
+    recent_button->setToolTip(QString());
     connect(act_open_recent, &QAction::triggered, this, [this, recent_button]()
     {
         show_recent_menu(recent_button->mapToGlobal(QPoint(0, recent_button->height())));
     });
-    auto* spacer = new QWidget(toolbar);
-    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    spacer->setAttribute(Qt::WA_TransparentForMouseEvents);
-    toolbar->addWidget(spacer);
-    auto* more_button = new QToolButton(toolbar);
-    more_button->setObjectName("more_menu");
-    more_button->setText("更多");
-    more_button->setIcon(toolbar_icon(":/icons/more.svg"));
-    more_button->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    more_button->setToolTip("更多");
-    more_button->setAccessibleName("更多");
-    more_button->setPopupMode(QToolButton::InstantPopup);
-    auto* more_menu = new QMenu(more_button);
-    more_button->setMenu(more_menu);
-    toolbar->addWidget(more_button);
-    auto* sort_menu = more_menu->addMenu(toolbar_icon(":/icons/sort.svg"), "排序");
+    auto* sort_button = new QToolButton(toolbar);
+    sort_button->setObjectName("sort_options");
+    sort_button->setText("排序");
+    sort_button->setToolButtonStyle(Qt::ToolButtonTextOnly);
+    sort_button->setToolTip(QString());
+    sort_button->setAccessibleName("排序方式");
+    sort_button->setPopupMode(QToolButton::InstantPopup);
+    auto* sort_menu = new QMenu(sort_button);
+    sort_button->setMenu(sort_menu);
+    toolbar->addWidget(sort_button);
 
     sort_group_ = new QActionGroup(this);
     sort_group_->setExclusive(true);
@@ -256,12 +254,25 @@ void main_window::setup_ui()
                 rescan_current_folder();
             });
 
-    more_menu->addSeparator();
-    dark_theme_action_ = more_menu->addAction(toolbar_icon(":/icons/theme.svg"), "深色主题");
+    dark_theme_action_ = new QAction("深色主题", this);
     dark_theme_action_->setObjectName("dark_theme");
     dark_theme_action_->setCheckable(true);
+    dark_theme_action_->setToolTip(QString());
     connect(dark_theme_action_, &QAction::toggled, this, &main_window::set_dark_theme);
-    more_menu->addAction(act_shortcuts);
+    toolbar->addAction(dark_theme_action_);
+    if (auto* theme_button = qobject_cast<QToolButton*>(toolbar->widgetForAction(dark_theme_action_)))
+    {
+        theme_button->setObjectName("theme_toggle");
+        theme_button->setAccessibleName(dark_theme_action_->text());
+        theme_button->setToolTip(QString());
+    }
+    toolbar->addAction(act_shortcuts);
+    toolbar->widgetForAction(act_shortcuts)->setAccessibleName("快捷键");
+    toolbar->widgetForAction(act_shortcuts)->setToolTip(QString());
+    auto* spacer = new QWidget(toolbar);
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    spacer->setAttribute(Qt::WA_TransparentForMouseEvents);
+    toolbar->addWidget(spacer);
 
     scene_ = new waterfall_scene(this);
     view_ = new waterfall_view(this);
@@ -327,6 +338,11 @@ void main_window::setup_ui()
     info_label_->setTextFormat(Qt::PlainText);
     statusBar()->addPermanentWidget(info_label_);
     setMenuWidget(new window_title_bar(this, toolbar));
+    toolbar->setToolButtonStyle(Qt::ToolButtonTextOnly);
+    for (auto* button : toolbar->findChildren<QToolButton*>())
+    {
+        button->setToolButtonStyle(Qt::ToolButtonTextOnly);
+    }
 }
 
 void main_window::setup_worker()
@@ -591,7 +607,7 @@ void main_window::show_recent_menu(const QPoint& global_pos)
         {
             label = QString("&%1 %2").arg(index + 1).arg(label);
         }
-        auto* action = menu.addAction(toolbar_icon(info.isDir() ? ":/icons/folder.svg" : ":/icons/image.svg"), label);
+        auto* action = menu.addAction(label);
         action->setData(path);
         if (index < 9)
         {
@@ -828,6 +844,14 @@ void main_window::closeEvent(QCloseEvent* event)
 
 void main_window::set_dark_theme(bool enabled)
 {
+    const QString theme_label = enabled ? "浅色主题" : "深色主题";
+    dark_theme_action_->setText(theme_label);
+    dark_theme_action_->setToolTip(QString());
+    if (auto* theme_button = findChild<QToolButton*>("theme_toggle"))
+    {
+        theme_button->setAccessibleName(theme_label);
+        theme_button->setToolTip(QString());
+    }
     QPalette palette = QApplication::style()->standardPalette();
     const QColor text(enabled ? "#e6ecf5" : "#28374a");
     const QColor disabled(enabled ? "#68768a" : "#8491a3");
