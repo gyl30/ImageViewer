@@ -76,9 +76,17 @@ jobs:
               throw "MSVC runtime missing from deployment: $runtime"
             }
           }
-          $version = & $exe --version
-          if ($LASTEXITCODE -ne 0) { throw "Deployed application failed to start: $version" }
-          Write-Output $version
+          $originalPath = $env:PATH
+          $env:PATH = "$(Join-Path $stage 'bin');$env:SystemRoot/System32;$env:SystemRoot"
+          Remove-Item Env:QT_PLUGIN_PATH -ErrorAction SilentlyContinue
+          Remove-Item Env:QML2_IMPORT_PATH -ErrorAction SilentlyContinue
+          try {
+            $version = & $exe --version
+            if ($LASTEXITCODE -ne 0) { throw "Deployed application failed to start: $version" }
+            Write-Output $version
+          } finally {
+            $env:PATH = $originalPath
+          }
       - name: 生成 MSI
         run: cpack --config build/CPackConfig.cmake -C Release -G WIX -B dist --verbose
       - name: 保存 WiX 失败日志
