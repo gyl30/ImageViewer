@@ -190,6 +190,7 @@ class correctness_test : public QObject
     void main_close_closes_viewer();
     void scanner_reports_root_error();
     void theme_keeps_scene_items();
+    void theme_styles_menus_and_scrollbars();
     void scroll_updates_during_motion();
     void viewer_error_is_visible();
     void scanner_sort_modes_data();
@@ -1319,6 +1320,32 @@ void correctness_test::theme_keeps_scene_items()
     QCOMPARE(scene->items().size(), items);
 }
 
+void correctness_test::theme_styles_menus_and_scrollbars()
+{
+    main_window window;
+    auto* theme = window.findChild<QAction*>("dark_theme");
+    QVERIFY(theme != nullptr);
+    theme->setChecked(false);
+    theme->setChecked(true);
+
+    QMenu menu;
+    menu.addAction("排序");
+    menu.show();
+    QTRY_VERIFY(menu.isVisible());
+    const QImage menu_image = menu.grab().toImage();
+    const QColor dark_surface = QApplication::palette().color(QPalette::Base);
+    QCOMPARE(menu_image.pixelColor(menu_image.width() - 8, menu_image.height() / 2).rgb(), dark_surface.rgb());
+
+    QScrollBar scrollbar(Qt::Vertical);
+    scrollbar.setRange(0, 100);
+    scrollbar.setPageStep(10);
+    scrollbar.resize(12, 120);
+    scrollbar.show();
+    QTRY_VERIFY(scrollbar.isVisible());
+    const QImage scrollbar_image = scrollbar.grab().toImage();
+    QCOMPARE(scrollbar_image.pixelColor(0, scrollbar_image.height() - 2).rgb(), dark_surface.rgb());
+}
+
 void correctness_test::scroll_updates_during_motion()
 {
     waterfall_scene scene;
@@ -1404,6 +1431,19 @@ void correctness_test::desktop_interactions()
     QVERIFY(scene != nullptr && view != nullptr);
     QTRY_COMPARE(scene->last_layout_index_, size_t(82));
     qInfo() << "Desktop" << QGuiApplication::platformName() << "DPR" << view->devicePixelRatioF();
+    auto* scroll_bar = view->verticalScrollBar();
+    QVERIFY(scroll_bar->maximum() > 0);
+    const int scroll_middle = scroll_bar->maximum() / 2;
+    scroll_bar->setValue(scroll_middle);
+    view->setFocus();
+    QTest::keyClick(view, Qt::Key_J);
+    QVERIFY(scroll_bar->value() > scroll_middle);
+    QTest::keyClick(view, Qt::Key_K);
+    QCOMPARE(scroll_bar->value(), scroll_middle);
+    QTest::keyClicks(view, "gg");
+    QCOMPARE(scroll_bar->value(), 0);
+    QTest::keyClick(view, Qt::Key_G, Qt::ShiftModifier);
+    QCOMPARE(scroll_bar->value(), scroll_bar->maximum());
     const QString anchor_path = dir.filePath("image-040.png");
     QVERIFY(scene->focus_path(anchor_path));
     QTest::qWait(40);
@@ -2076,6 +2116,11 @@ void correctness_test::viewer_mouse_navigation()
     QTest::mouseClick(viewport, Qt::BackButton);
     QCOMPARE(viewer.current_image_path(), paths[0]);
     QTest::mouseClick(viewport, Qt::ForwardButton);
+    QCOMPARE(viewer.current_image_path(), paths[1]);
+    auto* view = viewer.findChild<QGraphicsView*>();
+    QTest::keyClick(view, Qt::Key_H);
+    QCOMPARE(viewer.current_image_path(), paths[0]);
+    QTest::keyClick(view, Qt::Key_L);
     QCOMPARE(viewer.current_image_path(), paths[1]);
 }
 

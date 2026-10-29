@@ -164,8 +164,8 @@ void image_viewer_window::setup_ui()
     position_label_->setAlignment(Qt::AlignCenter);
     toolbar->addWidget(position_label_);
     next_action_ = toolbar->addAction(toolbar_icon(":/icons/next.svg"), "下一张");
-    prev_action_->setToolTip("上一张（Left / Backspace / 鼠标后退键）");
-    next_action_->setToolTip("下一张（Right / Space / 鼠标前进键）");
+    prev_action_->setToolTip("上一张（H / Left / Backspace / 鼠标后退键）");
+    next_action_->setToolTip("下一张（L / Right / Space / 鼠标前进键）");
     connect(prev_action_, &QAction::triggered, this, &image_viewer_window::load_prev_image);
     connect(next_action_, &QAction::triggered, this, &image_viewer_window::load_next_image);
     toolbar->addSeparator();
@@ -293,7 +293,9 @@ void image_viewer_window::setup_ui()
                 QMessageBox::information(
                     this,
                     "快捷键",
-                    "Left/Right 上一张/下一张\n"
+                    "H/L 上一张/下一张（兼容 Left/Right）\n"
+                    "Q 返回图库，F 全屏\n"
+                    "+/- 放大/缩小，0 适应窗口\n"
                     "Space 下一张，Backspace 上一张\n"
                     "Home/End 跳到首张/末张\n"
                     "鼠标侧键 后退/前进翻图\n"
@@ -812,6 +814,43 @@ bool image_viewer_window::eventFilter(QObject* watched, QEvent* event)
     if (event->type() == QEvent::KeyPress)
     {
         auto* key_event = static_cast<QKeyEvent*>(event);
+        const bool plain_key = key_event->modifiers() == Qt::NoModifier;
+        if (plain_key && key_event->key() == Qt::Key_H)
+        {
+            load_prev_image();
+            return true;
+        }
+        if (plain_key && key_event->key() == Qt::Key_L)
+        {
+            load_next_image();
+            return true;
+        }
+        if (plain_key && key_event->key() == Qt::Key_Q)
+        {
+            close();
+            return true;
+        }
+        if (plain_key && key_event->key() == Qt::Key_F)
+        {
+            toggle_full_screen();
+            return true;
+        }
+        if (plain_key && key_event->key() == Qt::Key_0)
+        {
+            set_fit_window_mode();
+            return true;
+        }
+        if ((key_event->key() == Qt::Key_Plus || key_event->key() == Qt::Key_Equal)
+            && (key_event->modifiers() == Qt::NoModifier || key_event->modifiers() == Qt::ShiftModifier))
+        {
+            zoom_in();
+            return true;
+        }
+        if (plain_key && key_event->key() == Qt::Key_Minus)
+        {
+            zoom_out();
+            return true;
+        }
         if (key_event->key() == Qt::Key_Left)
         {
             load_prev_image();

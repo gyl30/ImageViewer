@@ -28,6 +28,7 @@
 #include <QPalette>
 #include <QSignalBlocker>
 #include <QToolButton>
+#include <QScrollBar>
 
 #include "main_window.h"
 #include "image_loader.h"
@@ -133,10 +134,13 @@ void main_window::setup_ui()
                     "Ctrl+Shift+O 打开图片\n"
                     "Ctrl+Alt+O 打开最近项\n"
                     "Enter/Space 打开所选图片\n"
+                    "j/k 向下/向上滚动，g/G 到顶部/底部\n"
                     "Alt+1..9 打开最近菜单中的对应项目\n"
                     "F1 查看快捷键\n\n"
                     "预览窗口:\n"
-                    "Left/Right 上一张/下一张\n"
+                    "h/l 上一张/下一张（兼容 Left/Right）\n"
+                    "q 返回图库，f 全屏\n"
+                    "+/- 放大/缩小，0 适应窗口\n"
                     "Space/Backspace 下一张/上一张\n"
                     "鼠标侧键 后退/前进翻图\n"
                     "Ctrl+滚轮 缩放\n"
@@ -279,6 +283,31 @@ void main_window::setup_ui()
         {
             on_image_double_clicked(item->get_path());
         }
+    });
+
+    auto add_scroll_action = [this](const QKeySequence& shortcut, const char* name, auto callback)
+    {
+        auto* action = new QAction(view_);
+        action->setObjectName(name);
+        action->setShortcut(shortcut);
+        action->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+        view_->addAction(action);
+        connect(action, &QAction::triggered, view_, callback);
+    };
+    add_scroll_action(QKeySequence(Qt::Key_J), "vim_scroll_down", [this]()
+    {
+        auto* bar = view_->verticalScrollBar();
+        bar->setValue(bar->value() + bar->singleStep());
+    });
+    add_scroll_action(QKeySequence(Qt::Key_K), "vim_scroll_up", [this]()
+    {
+        auto* bar = view_->verticalScrollBar();
+        bar->setValue(bar->value() - bar->singleStep());
+    });
+    add_scroll_action(QKeySequence(Qt::Key_G), "vim_scroll_top", [this]() { view_->verticalScrollBar()->setValue(0); });
+    add_scroll_action(QKeySequence("Shift+G"), "vim_scroll_bottom", [this]()
+    {
+        view_->verticalScrollBar()->setValue(view_->verticalScrollBar()->maximum());
     });
 
     setCentralWidget(view_);
@@ -822,6 +851,35 @@ void main_window::set_dark_theme(bool enabled)
         palette.setColor(QPalette::ToolTipText, text);
     }
     QApplication::setPalette(palette);
+    const QString menu_background = palette.color(QPalette::Base).name();
+    const QString menu_text = palette.color(QPalette::Text).name();
+    const QString menu_selection = palette.color(QPalette::AlternateBase).name();
+    const QString disabled_text = palette.color(QPalette::Disabled, QPalette::Text).name();
+    const QString border = palette.color(QPalette::Mid).name();
+    const QString scrollbar_handle = palette.color(QPalette::Mid).name();
+    const QString scrollbar_hover = palette.color(QPalette::Highlight).name();
+    qApp->setStyleSheet(QStringLiteral(
+        "QMenu { background-color: %1; color: %2; border: 1px solid %5; padding: 4px; }"
+        "QMenu::item { background: transparent; color: %2; padding: 6px 28px; }"
+        "QMenu::item:selected { background-color: %3; color: %2; }"
+        "QMenu::item:disabled { color: %4; }"
+        "QMenu::separator { height: 1px; background: %5; margin: 4px 8px; }"
+        "QScrollBar:vertical { background: %1; width: 10px; margin: 0; border: none; }"
+        "QScrollBar:horizontal { background: %1; height: 10px; margin: 0; border: none; }"
+        "QScrollBar::handle:vertical { background: %6; min-height: 28px; border-radius: 5px; }"
+        "QScrollBar::handle:horizontal { background: %6; min-width: 28px; border-radius: 5px; }"
+        "QScrollBar::handle:vertical:hover, QScrollBar::handle:horizontal:hover { background: %7; }"
+        "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; border: none; }"
+        "QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal { width: 0; border: none; }"
+        "QScrollBar::add-page, QScrollBar::sub-page { background: transparent; }"
+        "QAbstractScrollArea::corner { background: %1; }")
+        .arg(menu_background,
+             menu_text,
+             menu_selection,
+             disabled_text,
+             border,
+             scrollbar_handle,
+             scrollbar_hover));
     for (auto* view : findChildren<QGraphicsView*>())
     {
         view->setBackgroundBrush(palette.base());
