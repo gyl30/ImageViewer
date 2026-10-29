@@ -46,7 +46,6 @@ target_compile_definitions(ImageViewer PRIVATE IMAGEVIEWER_VERSION="${IMAGEVIEWE
 include(GNUInstallDirs)
 install(TARGETS ImageViewer RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 if(WIN32)
-    set_property(INSTALL bin/ImageViewer.exe PROPERTY CPACK_DESKTOP_SHORTCUTS ImageViewer)
     get_filename_component(QT_INSTALL_PREFIX "${Qt6_DIR}/../../.." ABSOLUTE)
     configure_file(cmake/DeployQt.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/DeployQt.cmake @ONLY)
     install(SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/DeployQt.cmake)
