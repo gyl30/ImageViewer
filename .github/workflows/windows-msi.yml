@@ -29,6 +29,18 @@ jobs:
         run: |
           cmake --build build --config Release --parallel 2
           ctest --test-dir build -C Release --output-on-failure
+          if ($LASTEXITCODE -ne 0) {
+            & .\build\Release\imageviewer_tests.exe
+            exit 1
+          }
+      - name: 保存 Windows 测试失败日志
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: Windows-test-failure-log
+          path: build/Testing/Temporary/LastTest.log
+          if-no-files-found: ignore
+          retention-days: 7
       - name: 部署 Qt 运行库并检查启动
         shell: pwsh
         run: |
