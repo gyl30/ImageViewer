@@ -1,6 +1,6 @@
 execute_process(
     COMMAND "@QT_INSTALL_PREFIX@/bin/windeployqt.exe"
-        --release --compiler-runtime --no-translations
+        --release --no-compiler-runtime --no-translations
         --include-plugins qwebp,qsvgicon
         "${CMAKE_INSTALL_PREFIX}/@CMAKE_INSTALL_BINDIR@/ImageViewer.exe"
     RESULT_VARIABLE deploy_result
@@ -8,3 +8,21 @@ execute_process(
 if(NOT deploy_result EQUAL 0)
     message(FATAL_ERROR "windeployqt failed with exit code ${deploy_result}")
 endif()
+
+if(NOT DEFINED ENV{VCToolsRedistDir})
+    message(FATAL_ERROR "VCToolsRedistDir is not set; run from a Visual Studio developer environment")
+endif()
+
+file(GLOB runtime_directories LIST_DIRECTORIES true "$ENV{VCToolsRedistDir}/x64/Microsoft.VC*.CRT")
+if(NOT runtime_directories)
+    message(FATAL_ERROR "MSVC x64 runtime files were not found under $ENV{VCToolsRedistDir}")
+endif()
+list(GET runtime_directories 0 runtime_directory)
+foreach(runtime_file IN ITEMS msvcp140.dll vcruntime140.dll vcruntime140_1.dll)
+    if(NOT EXISTS "${runtime_directory}/${runtime_file}")
+        message(FATAL_ERROR "Required MSVC runtime file is missing: ${runtime_directory}/${runtime_file}")
+    endif()
+endforeach()
+
+file(GLOB runtime_files "${runtime_directory}/*.dll" "${runtime_directory}/*.manifest")
+file(COPY ${runtime_files} DESTINATION "${CMAKE_INSTALL_PREFIX}/@CMAKE_INSTALL_BINDIR@")

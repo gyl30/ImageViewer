@@ -23,6 +23,18 @@ jobs:
           version: 6.9.3
           arch: win64_msvc2022_64
           modules: qtimageformats
+      - name: 配置 MSVC 运行库环境
+        shell: pwsh
+        run: |
+          $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio/Installer/vswhere.exe'
+          $vsPath = & $vswhere -latest -products '*' -property installationPath
+          if (-not $vsPath) { throw 'Visual Studio installation was not found' }
+          $vcvars = Join-Path $vsPath 'VC/Auxiliary/Build/vcvars64.bat'
+          if (-not (Test-Path $vcvars)) { throw "MSVC environment script is missing: $vcvars" }
+          $variables = & $env:ComSpec /d /s /c "call `"$vcvars`" >nul && set"
+          $redistDir = $variables | Where-Object { $_.StartsWith('VCToolsRedistDir=') } | Select-Object -First 1
+          if (-not $redistDir) { throw 'MSVC did not define VCToolsRedistDir' }
+          Add-Content -Path $env:GITHUB_ENV -Value $redistDir
       - name: 配置 Release
         run: cmake -S . -B build -A x64 -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DCPACK_GENERATOR=WIX
       - name: 编译并运行 Qt 测试
@@ -57,6 +69,11 @@ jobs:
           )) {
             if (-not (Test-Path (Join-Path $stage "bin/$plugin"))) {
               throw "Qt plugin missing from deployment: $plugin"
+            }
+          }
+          foreach ($runtime in @('MSVCP140.dll', 'VCRUNTIME140.dll', 'VCRUNTIME140_1.dll')) {
+            if (-not (Test-Path (Join-Path $stage "bin/$runtime"))) {
+              throw "MSVC runtime missing from deployment: $runtime"
             }
           }
           $version = & $exe --version
