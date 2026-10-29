@@ -64,6 +64,14 @@ jobs:
           Write-Output $version
       - name: 生成 MSI
         run: cpack --config build/CPackConfig.cmake -C Release -G WIX -B dist --verbose
+      - name: 保存 WiX 失败日志
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: Windows-WiX-failure-log
+          path: dist/_CPack_Packages/win64/WIX/wix.log
+          if-no-files-found: ignore
+          retention-days: 7
       - name: 上传 MSI
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
