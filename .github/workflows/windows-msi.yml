@@ -93,13 +93,25 @@ jobs:
           }
       - name: 生成 MSI
         run: cpack --config build/CPackConfig.cmake -C Release -G WIX -B dist --verbose
-      - name: 验证桌面快捷方式
+      - name: 验证 MSI 安装与桌面快捷方式
         shell: pwsh
         run: |
-          $sources = Get-ChildItem 'dist/_CPack_Packages/win64/WIX' -Filter '*.wxs' -File
-          if (-not ($sources | Select-String -Pattern 'DesktopFolder' -Quiet)) {
-            throw 'MSI does not define the ImageViewer desktop shortcut'
+          $msi = (Resolve-Path 'dist/imageviewer-0.1.0-win64.msi').Path
+          $desktop = [Environment]::GetFolderPath('Desktop')
+          if (-not (Test-Path $desktop)) {
+            New-Item -ItemType Directory -Path $desktop -Force | Out-Null
           }
+          $shortcut = Join-Path $desktop 'ImageViewer.lnk'
+          $install = Start-Process msiexec.exe -ArgumentList "/i `"$msi`" /qn /norestart /L*v `"$env:RUNNER_TEMP\imageviewer-install.log`"" -Wait -PassThru
+          if ($install.ExitCode -notin @(0, 3010)) { throw "MSI install failed with exit code $($install.ExitCode)" }
+          if (-not (Test-Path $shortcut)) { throw "Desktop shortcut was not created: $shortcut" }
+          $link = (New-Object -ComObject WScript.Shell).CreateShortcut($shortcut)
+          if (-not (Test-Path $link.TargetPath)) { throw "Desktop shortcut target is missing: $($link.TargetPath)" }
+          $launch = Start-Process -FilePath $link.TargetPath -ArgumentList '--version' -Wait -PassThru -NoNewWindow
+          if ($launch.ExitCode -ne 0) { throw "Desktop shortcut target failed to start: $($link.TargetPath)" }
+          $uninstall = Start-Process msiexec.exe -ArgumentList "/x `"$msi`" /qn /norestart /L*v `"$env:RUNNER_TEMP\imageviewer-uninstall.log`"" -Wait -PassThru
+          if ($uninstall.ExitCode -notin @(0, 3010)) { throw "MSI uninstall failed with exit code $($uninstall.ExitCode)" }
+          if (Test-Path $shortcut) { throw 'MSI uninstall did not remove the desktop shortcut' }
       - name: 保存 WiX 失败日志
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

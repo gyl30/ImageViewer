@@ -1327,6 +1327,7 @@ void correctness_test::theme_styles_menus_and_scrollbars()
     QVERIFY(theme != nullptr);
     theme->setChecked(false);
     theme->setChecked(true);
+    QVERIFY(qApp->styleSheet().contains("padding: 6px 12px;"));
 
     QMenu menu;
     menu.addAction("排序");

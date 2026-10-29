@@ -860,7 +860,7 @@ void main_window::set_dark_theme(bool enabled)
     const QString scrollbar_hover = palette.color(QPalette::Highlight).name();
     qApp->setStyleSheet(QStringLiteral(
         "QMenu { background-color: %1; color: %2; border: 1px solid %5; padding: 4px; }"
-        "QMenu::item { background: transparent; color: %2; padding: 6px 28px; }"
+        "QMenu::item { background: transparent; color: %2; padding: 6px 12px; }"
         "QMenu::item:selected { background-color: %3; color: %2; }"
         "QMenu::item:disabled { color: %4; }"
         "QMenu::separator { height: 1px; background: %5; margin: 4px 8px; }"
